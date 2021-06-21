@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="21dp"
+        android:layout_marginBottom="21dp"
+        android:layout_marginLeft="23dp"
+        android:layout_marginRight="23dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:background="@drawable/border_ffffff_840a47_3dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/cross"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.6"
+            android:layout_marginTop="25dp"
+            android:orientation="vertical">
+            <View
+                android:layout_width="52dp"
+                android:layout_height="5dp"
+                android:background="#840a47"/>
+
+            <TextView
+                android:fontFamily="@font/nexon_bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:longClickable="false"
+                android:textColor="#840a47"
+                android:textSize="16dp"
+                android:lineSpacingExtra="2.6dp"
+                android:gravity="center_vertical|start"
+                android:text="Notice"
+                android:textStyle="bold" />
+
+            <TextView
+                android:fontFamily="@font/nexon_regular"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:clickable="false"
+                android:focusable="false"
+                android:longClickable="false"
+                android:textColor="#000000"
+                android:textSize="14dp"
+                android:lineSpacingExtra="2.6dp"
+                android:gravity="center_vertical|start"
+                android:text="따뜻한 생생하며, 그들은 것이다. 그들에게 우리 시들어 트고, 그들을 피가 이상을 있는가? 날카로우나 반짝이는 피는 간에 약동하다. 튼튼하며, 못할 열매를 그들의 별과 무엇을 인생의 끝에 쓸쓸하랴? 인간에 이상의 노년에게서 하여도 설레는 밥을 불어 교향악이다. " />
+
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
