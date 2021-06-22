@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#f4f4f4">
@@ -16,7 +17,9 @@
             android:paddingTop="20dp"
             android:paddingBottom="20dp"
             android:paddingLeft="24dp"
+            android:paddingStart="24dp"
             android:paddingRight="26dp"
+            android:paddingEnd="26dp"
             android:orientation="vertical">
 
             <RelativeLayout
@@ -32,7 +35,8 @@
                     android:textColor="#840a47"
                     android:gravity="center"
                     android:text="시리얼
-                    넘버"/>
+                    넘버"
+                    tools:ignore="HardcodedText"/>
 
                 <EditText
                     android:id="@+id/et_serialnumber"
@@ -41,15 +45,16 @@
                     android:layout_height="30dp"
                     android:layout_marginTop="2.5dp"
                     android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
                     android:paddingLeft="10dp"
                     android:paddingRight="10dp"
                     android:textSize="14dp"
                     android:textColor="#5d5d5d"
-                    android:textColorHint="#5d5d5d"
                     android:gravity="center_vertical|start"
-                    android:hint="04:B0:7B:3A:AA:52:80"
+                    android:text="04:B0:7B:3A:AA:52:80"
                     android:layout_toRightOf="@id/tv_serialnumber"
-                    android:background="@drawable/border_trans_5d5d5d_3dp"/>
+                    android:background="@drawable/border_trans_5d5d5d_3dp"
+                    tools:ignore="HardcodedText" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -65,24 +70,44 @@
                     android:textSize="14dp"
                     android:textColor="#840a47"
                     android:gravity="center"
-                    android:text="관로종류"/>
+                    android:text="관로종류"
+                    tools:ignore="HardcodedText" />
 
-                <EditText
-                    android:id="@+id/et_ganro_type"
-                    android:fontFamily="@font/nexon_regular"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="30dp"
                     android:layout_marginTop="2.5dp"
                     android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
                     android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:textSize="14dp"
-                    android:textColor="#5d5d5d"
-                    android:textColorHint="#5d5d5d"
-                    android:gravity="center_vertical|start"
-                    android:hint="상수관"
+                    android:paddingStart="10dp"
+                    android:paddingRight="7dp"
+                    android:paddingEnd="7dp"
+                    android:layout_gravity="center_vertical"
                     android:layout_toRightOf="@id/tv_ganro_type"
-                    android:background="@drawable/border_trans_5d5d5d_3dp"/>
+                    android:layout_toEndOf="@id/tv_ganro_type"
+                    android:background="@drawable/border_trans_5d5d5d_3dp">
+
+                    <TextView
+                        android:id="@+id/et_ganro_type"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:fontFamily="@font/nexon_regular"
+                        android:textSize="14dp"
+                        android:textColor="#5d5d5d"
+                        android:layout_toLeftOf="@id/et_ganro_type_add"
+                        android:layout_toStartOf="@id/et_ganro_type_add"
+                        android:gravity="center_vertical|start"
+                        android:text="상수관"
+                        tools:ignore="HardcodedText"/>
+                    <ImageView
+                        android:id="@+id/et_ganro_type_add"
+                        android:layout_width="24dp"
+                        android:layout_height="30dp"
+                        android:gravity="center_vertical|right"
+                        android:layout_alignParentRight="true"
+                        android:src="@drawable/ic_arrow_down"/>
+                </RelativeLayout>
             </RelativeLayout>
 
             <RelativeLayout
@@ -100,22 +125,42 @@
                     android:gravity="center"
                     android:text="관로형태"/>
 
-                <EditText
-                    android:id="@+id/et_ganro_kind"
-                    android:fontFamily="@font/nexon_regular"
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="30dp"
                     android:layout_marginTop="2.5dp"
                     android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
                     android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:textSize="14dp"
-                    android:textColor="#5d5d5d"
-                    android:textColorHint="#5d5d5d"
-                    android:gravity="center_vertical|start"
-                    android:hint="T분기형"
+                    android:paddingStart="10dp"
+                    android:paddingRight="7dp"
+                    android:paddingEnd="7dp"
+                    android:layout_gravity="center_vertical"
                     android:layout_toRightOf="@id/tv_ganro_kind"
-                    android:background="@drawable/border_trans_5d5d5d_3dp"/>
+                    android:layout_toEndOf="@id/tv_ganro_kind"
+                    android:background="@drawable/border_trans_5d5d5d_3dp">
+
+                    <TextView
+                        android:id="@+id/et_ganro_kind"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:fontFamily="@font/nexon_regular"
+                        android:textSize="14dp"
+                        android:textColor="#5d5d5d"
+                        android:layout_toLeftOf="@id/et_ganro_kind_add"
+                        android:layout_toStartOf="@id/et_ganro_kind_add"
+                        android:gravity="center_vertical|start"
+                        android:text="T분기형"
+                        tools:ignore="HardcodedText"/>
+                    <ImageView
+                        android:id="@+id/et_ganro_kind_add"
+                        android:layout_width="24dp"
+                        android:layout_height="30dp"
+                        android:gravity="center_vertical|right"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:src="@drawable/ic_arrow_down" />
+                </RelativeLayout>
             </RelativeLayout>
 
             <RelativeLayout
@@ -151,11 +196,362 @@
                     android:background="@drawable/border_trans_5d5d5d_3dp"/>
             </RelativeLayout>
 
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_deep"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="매설심도"/>
 
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_toRightOf="@id/tv_deep"
+                    android:background="@drawable/border_trans_5d5d5d_3dp">
+
+                    <TextView
+                        android:id="@+id/et_deep"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:fontFamily="@font/nexon_regular"
+                        android:textSize="14dp"
+                        android:textColor="#5d5d5d"
+                        android:layout_toLeftOf="@id/et_deep_add"
+                        android:gravity="center_vertical|start"
+                        android:text="2.6" />
+                    <TextView
+                        android:id="@+id/et_deep_add"
+                        android:layout_width="35dp"
+                        android:layout_height="30dp"
+                        android:layout_marginRight="5dp"
+                        android:fontFamily="@font/nexon_bold"
+                        android:textSize="16dp"
+                        android:textColor="#5d5d5d"
+                        android:gravity="center_vertical|right"
+                        android:layout_alignParentRight="true"
+                        android:text="m" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_cross"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="관    경"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_toRightOf="@id/tv_cross"
+                    android:background="@drawable/border_trans_5d5d5d_3dp">
+
+                    <TextView
+                        android:id="@+id/et_cross"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:fontFamily="@font/nexon_regular"
+                        android:textSize="14dp"
+                        android:textColor="#5d5d5d"
+                        android:layout_toLeftOf="@id/et_cross_add"
+                        android:gravity="center_vertical|start"
+                        android:text="2.6" />
+                    <TextView
+                        android:id="@+id/et_cross_add"
+                        android:layout_width="45dp"
+                        android:layout_height="30dp"
+                        android:layout_marginRight="5dp"
+                        android:fontFamily="@font/nexon_bold"
+                        android:textSize="16dp"
+                        android:textColor="#5d5d5d"
+                        android:gravity="center_vertical|right"
+                        android:layout_alignParentRight="true"
+                        android:text="mm" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_material"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="관로재질"/>
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingStart="10dp"
+                    android:paddingRight="7dp"
+                    android:paddingEnd="7dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_toRightOf="@id/tv_material"
+                    android:layout_toEndOf="@id/tv_material"
+                    android:background="@drawable/border_trans_5d5d5d_3dp">
+
+                    <TextView
+                        android:id="@+id/et_material"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:fontFamily="@font/nexon_regular"
+                        android:textSize="14dp"
+                        android:textColor="#5d5d5d"
+                        android:layout_toLeftOf="@id/et_material_add"
+                        android:layout_toStartOf="@id/et_material_add"
+                        android:gravity="center_vertical|start"
+                        android:text="스테인레스관"
+                        tools:ignore="HardcodedText"/>
+                    <ImageView
+                        android:id="@+id/et_material_add"
+                        android:layout_width="24dp"
+                        android:layout_height="30dp"
+                        android:gravity="center_vertical|right"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:src="@drawable/ic_arrow_down" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_agency"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="관리기관"
+                    tools:ignore="HardcodedText"/>
+
+                <EditText
+                    android:id="@+id/et_agency"
+                    android:fontFamily="@font/nexon_regular"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|start"
+                    android:text="고성군"
+                    android:layout_toRightOf="@id/tv_agency"
+                    android:layout_toEndOf="@id/tv_agency"
+                    android:background="@drawable/border_trans_5d5d5d_3dp"
+                    tools:ignore="HardcodedText" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_phone"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="전화번호"
+                    tools:ignore="HardcodedText"/>
+
+                <EditText
+                    android:id="@+id/et_phone"
+                    android:fontFamily="@font/nexon_regular"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|start"
+                    android:text="010-0000-0000"
+                    android:layout_toRightOf="@id/tv_phone"
+                    android:layout_toEndOf="@id/tv_phone"
+                    android:background="@drawable/border_trans_5d5d5d_3dp"
+                    tools:ignore="HardcodedText" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_memo"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="메    모"
+                    tools:ignore="HardcodedText"/>
+
+                <EditText
+                    android:id="@+id/et_memo"
+                    android:fontFamily="@font/nexon_regular"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|start"
+                    android:text="상수관"
+                    android:layout_toRightOf="@id/tv_memo"
+                    android:layout_toEndOf="@id/tv_memo"
+                    android:background="@drawable/border_trans_5d5d5d_3dp"
+                    tools:ignore="HardcodedText" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_maker"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="시공업체"
+                    tools:ignore="HardcodedText"/>
+
+                <EditText
+                    android:id="@+id/et_maker"
+                    android:fontFamily="@font/nexon_regular"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|start"
+                    android:text="이컴기술"
+                    android:layout_toRightOf="@id/tv_maker"
+                    android:layout_toEndOf="@id/tv_maker"
+                    android:background="@drawable/border_trans_5d5d5d_3dp"
+                    tools:ignore="HardcodedText" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_maker_phone"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="시공업체
+                    연락처"
+                    tools:ignore="HardcodedText"/>
+
+                <EditText
+                    android:id="@+id/et_maker_phone"
+                    android:fontFamily="@font/nexon_regular"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|start"
+                    android:text="010-1111-2222"
+                    android:layout_toRightOf="@id/tv_maker_phone"
+                    android:layout_toEndOf="@id/tv_maker_phone"
+                    android:background="@drawable/border_trans_5d5d5d_3dp"
+                    tools:ignore="HardcodedText" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_picture"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="현장사진"
+                    tools:ignore="HardcodedText"/>
+            </RelativeLayout>
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleType="fitXY"
+                android:src="@drawable/sample" />
 
         </LinearLayout>
-
-
     </ScrollView>
-
 </LinearLayout>
