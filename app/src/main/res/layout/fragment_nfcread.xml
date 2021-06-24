@@ -54,6 +54,7 @@
                     android:text="04:B0:7B:3A:AA:52:80"
                     android:layout_toRightOf="@id/tv_serialnumber"
                     android:background="@drawable/border_trans_5d5d5d_3dp"
+                    android:enabled="false"
                     tools:ignore="HardcodedText" />
             </RelativeLayout>
 
@@ -193,6 +194,7 @@
                     android:gravity="center_vertical|start"
                     android:hint="전 10.5m  좌 50.8m"
                     android:layout_toRightOf="@id/tv_distance"
+                    android:enabled="false"
                     android:background="@drawable/border_trans_5d5d5d_3dp"/>
             </RelativeLayout>
 
@@ -382,6 +384,7 @@
                     android:layout_toRightOf="@id/tv_agency"
                     android:layout_toEndOf="@id/tv_agency"
                     android:background="@drawable/border_trans_5d5d5d_3dp"
+                    android:enabled="false"
                     tools:ignore="HardcodedText" />
             </RelativeLayout>
 
@@ -418,6 +421,7 @@
                     android:layout_toRightOf="@id/tv_phone"
                     android:layout_toEndOf="@id/tv_phone"
                     android:background="@drawable/border_trans_5d5d5d_3dp"
+                    android:enabled="false"
                     tools:ignore="HardcodedText" />
             </RelativeLayout>
 
@@ -454,6 +458,7 @@
                     android:layout_toRightOf="@id/tv_memo"
                     android:layout_toEndOf="@id/tv_memo"
                     android:background="@drawable/border_trans_5d5d5d_3dp"
+                    android:enabled="false"
                     tools:ignore="HardcodedText" />
             </RelativeLayout>
 
@@ -490,6 +495,7 @@
                     android:layout_toRightOf="@id/tv_maker"
                     android:layout_toEndOf="@id/tv_maker"
                     android:background="@drawable/border_trans_5d5d5d_3dp"
+                    android:enabled="false"
                     tools:ignore="HardcodedText" />
             </RelativeLayout>
 
@@ -527,6 +533,7 @@
                     android:layout_toRightOf="@id/tv_maker_phone"
                     android:layout_toEndOf="@id/tv_maker_phone"
                     android:background="@drawable/border_trans_5d5d5d_3dp"
+                    android:enabled="false"
                     tools:ignore="HardcodedText" />
             </RelativeLayout>
 
