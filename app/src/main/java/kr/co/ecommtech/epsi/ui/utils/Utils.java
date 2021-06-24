@@ -222,4 +222,22 @@ public class Utils {
 
         return version;
     }
+
+    public static boolean checkPermission(Context context, String permission) {
+        PackageManager pm = context.getPackageManager();
+        int hasPerm = pm.checkPermission(permission, context.getPackageName());
+        return hasPerm == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static boolean hasFeature(Context context, String feature) {
+        boolean ret = false;
+        try {
+            ret = context.getPackageManager().hasSystemFeature(
+                    feature);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ret;
+    }
 }

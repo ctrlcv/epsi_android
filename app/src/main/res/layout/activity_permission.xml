@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F4F4F4">
+
+    <RelativeLayout
+        android:id="@+id/top_bar_linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:background="#840a47"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="22dp"
+        android:paddingEnd="22dp"
+        android:layout_alignParentTop="true">
+
+        <TextView
+            android:id="@+id/activity_title"
+            android:fontFamily="@font/nexon_bold"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="false"
+            android:focusable="false"
+            android:longClickable="false"
+            android:textColor="#FFFFFF"
+            android:textSize="24dp"
+            android:lineSpacingExtra="2.6dp"
+            android:gravity="center_vertical|start"
+            android:text="접근권한실행"
+            android:textStyle="bold" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/top_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/middle_layout"
+        android:layout_below="@id/top_bar_linear_layout"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:elevation="15dp"
+        android:background="#F4F4F4">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:fontFamily="@font/nexon_bold"
+            android:gravity="center"
+            android:clickable="false"
+            android:focusable="false"
+            android:longClickable="false"
+            android:textColor="#840a47"
+            android:textStyle="bold"
+            android:textSize="22dp"
+            android:lineSpacingExtra="2.6dp"
+            android:text="ESPI 앱 사용을 위해\n다음 권한들을 허용하여 주십시오." />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:src="@drawable/permission" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:fontFamily="@font/nexon_regular"
+            android:gravity="center"
+            android:clickable="false"
+            android:focusable="false"
+            android:longClickable="false"
+            android:textColor="#840a47"
+            android:textSize="15dp"
+            android:lineSpacingExtra="2.6dp"
+            android:text="ESPI 앱은 반드시 필요한 권한만\n사용하고 있으며, 단순 정보수집의 목적으로\n서비스에 불필요한 권한은 요구하지 않습니다." />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/middle_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/bottom_layout"
+        android:orientation="vertical"
+        android:elevation="10dp"
+        android:background="#ffffff">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="83dp"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.2"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:gravity="bottom">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/loc" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginBottom="3dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:longClickable="false"
+                    android:textColor="#840a47"
+                    android:textStyle="bold"
+                    android:textSize="16dp"
+                    android:lineSpacingExtra="2.6dp"
+                    android:text="위치정보 (필수)" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="36dp"
+                    android:layout_marginTop="5dp"
+                    android:fontFamily="@font/nexon_regular"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:longClickable="false"
+                    android:textColor="#5d5d5d"
+                    android:textSize="14dp"
+                    android:lineSpacingExtra="2.6dp"
+                    android:text="현재 위치 파악을 위해 필요합니다." />
+            </LinearLayout>
+        </LinearLayout>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:background="#a2a2a2" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="83dp"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1.2"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp"
+                android:gravity="bottom">
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/nfc" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
+                    android:layout_marginBottom="3dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:longClickable="false"
+                    android:textColor="#840a47"
+                    android:textStyle="bold"
+                    android:textSize="16dp"
+                    android:lineSpacingExtra="2.6dp"
+                    android:text="NFC 읽기/쓰기 (필수)" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginLeft="25dp"
+                android:layout_marginRight="25dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="39dp"
+                    android:layout_marginTop="5dp"
+                    android:fontFamily="@font/nexon_regular"
+                    android:clickable="false"
+                    android:focusable="false"
+                    android:longClickable="false"
+                    android:textColor="#5d5d5d"
+                    android:textSize="14dp"
+                    android:lineSpacingExtra="2.6dp"
+                    android:text="NFC 기능 사용을 위해 필요합니다." />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/bottom_layout"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:orientation="vertical"
+        android:layout_above="@id/button_layout">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal|bottom">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nexon_regular"
+                android:clickable="false"
+                android:focusable="false"
+                android:longClickable="false"
+                android:textColor="#5d5d5d"
+                android:textSize="16dp"
+                android:lineSpacingExtra="2.6dp"
+                android:text="휴대폰의" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nexon_regular"
+                android:clickable="false"
+                android:focusable="false"
+                android:longClickable="false"
+                android:textColor="#840a47"
+                android:textSize="16dp"
+                android:textStyle="bold"
+                android:lineSpacingExtra="2.6dp"
+                android:text=" 설정메뉴 > 애플리케이션 관리자" />
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:paddingTop="5dp"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal|top">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nexon_regular"
+                android:clickable="false"
+                android:focusable="false"
+                android:longClickable="false"
+                android:textColor="#5d5d5d"
+                android:textSize="16dp"
+                android:lineSpacingExtra="2.6dp"
+                android:text="에서 설정하실 수 있습니다." />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/button_layout"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#c4c4c4"
+            android:fontFamily="@font/nexon_bold"
+            android:clickable="false"
+            android:focusable="false"
+            android:longClickable="false"
+            android:textColor="#5d5d5d"
+            android:textSize="22dp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:lineSpacingExtra="2.6dp"
+            android:text="종료" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="#840a47"
+            android:fontFamily="@font/nexon_bold"
+            android:clickable="false"
+            android:focusable="false"
+            android:longClickable="false"
+            android:textColor="#f2ab24"
+            android:textSize="22dp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:lineSpacingExtra="2.6dp"
+            android:text="확인" />
+    </LinearLayout>
+
+</RelativeLayout>
