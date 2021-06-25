@@ -2,12 +2,17 @@ package kr.co.ecommtech.epsi.ui.utils;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -25,7 +30,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import kr.co.ecommtech.epsi.R;
 import kr.co.ecommtech.epsi.ui.data.RestError;
+import kr.co.ecommtech.epsi.ui.dialog.CustomDialog;
 import kr.co.ecommtech.epsi.ui.network.HttpClient;
 import okhttp3.ResponseBody;
 import retrofit2.Converter;
