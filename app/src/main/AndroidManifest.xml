@@ -16,11 +16,23 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Epsi"
         android:networkSecurityConfig="@xml/network_security_config">
-        <activity android:name=".ui.activity.LoginActivity">
+        <activity android:name=".ui.activity.StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".ui.activity.LoginActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="fullSensor">
+        </activity>
+        <activity
+            android:name=".ui.activity.PermissionActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="fullSensor">
         </activity>
         <activity
             android:name=".ui.activity.HomeActivity"

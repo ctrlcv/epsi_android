@@ -10,7 +10,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1.2">
+        android:layout_weight="1.15">
             <TextView
                 android:fontFamily="@font/anton"
                 android:layout_width="match_parent"
@@ -112,6 +112,29 @@
                 android:lineSpacingExtra="6.6sp"
                 android:text="Log in"
                 tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <CheckBox
+                android:id="@+id/cb_auto_login"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:button="@null"
+                android:drawableLeft="@drawable/check_button_default" />
+
+            <TextView
+                android:fontFamily="@font/nexon_bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-12dp"
+                android:gravity="center"
+                android:textColor="#840a47"
+                android:text="자동 로그인"
+                android:textSize="14dp" />
         </LinearLayout>
     </LinearLayout>
 

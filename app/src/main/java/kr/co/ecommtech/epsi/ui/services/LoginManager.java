@@ -77,9 +77,9 @@ public class LoginManager {
 
                             mLogInInfo = loginInfo;
 
-//                            if (isAutoLogin(context)) {
-//                                storeLoginInfo(context, mLoginInfo);
-//                            }
+                            if (isAutoLogIn(context)) {
+                                storeLogInInfo(context, mLogInInfo);
+                            }
 
                             Log.d(TAG,"requestLogin() Login success!!");
                             if (mListener != null) {
@@ -105,6 +105,24 @@ public class LoginManager {
                 }
             }
         });
+    }
+
+    public synchronized boolean isAutoLogIn(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean isAutoLogin = sharedPreferences.getBoolean("isAutoLogin", false);
+
+        Log.d(TAG, "isAutoLogin:" + isAutoLogin);
+        return isAutoLogin;
+    }
+
+    public synchronized void initLoginInfo(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.clear();
+        editor.apply();
+
+        mLogInInfo = null;
     }
 
     public synchronized boolean isLoggedIn(Context context) {
@@ -144,10 +162,10 @@ public class LoginManager {
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
-//        boolean isAutoLogin = sharedPreferences.getBoolean("isAutoLogin", false);
-//        if (!isAutoLogin) {
-//            return null;
-//        }
+        boolean isAutoLogin = sharedPreferences.getBoolean("isAutoLogin", false);
+        if (!isAutoLogin) {
+            return null;
+        }
 
         mLogInInfo = new LogIn();
         mLogInInfo.setId(sharedPreferences.getInt("id", 0));

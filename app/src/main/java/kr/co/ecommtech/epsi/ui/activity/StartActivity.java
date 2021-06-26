@@ -4,16 +4,20 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import kr.co.ecommtech.epsi.R;
 import kr.co.ecommtech.epsi.ui.dialog.CustomDialog;
+import kr.co.ecommtech.epsi.ui.services.LoginManager;
 import kr.co.ecommtech.epsi.ui.utils.Utils;
 
 public class StartActivity extends BaseActivity {
@@ -40,6 +44,22 @@ public class StartActivity extends BaseActivity {
         super.onDestroy();
     }
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable @org.jetbrains.annotations.Nullable Intent data) {
+        if (requestCode == REQUEST_PERMISSIONS) {
+            if (resultCode == Activity.RESULT_OK) {
+                processStartApplication();
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                finishAndRemoveTaskCompat();
+            } else {
+                finish();
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+
     private void checkPermissions() {
         for (String p : PermissionActivity.requiredPermissions) {
             boolean check = Utils.checkPermission(this, p);
@@ -62,10 +82,10 @@ public class StartActivity extends BaseActivity {
     private void processStartApplication() {
         boolean isNotSupport = false;
 
-        // NFC 미지원 단말
-        if (Utils.hasFeature(this, PackageManager.FEATURE_NFC) == false) {
-            isNotSupport = true;
-        }
+//        // NFC 미지원 단말
+//        if (Utils.hasFeature(this, PackageManager.FEATURE_NFC) == false) {
+//            isNotSupport = true;
+//        }
 
         if (isNotSupport) {
             new CustomDialog(this, new CustomDialog.CustomDialogListener() {
@@ -89,5 +109,18 @@ public class StartActivity extends BaseActivity {
             }).show();
             return;
         }
+
+//        LoginManager.getInstance().initLoginInfo(getApplicationContext());
+
+        if (LoginManager.getInstance().isLoggedIn(StartActivity.this)) {
+            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        } else {
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
+        finish();
     }
 }
