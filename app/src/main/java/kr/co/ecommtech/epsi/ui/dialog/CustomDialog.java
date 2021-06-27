@@ -43,7 +43,7 @@ public class CustomDialog extends Dialog {
         if (contentView != null) {
             View view = contentView.getChildAt(0);
             if (view != null) {
-                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) view.getLayoutParams();
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams)view.getLayoutParams();
                 params.width = Utils.getDialogWidth(context);
                 view.setLayoutParams(params);
             }
