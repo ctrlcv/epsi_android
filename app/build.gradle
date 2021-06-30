@@ -41,6 +41,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:15.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
     implementation 'com.karumi:dexter:6.2.2'
+    implementation 'com.google.guava:guava:30.1.1-android'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
