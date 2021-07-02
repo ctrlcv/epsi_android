@@ -30,6 +30,7 @@ import kr.co.ecommtech.epsi.ui.nfc.NdefMessageParser;
 import kr.co.ecommtech.epsi.ui.nfc.ParsedRecord;
 import kr.co.ecommtech.epsi.ui.nfc.TextRecord;
 import kr.co.ecommtech.epsi.ui.nfc.UriRecord;
+import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.utils.Utils;
 
 public class NfcReadFragment extends Fragment {
@@ -44,8 +45,12 @@ public class NfcReadFragment extends Fragment {
     @org.jetbrains.annotations.Nullable
     @Override
     public View onCreateView(@NonNull @NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView()");
+
         View rootView = inflater.inflate(R.layout.fragment_nfcread, container, false);
         ButterKnife.bind(this, rootView);
+
+//        NfcService.getInstance().initNfcReadMode(getActivity());
 
         return rootView;
     }
@@ -53,15 +58,21 @@ public class NfcReadFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy()");
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "onResume()");
+//        NfcService.getInstance().onResumeNfcReadMode(getActivity(), getIntent);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        Log.d(TAG, "onPause()");
     }
+
+
 }

@@ -40,6 +40,8 @@ public class NfcWriteFragment extends Fragment {
     @org.jetbrains.annotations.Nullable
     @Override
     public View onCreateView(@NonNull @NotNull LayoutInflater inflater, @Nullable @org.jetbrains.annotations.Nullable ViewGroup container, @Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView()");
+
         View rootView = inflater.inflate(R.layout.fragment_nfcwrite, container, false);
         ButterKnife.bind(this, rootView);
 
@@ -51,6 +53,19 @@ public class NfcWriteFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy()");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "onResume()");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause()");
     }
 
     @SuppressLint("NonConstantResourceId")
