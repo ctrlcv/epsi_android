@@ -13,15 +13,15 @@
         android:layout_height="0dp"
         android:layout_weight="1.15">
             <TextView
-                android:fontFamily="@font/anton"
+                android:fontFamily="@font/nexon_bold"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginTop="20dp"
-                android:textSize="100sp"
-                android:textColor="@android:color/black"
+                android:layout_marginTop="40dp"
+                android:textSize="42sp"
+                android:textColor="#840a47"
                 android:lineSpacingExtra="6.6sp"
                 android:gravity="center"
-                android:text="ESPI"
+                android:text="스마트 관로\n시설정보 시스템"
                 tools:ignore="HardcodedText" />
     </LinearLayout>
     <LinearLayout

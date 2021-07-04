@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:background="#efe8df">
 
@@ -72,4 +72,67 @@
             android:layout_below="@id/readinfo_tablayout"
             android:layout_alignParentBottom="true"/>
     </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/nfc_write_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99000000"
+        android:clickable="false"
+        android:visibility="gone">
+        <LinearLayout
+            android:layout_width="306dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_centerInParent="true">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:fontFamily="@font/nexon_bold"
+                android:textSize="20dp"
+                android:background="#99840a47"
+                android:gravity="center"
+                android:text="TAG 쓰기"
+                android:textColor="#FFFFFFFF"
+                tools:ignore="HardcodedText"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#FFFFFFFF"
+                android:orientation="vertical">
+                <ImageView
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="20dp"
+                    android:src="@drawable/nfc2"
+                    android:layout_gravity="center" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="30dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:textSize="18dp"
+                    android:gravity="center"
+                    android:text="TAG 에 접촉하세요"
+                    android:textColor="#840a47" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/btn_nfc_write_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:fontFamily="@font/nexon_bold"
+                android:textSize="20dp"
+                android:background="#C4C4C4"
+                android:gravity="center"
+                android:text="취소"
+                android:textColor="#5d5d5d"
+                tools:ignore="HardcodedText"/>
+
+        </LinearLayout>
+    </RelativeLayout>
+
 </RelativeLayout>

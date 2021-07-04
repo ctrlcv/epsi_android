@@ -5,6 +5,7 @@ import android.util.Log;
 
 import java.io.IOException;
 
+import kr.co.ecommtech.epsi.ui.services.LoginManager;
 import kr.co.ecommtech.epsi.ui.services.QueryService;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -20,11 +21,11 @@ public class HttpClientToken {
     private static String currentAccessToken;
 
     public static Retrofit getRetrofit() {
-//        if (LoginManager.getInstance().getLoginInfo() != null) {
-//            if (LoginManager.getInstance().getLoginInfo().getAccessToken() != null) {
-//                return getRetrofit(LoginManager.getInstance().getLoginInfo().getAccessToken());
-//            }
-//        }
+        if (LoginManager.getInstance().getLogInInfo() != null) {
+            if (LoginManager.getInstance().getLogInInfo().getAccessToken() != null) {
+                return getRetrofit(LoginManager.getInstance().getLogInInfo().getAccessToken());
+            }
+        }
 
         return HttpClient.getRetrofit();
     }

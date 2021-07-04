@@ -4,5 +4,7 @@
 		<domain includeSubdomains="true">3.35.9.107</domain>
 		<domain includeSubdomains="true">192.168.0.26</domain>
 		<domain includeSubdomains="true">121.137.122.187</domain>
+		<domain includeSubdomains="true">139.150.83.28</domain>
+		<domain includeSubdomains="true">www.foriton.com</domain>
 	</domain-config>
 </network-security-config>

@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,6 +38,7 @@ import kr.co.ecommtech.epsi.ui.nfc.NdefMessageParser;
 import kr.co.ecommtech.epsi.ui.nfc.ParsedRecord;
 import kr.co.ecommtech.epsi.ui.nfc.TextRecord;
 import kr.co.ecommtech.epsi.ui.nfc.UriRecord;
+import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.utils.Utils;
 
 public class InfoActivity extends BaseActivity {
@@ -49,6 +51,10 @@ public class InfoActivity extends BaseActivity {
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.readinfo_viewpager)
     ViewPager2 mReadInfoViewPager;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.nfc_write_layout)
+    RelativeLayout mNfcWriteLayout;
 
     InfoPageAdapter mInfoPageAdapter;
 
@@ -71,6 +77,8 @@ public class InfoActivity extends BaseActivity {
         }).attach();
 
         mReadInfoViewPager.setCurrentItem(0);
+
+        NfcService.getInstance().initializeNfcMode(this);
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -80,25 +88,41 @@ public class InfoActivity extends BaseActivity {
             case R.id.home_btn:
                 finish();
                 break;
+
+            case R.id.btn_nfc_write_cancel:
+                mNfcWriteLayout.setVisibility(View.GONE);
+                NfcService.getInstance().onPauseNfcMode();
+                break;
+
+            default:
+                break;
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG, "onResume(): ");
+        Log.d(TAG, "onResume()");
+
+        NfcService.getInstance().onResumeNfcMode(this, getIntent());
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause(): ");
-    }
+        Log.d(TAG, "onPause()");
 
+        NfcService.getInstance().onPauseNfcMode();
+    }
 
     @Override
     public void onNewIntent(Intent passedIntent) {
         Log.d(TAG, "onNewIntent(): " + passedIntent);
+        NfcService.getInstance().onNewIntentNfcMode(this, passedIntent);
         super.onNewIntent(passedIntent);
+    }
+
+    public void setVisibleNfcWriteDialog(boolean visible) {
+        mNfcWriteLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 }

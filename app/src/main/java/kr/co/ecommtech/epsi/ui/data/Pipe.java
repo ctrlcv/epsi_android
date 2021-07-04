@@ -245,4 +245,30 @@ public class Pipe {
     public void setLocDistance(double locDistance) {
         this.locDistance = locDistance;
     }
+
+    @Override
+    public String toString() {
+        return "Pipe{" +
+                "pipeId=" + pipeId +
+                ", pipeGroup='" + pipeGroup + '\'' +
+                ", pipeGroupName='" + pipeGroupName + '\'' +
+                ", pipeGroupColor='" + pipeGroupColor + '\'' +
+                ", pipeType='" + pipeType + '\'' +
+                ", pipeTypeName='" + pipeTypeName + '\'' +
+                ", diameter=" + diameter +
+                ", material='" + material + '\'' +
+                ", materialName='" + materialName + '\'' +
+                ", distance=" + distance +
+                ", pipeDepth=" + pipeDepth +
+                ", positionX=" + positionX +
+                ", positionY=" + positionY +
+                ", offerCompany='" + offerCompany + '\'' +
+                ", companyPhone='" + companyPhone + '\'' +
+                ", memo='" + memo + '\'' +
+                ", buildCompany='" + buildCompany + '\'' +
+                ", buildPhone='" + buildPhone + '\'' +
+                ", siteImageUrl='" + siteImageUrl + '\'' +
+                ", locDistance=" + locDistance +
+                '}';
+    }
 }

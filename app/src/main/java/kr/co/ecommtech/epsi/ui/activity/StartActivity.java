@@ -110,7 +110,7 @@ public class StartActivity extends BaseActivity {
             return;
         }
 
-//        LoginManager.getInstance().initLoginInfo(getApplicationContext());
+        LoginManager.getInstance().initLoginInfo(getApplicationContext());
 
         if (LoginManager.getInstance().isLoggedIn(StartActivity.this)) {
             Intent intent = new Intent(getApplicationContext(), HomeActivity.class);

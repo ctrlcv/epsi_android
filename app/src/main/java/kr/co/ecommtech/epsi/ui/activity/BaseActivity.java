@@ -1,5 +1,10 @@
 package kr.co.ecommtech.epsi.ui.activity;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -7,46 +12,139 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class BaseActivity  extends AppCompatActivity {
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class BaseActivity  extends AppCompatActivity implements LocationListener {
     private final String TAG = "BaseActivity";
+
+    private LocationManager mLocationManager;
+    private Location mLocation = null;
+    private OnGpsLocGetListener mLocGetListener;
+    private float mMinAccuracy = 9999;
+    private Timer mGpsTimer;
+
+    public interface OnGpsLocGetListener {
+        void onGpsLocGet(Location location);
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        Log.d(TAG, "onCreate()");
+
+        mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        if (mLocationManager == null) {
+            Log.e(TAG, "onCreate() can't create LocationManager!");
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-//        Log.d(TAG, "onResume()");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        Log.d(TAG, "onPause()");
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-//        Log.d(TAG, "onStart()");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-//        Log.d(TAG, "onStop()");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        Log.d(TAG, "onDestroy()");
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        if (mMinAccuracy > location.getAccuracy()) {
+            mLocation = location;
+            mMinAccuracy = location.getAccuracy();
+            mLocGetListener.onGpsLocGet(mLocation);
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    public void findMyLocation(OnGpsLocGetListener locListener) {
+        if (mLocationManager == null) {
+            Log.e(TAG, "findMyLocation() can't create LocationManager!");
+            return;
+        }
+
+        mLocationManager.removeUpdates(this);
+        mMinAccuracy = 9999;
+        mLocGetListener = locListener;
+
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 1, this);
+        mLocationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,100, 1, this);
+
+        FusedLocationProviderClient locationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        locationProviderClient.getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location == null) {
+                            Log.e(TAG, "locationProviderClient location is null");
+                            return;
+                        }
+
+                        mMinAccuracy = location.getAccuracy();
+                        mLocation = location;
+
+                        Log.d(TAG, "get Location Accuracy:" + mMinAccuracy + ", lat:" + mLocation.getLatitude() + ", lon:" + mLocation.getLongitude());
+                        mLocGetListener.onGpsLocGet(mLocation);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {}
+                });
+
+        if (mGpsTimer != null) {
+            mGpsTimer.cancel();
+            mGpsTimer = null;
+        }
+
+        mGpsTimer = new Timer();
+        mGpsTimer.schedule(new CustomTimer(), 5000);
+    }
+
+    public void stopGpsSearch() {
+        if (mLocationManager != null) {
+            mLocationManager.removeUpdates(this);
+        }
+
+        if (mGpsTimer != null) {
+            mGpsTimer.cancel();
+            mGpsTimer = null;
+        }
+
+        mMinAccuracy = 9999;
+        mLocGetListener = null;
+    }
+
+    private class CustomTimer extends TimerTask {
+        @Override
+        public void run() {
+            stopGpsSearch();
+        }
     }
 
     public void finishAndRemoveTaskCompat() {
