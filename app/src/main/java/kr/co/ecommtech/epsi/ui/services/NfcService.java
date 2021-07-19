@@ -104,6 +104,10 @@ public class NfcService {
     }
 
     public void onResumeNfcMode(Context context, Intent intent) {
+        if (!mIsReadMode && !mIsWriteMode) {
+            return;
+        }
+
         checkNfcEnabled(context);
 
         Log.d(TAG, "onResumeNfcMode()");
@@ -116,6 +120,10 @@ public class NfcService {
     }
 
     public void onPauseNfcMode() {
+        if (!mIsReadMode && !mIsWriteMode) {
+            return;
+        }
+
         if (mNfcAdapter != null) {
             Log.d(TAG, "onPauseNfcMode()");
             mNfcAdapter.disableForegroundDispatch(mActivity);
@@ -125,6 +133,10 @@ public class NfcService {
     }
 
     public void onNewIntentNfcMode(Context context, Intent intent) {
+        if (!mIsReadMode && !mIsWriteMode) {
+            return;
+        }
+
         if (intent.getAction() == null) {
             Log.e(TAG, "onNewIntentNfcMode() intent.getAction() is null");
             return;

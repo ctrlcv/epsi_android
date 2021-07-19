@@ -58,6 +58,7 @@
                 android:paddingLeft="10dp"
                 android:hint="Enter your User Id"
                 android:textSize="15dp"
+                android:textColor="#840A47"
                 android:background="@android:color/transparent"/>
         </LinearLayout>
 
@@ -91,6 +92,7 @@
                 android:inputType="textPassword"
                 android:hint="Enter your password"
                 android:textSize="15dp"
+                android:textColor="#840A47"
                 android:background="@android:color/transparent"/>
         </LinearLayout>
 

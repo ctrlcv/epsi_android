@@ -173,6 +173,114 @@
                 android:layout_marginTop="12dp"
                 android:layout_gravity="center_vertical">
                 <TextView
+                    android:id="@+id/tv_set_position"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="설치위치"/>
+
+                <RelativeLayout
+                    android:id="@+id/item_set_position"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingStart="10dp"
+                    android:paddingRight="7dp"
+                    android:paddingEnd="7dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_toRightOf="@id/tv_set_position"
+                    android:layout_toEndOf="@id/tv_set_position"
+                    android:background="@drawable/border_ffffff_840a47_3dp">
+
+                    <TextView
+                        android:id="@+id/et_set_position"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:fontFamily="@font/nexon_regular"
+                        android:textSize="14dp"
+                        android:textColor="#840a47"
+                        android:layout_toLeftOf="@id/et_set_position_add"
+                        android:layout_toStartOf="@id/et_set_position_add"
+                        android:gravity="center_vertical|start"
+                        android:text=""
+                        tools:ignore="HardcodedText"/>
+                    <ImageView
+                        android:id="@+id/et_set_position_add"
+                        android:layout_width="24dp"
+                        android:layout_height="30dp"
+                        android:gravity="center_vertical|right"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:src="@drawable/ic_arrow_down_840a47" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
+                    android:id="@+id/tv_distance_direction"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="이격위치"/>
+
+                <RelativeLayout
+                    android:id="@+id/item_distance_direction"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingStart="10dp"
+                    android:paddingRight="7dp"
+                    android:paddingEnd="7dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_toRightOf="@id/tv_distance_direction"
+                    android:layout_toEndOf="@id/tv_distance_direction"
+                    android:background="@drawable/border_ffffff_840a47_3dp">
+
+                    <TextView
+                        android:id="@+id/et_distance_direction"
+                        android:layout_width="match_parent"
+                        android:layout_height="30dp"
+                        android:fontFamily="@font/nexon_regular"
+                        android:textSize="14dp"
+                        android:textColor="#840a47"
+                        android:layout_toLeftOf="@id/et_distance_direction_add"
+                        android:layout_toStartOf="@id/et_distance_direction_add"
+                        android:gravity="center_vertical|start"
+                        android:text=""
+                        tools:ignore="HardcodedText"/>
+                    <ImageView
+                        android:id="@+id/et_distance_direction_add"
+                        android:layout_width="24dp"
+                        android:layout_height="30dp"
+                        android:gravity="center_vertical|right"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:src="@drawable/ic_arrow_down_840a47" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
                     android:id="@+id/tv_distance"
                     android:fontFamily="@font/nexon_bold"
                     android:layout_width="65dp"
@@ -680,11 +788,67 @@
         android:background="#99000000"
         android:clickable="false"
         android:visibility="gone">
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/code_item_rv"
+        <RelativeLayout
             android:layout_width="306dp"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true" />
+            android:background="#99000000"
+            android:clickable="false"
+            android:layout_centerInParent="true">
+            <TextView
+                android:id="@+id/tv_code_list_title"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:fontFamily="@font/nexon_regular"
+                android:textSize="16dp"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:text="관로형태"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText"
+                android:background="#840a47"
+                android:layout_alignParentTop="true" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/code_item_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_code_list_title" />
+        </RelativeLayout>
     </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/type_item_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99000000"
+        android:clickable="false"
+        android:visibility="gone">
+        <RelativeLayout
+            android:layout_width="306dp"
+            android:layout_height="match_parent"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="50dp"
+            android:layout_centerInParent="true">
+            <TextView
+                android:id="@+id/tv_type_list_title"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:fontFamily="@font/nexon_regular"
+                android:textSize="16dp"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:text="관로형태"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText"
+                android:background="#840a47"
+                android:layout_alignParentTop="true" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/type_item_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@id/tv_type_list_title" />
+        </RelativeLayout>
+    </RelativeLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

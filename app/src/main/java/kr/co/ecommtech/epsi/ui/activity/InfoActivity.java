@@ -103,7 +103,6 @@ public class InfoActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume()");
-
         NfcService.getInstance().onResumeNfcMode(this, getIntent());
     }
 
@@ -111,7 +110,6 @@ public class InfoActivity extends BaseActivity {
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause()");
-
         NfcService.getInstance().onPauseNfcMode();
     }
 
@@ -126,3 +124,4 @@ public class InfoActivity extends BaseActivity {
         mNfcWriteLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 }
+

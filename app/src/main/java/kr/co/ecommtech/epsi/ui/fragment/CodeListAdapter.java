@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,9 +26,9 @@ public class CodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
 
     private Context mContext;
     private ArrayList<Object> mCodeList;
-    private OnListItemSelectedListener mListener;
+    private OnCodeItemSelectedListener mListener;
 
-    public CodeListAdapter(Context context, OnListItemSelectedListener listener) {
+    public CodeListAdapter(Context context, OnCodeItemSelectedListener listener) {
         mContext = context;
         mListener = listener;
     }
@@ -39,7 +37,7 @@ public class CodeListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         mCodeList = codeList;
     }
 
-    public interface OnListItemSelectedListener {
+    public interface OnCodeItemSelectedListener {
         void onItemSelected(View v, Object selectedObject);
     }
 

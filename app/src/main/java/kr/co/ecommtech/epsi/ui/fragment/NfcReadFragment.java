@@ -32,6 +32,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import kr.co.ecommtech.epsi.R;
 import kr.co.ecommtech.epsi.ui.activity.InfoActivity;
 import kr.co.ecommtech.epsi.ui.nfc.NdefMessageParser;
@@ -130,13 +131,25 @@ public class NfcReadFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume()");
-        NfcService.getInstance().enableTagReadMode();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         Log.d(TAG, "onPause()");
+    }
+
+    @SuppressLint("NonConstantResourceId")
+    @OnClick({R.id.read_btn})
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.read_btn:
+                NfcService.getInstance().enableTagReadMode();
+                break;
+
+            default:
+                break;
+        }
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

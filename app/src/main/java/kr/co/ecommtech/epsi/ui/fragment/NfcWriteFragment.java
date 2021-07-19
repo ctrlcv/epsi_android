@@ -24,10 +24,6 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,6 +38,7 @@ import kr.co.ecommtech.epsi.ui.data.MaterialCodeList;
 import kr.co.ecommtech.epsi.ui.data.TypeCode;
 import kr.co.ecommtech.epsi.ui.data.TypeCodeList;
 import kr.co.ecommtech.epsi.ui.network.HttpClientToken;
+import kr.co.ecommtech.epsi.ui.services.DistanceDirection;
 import kr.co.ecommtech.epsi.ui.services.EventMessage;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.services.QueryService;
@@ -50,7 +47,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnListItemSelectedListener {
+public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCodeItemSelectedListener, TypeListAdapter.OnTypeItemSelectedListener {
     private static String TAG = "NfcWriteFragment";
 
     protected QueryService mQueryService;
@@ -119,6 +116,22 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnList
     @BindView(R.id.code_item_rv)
     RecyclerView mCodeRecyclerView;
 
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.tv_code_list_title)
+    TextView mCodeListTitle;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.type_item_layout)
+    RelativeLayout mTypeItemLayout;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.tv_type_list_title)
+    TextView mTypeListTitle;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.type_item_rv)
+    RecyclerView mTypeRecyclerView;
+
     private String mSelectedPipeGroup;
     private String mSelectedPipeType;
     private String mSelectedMaterial;
@@ -126,7 +139,12 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnList
     private ArrayList<GroupCode> mGroupCodeList;
     private ArrayList<TypeCode> mTypeCodeList;
     private ArrayList<MaterialCode> mMaterialCodeList;
+
+    private ArrayList<String> mSetPositionList;
+    private ArrayList<DistanceDirection> mDistanceDirectionList;
+
     private CodeListAdapter mCodeListAdapter;
+    private TypeListAdapter mTypeListAdapter;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -146,8 +164,14 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnList
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         mCodeRecyclerView.setLayoutManager(layoutManager);
 
+        LinearLayoutManager layoutManager2 = new LinearLayoutManager(getActivity());
+        mTypeRecyclerView.setLayoutManager(layoutManager2);
+
         mCodeListAdapter = new CodeListAdapter(getActivity(), this);
         mCodeRecyclerView.setAdapter(mCodeListAdapter);
+
+        mTypeListAdapter = new TypeListAdapter(getActivity(), this);
+        mTypeRecyclerView.setAdapter(mTypeListAdapter);
 
         mQueryService = HttpClientToken.getRetrofit().create(QueryService.class);
 
@@ -175,7 +199,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnList
     }
 
     @SuppressLint("NonConstantResourceId")
-    @OnClick({R.id.item_pipe_group, R.id.item_pipe_type, R.id.item_material, R.id.write_btn, R.id.location_btn})
+    @OnClick({R.id.item_pipe_group, R.id.item_pipe_type, R.id.item_material, R.id.item_set_position, R.id.item_distance_direction, R.id.write_btn, R.id.location_btn})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.item_pipe_group:
@@ -188,6 +212,14 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnList
 
             case R.id.item_material:
                 reqGetPipeMaterialCodes();
+                break;
+
+            case R.id.item_set_position:
+                makeSetPositionCodes();
+                break;
+
+            case R.id.item_distance_direction:
+                makeDistanceDirectionCodes();
                 break;
 
             case R.id.write_btn:
@@ -409,6 +441,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnList
                                 }
                                 mCodeListAdapter.setItems(resultList);
                                 mCodeListAdapter.notifyDataSetChanged();
+                                mCodeListTitle.setText("관로종류");
                                 mCodeItemLayout.setVisibility(View.VISIBLE);
                             }
                         }
@@ -443,14 +476,15 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnList
                             mTypeCodeList = (ArrayList<TypeCode>)mList.typeCodeList;
 
                             if (mTypeCodeList != null && mTypeCodeList.size() > 0) {
-
                                 ArrayList<Object> resultList = new ArrayList<>();
                                 for (TypeCode typeCode : mTypeCodeList) {
                                     resultList.add(typeCode);
                                 }
-                                mCodeListAdapter.setItems(resultList);
-                                mCodeListAdapter.notifyDataSetChanged();
-                                mCodeItemLayout.setVisibility(View.VISIBLE);
+
+                                mTypeListAdapter.setItems(resultList);
+                                mTypeListAdapter.notifyDataSetChanged();
+                                mTypeListTitle.setText("관로형태");
+                                mTypeItemLayout.setVisibility(View.VISIBLE);
                             }
                         }
                     });
@@ -491,6 +525,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnList
                                 }
                                 mCodeListAdapter.setItems(resultList);
                                 mCodeListAdapter.notifyDataSetChanged();
+                                mCodeListTitle.setText("관로재질");
                                 mCodeItemLayout.setVisibility(View.VISIBLE);
                             }
                         }
@@ -507,18 +542,35 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnList
         });
     }
 
+    public void makeSetPositionCodes() {
+        mSetPositionList.clear();
+        mSetPositionList.add("경계석");
+        mSetPositionList.add("관로위");
+    }
+
+    public void makeDistanceDirectionCodes() {
+        mDistanceDirectionList.add(DistanceDirection.EL_DIRECTION_CENTER);
+        mDistanceDirectionList.add(DistanceDirection.EL_DIRECTION_LEFT);
+        mDistanceDirectionList.add(DistanceDirection.EL_DIRECTION_RIGHT);
+    }
+
     @Override
     public void onItemSelected(View v, Object selectedObject) {
         if (selectedObject instanceof GroupCode) {
             mSelectedPipeGroup = ((GroupCode)selectedObject).getGroupCd();
             mPipeGroup.setText(((GroupCode)selectedObject).getGroupName());
-        } else if (selectedObject instanceof TypeCode) {
-            mSelectedPipeType = ((TypeCode)selectedObject).getTypeCd();
-            mPipeType.setText(((TypeCode)selectedObject).getTypeName());
         } else if (selectedObject instanceof MaterialCode) {
             mSelectedMaterial = ((MaterialCode)selectedObject).getMaterialCd();
             mMaterial.setText(((MaterialCode)selectedObject).getMaterialName());
         }
         mCodeItemLayout.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onTypeItemSelected(View v, Object selectedObject) {
+        mSelectedPipeType = ((TypeCode)selectedObject).getTypeCd();
+        mPipeType.setText(((TypeCode)selectedObject).getTypeName());
+
+        mTypeItemLayout.setVisibility(View.GONE);
     }
 }

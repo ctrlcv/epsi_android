@@ -13,7 +13,7 @@ import retrofit2.http.Headers;
 import retrofit2.http.POST;
 
 public interface QueryService {
-    String SERVER_URL = "http://www.foriton.com:3108";// "http://139.150.83.28:3108"; //http://192.168.0.26:3108"; //121.137.122.187:3108";
+    String SERVER_URL = "http://www.foriton.com:3108";// "http://139.150.83.28:3108"; //http://192.168.0.26:3108";
 
     @Headers({"Accept: applcation/json", "Content-Type: application/json; charset=utf-8"})
     @POST("/api/users/signin")
