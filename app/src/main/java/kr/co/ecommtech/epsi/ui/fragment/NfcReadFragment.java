@@ -59,8 +59,20 @@ public class NfcReadFragment extends Fragment {
     TextView mPipeType;
 
     @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.et_set_position)
+    TextView mSetPosition;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.et_distance_direction)
+    TextView mDistanceDirection;
+
+    @SuppressLint("NonConstantResourceId")
     @BindView(R.id.et_distance)
     TextView mPipeDistance;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.et_distance_lr)
+    TextView mPipeDistanceLR;
 
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.et_depth)
@@ -185,13 +197,31 @@ public class NfcReadFragment extends Fragment {
             mPipeType.setText("");
         }
 
+        if (!TextUtils.isEmpty(NfcService.getInstance().getSetPosition())) {
+            mSetPosition.setText(NfcService.getInstance().getSetPosition());
+        } else {
+            mSetPosition.setText("");
+        }
+
+        if (!TextUtils.isEmpty(NfcService.getInstance().getDistanceDirection())) {
+            mDistanceDirection.setText(NfcService.getInstance().getDistanceDirection());
+        } else {
+            mDistanceDirection.setText("");
+        }
+
         if (NfcService.getInstance().getDistance() != 0.0) {
             mPipeDistance.setText(String.valueOf(NfcService.getInstance().getDistance()));
         } else {
             mPipeDistance.setText("");
         }
 
-        if (NfcService.getInstance().getDistance() != 0.0) {
+        if (NfcService.getInstance().getDistanceLR() != 0.0) {
+            mPipeDistanceLR.setText(String.valueOf(NfcService.getInstance().getDistanceLR()));
+        } else {
+            mPipeDistanceLR.setText("");
+        }
+
+        if (NfcService.getInstance().getPipeDepth() != 0.0) {
             mDepth.setText(String.valueOf(NfcService.getInstance().getPipeDepth()));
         } else {
             mDepth.setText("");

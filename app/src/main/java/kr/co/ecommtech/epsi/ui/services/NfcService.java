@@ -45,10 +45,13 @@ public class NfcService {
     private String mPipeGroupColor;
     private String mPipeType;
     private String mPipeTypeName;
+    private String mSetPosition;
+    private String mDistanceDirection;
+    private double mDistance;
+    private double mDistanceLR;
     private double mDiameter;
     private String mMaterial;
     private String mMaterialName;
-    private double mDistance;
     private double mPipeDepth;
     private double mPositionX;
     private double mPositionY;
@@ -680,7 +683,10 @@ public class NfcService {
                 textToNdefRecord("PipeGroupName:" + mPipeGroupName),
                 textToNdefRecord("PipeType:" + mPipeType),
                 textToNdefRecord("PipeTypeName:" + mPipeTypeName),
+                textToNdefRecord("SetPosition:" + mSetPosition),
+                textToNdefRecord("DistanceDirection:" + mDistanceDirection),
                 textToNdefRecord("Distance:" + mDistance),
+                textToNdefRecord("DistanceLR:" + mDistanceLR),
                 textToNdefRecord("PipeDepth:" + mPipeDepth),
                 textToNdefRecord("PipeDiameter:" + mDiameter),
                 textToNdefRecord("Material:" + mMaterial),
@@ -768,6 +774,30 @@ public class NfcService {
 
     public void setPipeTypeName(String pipeTypeName) {
         this.mPipeTypeName = pipeTypeName;
+    }
+
+    public String getSetPosition() {
+        return mSetPosition;
+    }
+
+    public void setSetPosition(String setPosition) {
+        this.mSetPosition = setPosition;
+    }
+
+    public String getDistanceDirection() {
+        return mDistanceDirection;
+    }
+
+    public void setDistanceDirection(String distanceDirection) {
+        this.mDistanceDirection = distanceDirection;
+    }
+
+    public double getDistanceLR() {
+        return mDistanceLR;
+    }
+
+    public void setDistanceLR(double distanceLR) {
+        this.mDistanceLR = distanceLR;
     }
 
     public double getDiameter() {

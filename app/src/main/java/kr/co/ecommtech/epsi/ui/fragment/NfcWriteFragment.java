@@ -1,7 +1,11 @@
 package kr.co.ecommtech.epsi.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.ContentUris;
+import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -9,9 +13,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -47,8 +56,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import static android.app.Activity.RESULT_OK;
+
 public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCodeItemSelectedListener, TypeListAdapter.OnTypeItemSelectedListener {
     private static String TAG = "NfcWriteFragment";
+    private static final int REQUEST_IMAGE_CODE = 7001;
 
     protected QueryService mQueryService;
 
@@ -75,6 +87,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.et_distance)
     EditText mPipeDistance;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.et_distance_lr)
+    EditText mPipeDistanceLR;
 
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.et_depth)
@@ -117,6 +133,18 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     EditText mMakerPhone;
 
     @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.item_distance_direction)
+    RelativeLayout mDistanceDirectionLayout;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.item_distance)
+    RelativeLayout mDistanceLayout;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.item_distance_lr)
+    RelativeLayout mDistanceLRLayout;
+
+    @SuppressLint("NonConstantResourceId")
     @BindView(R.id.code_item_layout)
     RelativeLayout mCodeItemLayout;
 
@@ -139,6 +167,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.type_item_rv)
     RecyclerView mTypeRecyclerView;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.site_image)
+    ImageView mSiteImage;
 
     private String mSelectedPipeGroup;
     private String mSelectedPipeType;
@@ -208,7 +240,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
     @SuppressLint("NonConstantResourceId")
     @OnClick({R.id.item_pipe_group, R.id.item_pipe_type, R.id.item_material, R.id.item_set_position,
-              R.id.item_distance_direction, R.id.write_btn, R.id.location_btn})
+              R.id.item_distance_direction, R.id.write_btn, R.id.location_btn, R.id.site_image})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.item_pipe_group:
@@ -228,6 +260,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 break;
 
             case R.id.item_distance_direction:
+                String distanceDirection = mSetPosition.getText().toString();
+                if (!TextUtils.isEmpty(distanceDirection) && distanceDirection.equals("관로위")) {
+                    return;
+                }
                 makeDistanceDirectionCodes();
                 break;
 
@@ -242,10 +278,30 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                     return;
                 }
 
-                if (TextUtils.isEmpty(mPipeDistance.getText())) {
-                    Utils.showToast(getActivity(), "이격거리를 입력하세요.");
-                    mPipeDistance.requestFocus();
+                if (TextUtils.isEmpty(mSetPosition.getText())) {
+                    Utils.showToast(getActivity(), "설치위치를 선택하세요.");
                     return;
+                }
+
+                if (!TextUtils.isEmpty(mSetPosition.getText()) && "경계석".equals(mSetPosition.getText())) {
+                    if (TextUtils.isEmpty(mDistanceDirection.getText())) {
+                        Utils.showToast(getActivity(), "이격위치를 선택하세요.");
+                        return;
+                    }
+
+                    if (TextUtils.isEmpty(mPipeDistance.getText())) {
+                        Utils.showToast(getActivity(), "이격거리/정면을 입력하세요.");
+                        mPipeDistance.requestFocus();
+                        return;
+                    }
+
+                    if (!TextUtils.isEmpty(mDistanceDirection.getText()) && !"CENTER".equals(mDistanceDirection.getText())) {
+                        if (TextUtils.isEmpty(mPipeDistanceLR.getText())) {
+                            Utils.showToast(getActivity(), "이격거리/좌우를 입력하세요.");
+                            mPipeDistanceLR.requestFocus();
+                            return;
+                        }
+                    }
                 }
 
                 if (TextUtils.isEmpty(mDepth.getText())) {
@@ -295,10 +351,32 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 });
                 break;
 
+            case R.id.site_image:
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                mImageLauncher.launch(intent);
+                break;
+
             default:
                 break;
         }
     }
+
+    ActivityResultLauncher<Intent> mImageLauncher = registerForActivityResult(
+        new ActivityResultContracts.StartActivityForResult(),
+        new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == RESULT_OK) {
+                    Intent intent = result.getData();
+                    Uri uri = intent.getData();
+                    Log.d(TAG, uri.toString());
+                    mSiteImage.setImageURI(uri);
+                    // new File(uri.getPath());
+                }
+            }
+        });
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(EventMessage e) {
@@ -339,13 +417,31 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             mPipeType.setText("");
         }
 
+        if (!TextUtils.isEmpty(NfcService.getInstance().getSetPosition())) {
+            mSetPosition.setText(NfcService.getInstance().getSetPosition());
+        } else {
+            mSetPosition.setText("");
+        }
+
+        if (!TextUtils.isEmpty(NfcService.getInstance().getDistanceDirection())) {
+            mDistanceDirection.setText(NfcService.getInstance().getDistanceDirection());
+        } else {
+            mDistanceDirection.setText("");
+        }
+
         if (NfcService.getInstance().getDistance() != 0.0) {
             mPipeDistance.setText(String.valueOf(NfcService.getInstance().getDistance()));
         } else {
             mPipeDistance.setText("");
         }
 
-        if (NfcService.getInstance().getDistance() != 0.0) {
+        if (NfcService.getInstance().getDistanceLR() != 0.0) {
+            mPipeDistanceLR.setText(String.valueOf(NfcService.getInstance().getDistanceLR()));
+        } else {
+            mPipeDistanceLR.setText("");
+        }
+
+        if (NfcService.getInstance().getPipeDepth() != 0.0) {
             mDepth.setText(String.valueOf(NfcService.getInstance().getPipeDepth()));
         } else {
             mDepth.setText("");
@@ -411,7 +507,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         NfcService.getInstance().setPipeGroupName(mPipeGroup.getText().toString());
         NfcService.getInstance().setPipeType(mSelectedPipeType);
         NfcService.getInstance().setPipeTypeName(mPipeType.getText().toString());
+        NfcService.getInstance().setSetPosition(mSetPosition.getText().toString());
+        NfcService.getInstance().setDistanceDirection(mDistanceDirection.getText().toString());
         NfcService.getInstance().setDistance(Double.parseDouble(mPipeDistance.getText().toString()));
+        NfcService.getInstance().setDistanceLR(Double.parseDouble(mPipeDistanceLR.getText().toString()));
         NfcService.getInstance().setPipeDepth(Double.parseDouble(mDepth.getText().toString()));
         NfcService.getInstance().setDiameter(Double.parseDouble(mPipeDiameter.getText().toString()));
         NfcService.getInstance().setMaterial(mSelectedMaterial);
@@ -558,7 +657,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
         mTypeListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
         mTypeListAdapter.notifyDataSetChanged();
-        mTypeListTitle.setText("관로형태");
+        mTypeListTitle.setText("설치위치");
         mTypeItemLayout.setVisibility(View.VISIBLE);
     }
 
@@ -570,7 +669,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
         mTypeListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
         mTypeListAdapter.notifyDataSetChanged();
-        mTypeListTitle.setText("관로형태");
+        mTypeListTitle.setText("이격위치");
         mTypeItemLayout.setVisibility(View.VISIBLE);
     }
 
@@ -598,13 +697,29 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             mSetPosition.setText(selText);
             if (!TextUtils.isEmpty(selText) && "관로위".equals(selText)) {
                 mDistanceDirection.setText("");
-                mDistanceDirection.setEnabled(false);
+                mPipeDistance.setText("");
+                mPipeDistanceLR.setText("");
+                mDistanceDirectionLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
+                mDistanceLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
+                mDistanceLRLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
+                mPipeDistance.setEnabled(false);
+                mPipeDistanceLR.setEnabled(false);
             } else {
-                mDistanceDirection.setEnabled(true);
+                mDistanceDirectionLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
+                mDistanceLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
+                mDistanceLRLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
+                mPipeDistance.setEnabled(true);
+                mPipeDistanceLR.setEnabled(true);
             }
         } else if (selectedObject instanceof DistanceDirection) {
+            mDistanceLRLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
+            mPipeDistanceLR.setEnabled(true);
+
             if ((DistanceDirection)selectedObject == DistanceDirection.EL_DIRECTION_CENTER) {
                 mDistanceDirection.setText("CENTER");
+                mDistanceLRLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
+                mPipeDistanceLR.setText("");
+                mPipeDistanceLR.setEnabled(false);
             } else if ((DistanceDirection)selectedObject == DistanceDirection.EL_DIRECTION_LEFT) {
                 mDistanceDirection.setText("LEFT");
             } else if ((DistanceDirection)selectedObject == DistanceDirection.EL_DIRECTION_RIGHT) {

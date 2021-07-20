@@ -8,9 +8,10 @@
         android:id="@+id/item_image"
         android:layout_width="88dp"
         android:layout_height="70dp"
-        android:layout_margin="2dp"
-        android:padding="5dp"
-        android:src="@drawable/e_type_0_center"/>
+        android:layout_margin="3dp"
+        android:padding="2dp"
+        android:src="@drawable/e_type_0_center"
+        android:background="@drawable/border_ffffff_840a47_3dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
