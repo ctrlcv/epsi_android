@@ -65,6 +65,14 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     TextView mPipeType;
 
     @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.et_set_position)
+    TextView mSetPosition;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.et_distance_direction)
+    TextView mDistanceDirection;
+
+    @SuppressLint("NonConstantResourceId")
     @BindView(R.id.et_distance)
     EditText mPipeDistance;
 
@@ -199,7 +207,8 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     }
 
     @SuppressLint("NonConstantResourceId")
-    @OnClick({R.id.item_pipe_group, R.id.item_pipe_type, R.id.item_material, R.id.item_set_position, R.id.item_distance_direction, R.id.write_btn, R.id.location_btn})
+    @OnClick({R.id.item_pipe_group, R.id.item_pipe_type, R.id.item_material, R.id.item_set_position,
+              R.id.item_distance_direction, R.id.write_btn, R.id.location_btn})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.item_pipe_group:
@@ -481,7 +490,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                                     resultList.add(typeCode);
                                 }
 
-                                mTypeListAdapter.setItems(resultList);
+                                mTypeListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
                                 mTypeListAdapter.notifyDataSetChanged();
                                 mTypeListTitle.setText("관로형태");
                                 mTypeItemLayout.setVisibility(View.VISIBLE);
@@ -543,15 +552,26 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     }
 
     public void makeSetPositionCodes() {
-        mSetPositionList.clear();
-        mSetPositionList.add("경계석");
-        mSetPositionList.add("관로위");
+        ArrayList<Object> resultList = new ArrayList<>();
+        resultList.add("경계석");
+        resultList.add("관로위");
+
+        mTypeListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
+        mTypeListAdapter.notifyDataSetChanged();
+        mTypeListTitle.setText("관로형태");
+        mTypeItemLayout.setVisibility(View.VISIBLE);
     }
 
     public void makeDistanceDirectionCodes() {
-        mDistanceDirectionList.add(DistanceDirection.EL_DIRECTION_CENTER);
-        mDistanceDirectionList.add(DistanceDirection.EL_DIRECTION_LEFT);
-        mDistanceDirectionList.add(DistanceDirection.EL_DIRECTION_RIGHT);
+        ArrayList<Object> resultList = new ArrayList<>();
+        resultList.add(DistanceDirection.EL_DIRECTION_CENTER);
+        resultList.add(DistanceDirection.EL_DIRECTION_LEFT);
+        resultList.add(DistanceDirection.EL_DIRECTION_RIGHT);
+
+        mTypeListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
+        mTypeListAdapter.notifyDataSetChanged();
+        mTypeListTitle.setText("관로형태");
+        mTypeItemLayout.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -566,11 +586,31 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         mCodeItemLayout.setVisibility(View.GONE);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onTypeItemSelected(View v, Object selectedObject) {
-        mSelectedPipeType = ((TypeCode)selectedObject).getTypeCd();
-        mPipeType.setText(((TypeCode)selectedObject).getTypeName());
+        if (selectedObject instanceof TypeCode) {
+            mSelectedPipeType = ((TypeCode)selectedObject).getTypeCd();
+            mPipeType.setText(((TypeCode)selectedObject).getTypeName());
+        } else if (selectedObject instanceof String) {
+            String selText = (String)selectedObject;
 
+            mSetPosition.setText(selText);
+            if (!TextUtils.isEmpty(selText) && "관로위".equals(selText)) {
+                mDistanceDirection.setText("");
+                mDistanceDirection.setEnabled(false);
+            } else {
+                mDistanceDirection.setEnabled(true);
+            }
+        } else if (selectedObject instanceof DistanceDirection) {
+            if ((DistanceDirection)selectedObject == DistanceDirection.EL_DIRECTION_CENTER) {
+                mDistanceDirection.setText("CENTER");
+            } else if ((DistanceDirection)selectedObject == DistanceDirection.EL_DIRECTION_LEFT) {
+                mDistanceDirection.setText("LEFT");
+            } else if ((DistanceDirection)selectedObject == DistanceDirection.EL_DIRECTION_RIGHT) {
+                mDistanceDirection.setText("RIGHT");
+            }
+        }
         mTypeItemLayout.setVisibility(View.GONE);
     }
 }
