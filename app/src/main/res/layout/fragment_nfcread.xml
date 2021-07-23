@@ -753,6 +753,7 @@
                     tools:ignore="HardcodedText"/>
             </RelativeLayout>
             <ImageView
+                android:id="@+id/site_image"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scaleType="fitXY"

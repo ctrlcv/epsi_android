@@ -3,6 +3,7 @@ package kr.co.ecommtech.epsi.ui.fragment;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.net.Uri;
@@ -27,11 +28,15 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.apache.commons.net.ftp.FTP;
+import org.apache.commons.net.ftp.FTPClient;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -396,6 +401,48 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             default:
                 break;
         }
+    }
+
+    public void uploadSiteImageByFtp(String filePath, String uploadFileName) {
+        final String parameter = uploadFileName;
+
+        Thread thread = new Thread(new Runnable() {
+            String fileName = parameter;
+
+            @Override
+            public void run() {
+                FTPClient ftpClient = new FTPClient();
+
+                try {
+                    ftpClient.connect("139.150.83.28", FTP.DEFAULT_PORT);
+                    ftpClient.login("root", "ecomm123456");
+                    ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+                } catch (Exception ex) {
+                    Utils.showToast(requireActivity(), "FTP 접속에 실패하여 사진을 upload 할 수 없습니다. 관리자에게 문의하세요.");
+                    return;
+                }
+
+                File uploadFile = new File(filePath);
+                FileInputStream fileInputStream = null;
+
+                try {
+                    ftpClient.changeWorkingDirectory("/siteImages");
+                    fileInputStream = new FileInputStream(uploadFile);
+                    boolean isSuccess = ftpClient.storeFile(uploadFile.getName(), fileInputStream);
+
+                    if (isSuccess){
+                        // success
+                    } else {
+                        // fail
+                    }
+
+                } catch(Exception e) {
+                    Utils.showToast(requireActivity(), "파일전송에 실패하여 사진을 upload 할 수 없습니다. 관리자에게 문의하세요.");
+                    return;
+                }
+            }
+        });
+        thread.start();
     }
 
     private void loadPipeInfo() {
