@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -63,9 +64,8 @@ import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
-public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCodeItemSelectedListener, TypeListAdapter.OnTypeItemSelectedListener {
+public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCodeItemSelectedListener, TypeListAdapter.OnTypeItemSelectedListener, DirectionListAdapter.OnDirectionItemSelectedListener {
     private static String TAG = "NfcWriteFragment";
-    private static final int REQUEST_IMAGE_CODE = 7001;
 
     protected QueryService mQueryService;
 
@@ -174,8 +174,24 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     RecyclerView mTypeRecyclerView;
 
     @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.direction_item_layout)
+    RelativeLayout mDirectionItemLayout;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.tv_direction_list_title)
+    TextView mDirectionListTitle;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.direction_item_rv)
+    RecyclerView mDirectionRecyclerView;
+
+    @SuppressLint("NonConstantResourceId")
     @BindView(R.id.site_image)
     ImageView mSiteImage;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.select_site_image)
+    LinearLayout mSelectImageLayout;
 
     private String mSelectedPipeGroup;
     private String mSelectedPipeType;
@@ -190,6 +206,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
     private CodeListAdapter mCodeListAdapter;
     private TypeListAdapter mTypeListAdapter;
+    private DirectionListAdapter mDirectionListAdapter;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -212,11 +229,17 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         LinearLayoutManager layoutManager2 = new LinearLayoutManager(getActivity());
         mTypeRecyclerView.setLayoutManager(layoutManager2);
 
+        LinearLayoutManager layoutManager3 = new LinearLayoutManager(getActivity());
+        mDirectionRecyclerView.setLayoutManager(layoutManager3);
+
         mCodeListAdapter = new CodeListAdapter(getActivity(), this);
         mCodeRecyclerView.setAdapter(mCodeListAdapter);
 
         mTypeListAdapter = new TypeListAdapter(getActivity(), this);
         mTypeRecyclerView.setAdapter(mTypeListAdapter);
+
+        mDirectionListAdapter = new DirectionListAdapter(getActivity(), this);
+        mDirectionRecyclerView.setAdapter(mDirectionListAdapter);
 
         mQueryService = HttpClientToken.getRetrofit().create(QueryService.class);
 
@@ -245,7 +268,8 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
     @SuppressLint("NonConstantResourceId")
     @OnClick({R.id.item_pipe_group, R.id.item_pipe_type, R.id.item_material, R.id.item_set_position,
-              R.id.item_distance_direction, R.id.write_btn, R.id.location_btn, R.id.site_image})
+              R.id.item_distance_direction, R.id.write_btn, R.id.location_btn, R.id.site_image,
+              R.id.select_site_image})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.item_pipe_group:
@@ -356,6 +380,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 });
                 break;
 
+            case R.id.select_site_image:
             case R.id.site_image:
                 Intent intent = new Intent();
                 intent.setType("image/*");
@@ -378,6 +403,8 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                     Uri uri = intent.getData();
                     Log.d(TAG, uri.toString());
                     mSiteImage.setImageURI(uri);
+                    mSiteImage.setVisibility(View.VISIBLE);
+                    mSelectImageLayout.setVisibility(View.GONE);
                     // new File(uri.getPath());
                 }
             }
@@ -636,7 +663,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                                     resultList.add(typeCode);
                                 }
 
-                                mTypeListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
+                                mTypeListAdapter.setItems(resultList, mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
                                 mTypeListAdapter.notifyDataSetChanged();
                                 mTypeListTitle.setText("관로형태");
                                 mTypeItemLayout.setVisibility(View.VISIBLE);
@@ -702,10 +729,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         resultList.add("경계석");
         resultList.add("관로위");
 
-        mTypeListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
-        mTypeListAdapter.notifyDataSetChanged();
-        mTypeListTitle.setText("설치위치");
-        mTypeItemLayout.setVisibility(View.VISIBLE);
+        mDirectionListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
+        mDirectionListAdapter.notifyDataSetChanged();
+        mDirectionListTitle.setText("설치위치");
+        mDirectionItemLayout.setVisibility(View.VISIBLE);
     }
 
     public void makeDistanceDirectionCodes() {
@@ -714,10 +741,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         resultList.add(DistanceDirection.EL_DIRECTION_LEFT);
         resultList.add(DistanceDirection.EL_DIRECTION_RIGHT);
 
-        mTypeListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
-        mTypeListAdapter.notifyDataSetChanged();
-        mTypeListTitle.setText("이격위치");
-        mTypeItemLayout.setVisibility(View.VISIBLE);
+        mDirectionListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
+        mDirectionListAdapter.notifyDataSetChanged();
+        mDirectionListTitle.setText("이격위치");
+        mDirectionItemLayout.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -738,7 +765,15 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         if (selectedObject instanceof TypeCode) {
             mSelectedPipeType = ((TypeCode)selectedObject).getTypeCd();
             mPipeType.setText(((TypeCode)selectedObject).getTypeName());
-        } else if (selectedObject instanceof String) {
+        }
+
+        mTypeItemLayout.setVisibility(View.GONE);
+    }
+
+    @SuppressLint("SetTextI18n")
+    @Override
+    public void onDirectionItemSelected(View v, Object selectedObject) {
+        if (selectedObject instanceof String) {
             String selText = (String)selectedObject;
 
             mSetPosition.setText(selText);
@@ -773,6 +808,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 mDistanceDirection.setText("RIGHT");
             }
         }
-        mTypeItemLayout.setVisibility(View.GONE);
+
+        mDirectionItemLayout.setVisibility(View.GONE);
     }
 }

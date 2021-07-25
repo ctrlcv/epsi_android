@@ -2,6 +2,7 @@ package kr.co.ecommtech.epsi.ui.fragment;
 
 import android.annotation.SuppressLint;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
@@ -15,10 +16,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -140,6 +143,8 @@ public class NfcReadFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_nfcread, container, false);
         ButterKnife.bind(this, rootView);
+
+        sendImageRequest();
 
         return rootView;
     }
@@ -294,13 +299,30 @@ public class NfcReadFragment extends Fragment {
         }
     }
 
-    private class LoadImageByUrlTask extends AsyncTask<String,Void, Bitmap> {
+    public void sendImageRequest() {
+        String url = "https://thumb.mt.co.kr/06/2021/06/2021061710222366653_2.jpg/dims/optimize/";
+
+        LoadImageByUrlTask task = new LoadImageByUrlTask(url);
+        task.execute();
+    }
+
+    private class LoadImageByUrlTask extends AsyncTask<Void, Void, Bitmap> {
+        private String urlStr;
+
+        public LoadImageByUrlTask(String urlStr) {
+            this.urlStr = urlStr;
+        }
+
         @Override
-        protected Bitmap doInBackground(String... strings) {
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... voids) {
             Bitmap bmp = null;
             try {
-                String img_url = strings[0]; //url of the image
-                URL url = new URL(img_url);
+                URL url = new URL(urlStr);
                 bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -308,11 +330,6 @@ public class NfcReadFragment extends Fragment {
                 e.printStackTrace();
             }
             return bmp;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
         }
 
         @Override

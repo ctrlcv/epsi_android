@@ -3,7 +3,7 @@ package kr.co.ecommtech.epsi.ui.data;
 import com.google.gson.annotations.SerializedName;
 
 public class Pipe {
-    @SerializedName("pipeid")
+    @SerializedName("id")
     int pipeId;
 
     @SerializedName("pipegroup")
@@ -21,6 +21,12 @@ public class Pipe {
     @SerializedName("pipetypename")
     String pipeTypeName;
 
+    @SerializedName("setPosition")
+    String setPosition;
+
+    @SerializedName("distanceDirection")
+    String distanceDirection;
+
     @SerializedName("diameter")
     double diameter;
 
@@ -32,6 +38,9 @@ public class Pipe {
 
     @SerializedName("distance")
     double distance;
+
+    @SerializedName("distanceLr")
+    double distanceLr;
 
     @SerializedName("pipedepth")
     double pipeDepth;
@@ -63,17 +72,20 @@ public class Pipe {
     @SerializedName("locdistance")
     double locDistance;
 
-    public Pipe(int pipeId, String pipeGroup, String pipeGroupName, String pipeGroupColor, String pipeType, String pipeTypeName, double diameter, String material, String materialName, double distance, double pipeDepth, double positionX, double positionY, String offerCompany, String companyPhone, String memo, String buildCompany, String buildPhone, String siteImageUrl, double locDistance) {
+    public Pipe(int pipeId, String pipeGroup, String pipeGroupName, String pipeGroupColor, String pipeType, String pipeTypeName, String setPosition, String distanceDirection, double diameter, String material, String materialName, double distance, double distanceLr, double pipeDepth, double positionX, double positionY, String offerCompany, String companyPhone, String memo, String buildCompany, String buildPhone, String siteImageUrl, double locDistance) {
         this.pipeId = pipeId;
         this.pipeGroup = pipeGroup;
         this.pipeGroupName = pipeGroupName;
         this.pipeGroupColor = pipeGroupColor;
         this.pipeType = pipeType;
         this.pipeTypeName = pipeTypeName;
+        this.setPosition = setPosition;
+        this.distanceDirection = distanceDirection;
         this.diameter = diameter;
         this.material = material;
         this.materialName = materialName;
         this.distance = distance;
+        this.distanceLr = distanceLr;
         this.pipeDepth = pipeDepth;
         this.positionX = positionX;
         this.positionY = positionY;
@@ -134,6 +146,22 @@ public class Pipe {
         this.pipeTypeName = pipeTypeName;
     }
 
+    public String getSetPosition() {
+        return setPosition;
+    }
+
+    public void setSetPosition(String setPosition) {
+        this.setPosition = setPosition;
+    }
+
+    public String getDistanceDirection() {
+        return distanceDirection;
+    }
+
+    public void setDistanceDirection(String distanceDirection) {
+        this.distanceDirection = distanceDirection;
+    }
+
     public double getDiameter() {
         return diameter;
     }
@@ -164,6 +192,14 @@ public class Pipe {
 
     public void setDistance(double distance) {
         this.distance = distance;
+    }
+
+    public double getDistanceLr() {
+        return distanceLr;
+    }
+
+    public void setDistanceLr(double distanceLr) {
+        this.distanceLr = distanceLr;
     }
 
     public double getPipeDepth() {
@@ -255,10 +291,13 @@ public class Pipe {
                 ", pipeGroupColor='" + pipeGroupColor + '\'' +
                 ", pipeType='" + pipeType + '\'' +
                 ", pipeTypeName='" + pipeTypeName + '\'' +
+                ", setPosition='" + setPosition + '\'' +
+                ", distanceDirection='" + distanceDirection + '\'' +
                 ", diameter=" + diameter +
                 ", material='" + material + '\'' +
                 ", materialName='" + materialName + '\'' +
                 ", distance=" + distance +
+                ", distanceLr=" + distanceLr +
                 ", pipeDepth=" + pipeDepth +
                 ", positionX=" + positionX +
                 ", positionY=" + positionY +

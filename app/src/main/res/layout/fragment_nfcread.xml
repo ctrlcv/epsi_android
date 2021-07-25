@@ -756,8 +756,10 @@
                 android:id="@+id/site_image"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scaleType="fitXY"
-                android:src="@drawable/sample" />
+                android:scaleType="fitCenter"
+                android:padding="10dp"
+                android:adjustViewBounds="true"
+                android:background="@drawable/border_ffffff_840a47_3dp" />
         </LinearLayout>
     </ScrollView>
 

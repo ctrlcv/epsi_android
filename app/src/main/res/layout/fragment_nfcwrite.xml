@@ -822,15 +822,42 @@
                     android:text="현장사진"
                     tools:ignore="HardcodedText"/>
             </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/select_site_image"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:background="@drawable/border_840a47_840a47_3dp">
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:src="@drawable/ic_baseline_photo" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="10dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:textSize="17dp"
+                    android:textColor="#FFFFFF"
+                    android:gravity="center"
+                    android:text="사진선택"
+                    tools:ignore="HardcodedText"/>
+            </LinearLayout>
+
             <ImageView
                 android:id="@+id/site_image"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scaleType="fitCenter"
                 android:padding="10dp"
+                android:adjustViewBounds="true"
                 android:src="@drawable/ic_baseline_photo"
-                android:background="@drawable/border_ffffff_840a47_3dp"/>
-
+                android:background="@drawable/border_ffffff_840a47_3dp"
+                android:visibility="gone"/>
         </LinearLayout>
     </ScrollView>
 
@@ -861,8 +888,8 @@
                 android:id="@+id/tv_code_list_title"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:fontFamily="@font/nexon_regular"
-                android:textSize="16dp"
+                android:fontFamily="@font/nexon_bold"
+                android:textSize="18dp"
                 android:textColor="@android:color/white"
                 android:gravity="center"
                 android:text="관로형태"
@@ -888,16 +915,16 @@
         <RelativeLayout
             android:layout_width="306dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
-            android:layout_marginBottom="50dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="40dp"
             android:layout_centerInParent="true"
             app:layout_constraintHeight_max="420dp">
             <TextView
                 android:id="@+id/tv_type_list_title"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:fontFamily="@font/nexon_regular"
-                android:textSize="16dp"
+                android:fontFamily="@font/nexon_bold"
+                android:textSize="18dp"
                 android:textColor="@android:color/white"
                 android:gravity="center"
                 android:text="관로형태"
@@ -911,6 +938,40 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_below="@id/tv_type_list_title" />
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/direction_item_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#99000000"
+        android:clickable="false"
+        android:visibility="gone">
+        <RelativeLayout
+            android:layout_width="306dp"
+            android:layout_height="wrap_content"
+            android:background="#99000000"
+            android:clickable="false"
+            android:layout_centerInParent="true">
+            <TextView
+                android:id="@+id/tv_direction_list_title"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:fontFamily="@font/nexon_bold"
+                android:textSize="18dp"
+                android:textColor="@android:color/white"
+                android:gravity="center"
+                android:text="관로형태"
+                android:textStyle="bold"
+                tools:ignore="HardcodedText"
+                android:background="#840a47"
+                android:layout_alignParentTop="true" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/direction_item_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tv_direction_list_title" />
         </RelativeLayout>
     </RelativeLayout>
 

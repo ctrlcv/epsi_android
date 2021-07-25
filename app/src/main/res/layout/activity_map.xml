@@ -1,57 +1,290 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#efe8df">
-
-    <RelativeLayout
-        android:id="@+id/top_bar_linear_layout"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:background="#840a47"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="22dp"
-        android:paddingEnd="22dp"
-        android:layout_alignParentTop="true">
-
-        <TextView
-            android:id="@+id/activity_title"
-            android:fontFamily="@font/nexon_bold"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clickable="false"
-            android:focusable="false"
-            android:longClickable="false"
-            android:textColor="#FFFFFF"
-            android:textSize="24dp"
-            android:lineSpacingExtra="2.6dp"
-            android:gravity="center_vertical|start"
-            android:text="지도보기"
-            android:textStyle="bold" />
-
-        <ImageButton
-            android:id="@+id/home_btn"
-            android:layout_width="36dp"
-            android:layout_height="match_parent"
-            android:scaleType="fitCenter"
-            android:layout_alignParentRight="true"
-            android:background="@android:color/transparent"
-            android:src="@drawable/ic_home" />
-    </RelativeLayout>
-
+    android:layout_height="match_parent">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/white"
-        android:layout_below="@id/top_bar_linear_layout">
+        android:orientation="vertical"
+        android:background="#efe8df">
 
-        <com.naver.maps.map.MapView
+        <RelativeLayout
+            android:id="@+id/top_bar_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:background="#840a47"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="22dp"
+            android:paddingEnd="22dp"
+            android:layout_alignParentTop="true">
+
+            <TextView
+                android:id="@+id/activity_title"
+                android:fontFamily="@font/nexon_bold"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clickable="false"
+                android:focusable="false"
+                android:longClickable="false"
+                android:textColor="#FFFFFF"
+                android:textSize="24dp"
+                android:lineSpacingExtra="2.6dp"
+                android:gravity="center_vertical|start"
+                android:text="지도보기"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/home_btn"
+                android:layout_width="36dp"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:layout_alignParentRight="true"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_home" />
+        </RelativeLayout>
+
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/map_view" />
+            android:background="@android:color/white"
+            android:layout_below="@id/top_bar_linear_layout">
+
+            <fragment
+                android:id="@+id/map_fragment"
+                android:name="com.naver.maps.map.MapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </RelativeLayout>
     </RelativeLayout>
-</RelativeLayout>
+
+    <LinearLayout
+        android:id="@+id/detail_info_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="22dp"
+        android:orientation="vertical"
+        android:background="@drawable/border_ffffff_ffffff_3dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/tv_info_title"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/border_840a47_840a47_top3dp"
+            android:gravity="center"
+            android:textColor="#FFFFFF"
+            android:textSize="22dp"
+            android:lineSpacingExtra="2.6dp"
+            android:text="상수관"
+            android:textStyle="bold" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="10dp">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center_vertical|right"
+                    android:text="관로형태"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center_vertical|right"
+                    android:text="설치위치"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:id="@+id/tv_pipe_distance_direction_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center_vertical|right"
+                    android:text="이격위치"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:id="@+id/tv_pipe_distance_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center_vertical|right"
+                    android:text="이격거리"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center_vertical|right"
+                    android:text="매설심도"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center_vertical|right"
+                    android:text="관경"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_bold"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center_vertical|right"
+                    android:text="관로재질"
+                    tools:ignore="HardcodedText"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="6"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_pipe_type"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_regular"
+                    android:paddingLeft="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|left"
+                    android:text="T분기형(90)"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:id="@+id/tv_pipe_set_position"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_regular"
+                    android:paddingLeft="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|left"
+                    android:text="경계석"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:id="@+id/tv_pipe_distance_direction"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_regular"
+                    android:paddingLeft="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|left"
+                    android:text="CENTER"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:id="@+id/tv_pipe_distance"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_regular"
+                    android:paddingLeft="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|left"
+                    android:text="전 2.34m   좌 4.34m"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:id="@+id/tv_pipe_diameter"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_regular"
+                    android:paddingLeft="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|left"
+                    android:text="3.23m"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:id="@+id/tv_pipe_depth"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_regular"
+                    android:paddingLeft="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|left"
+                    android:text="3.21m"
+                    tools:ignore="HardcodedText"/>
+
+                <TextView
+                    android:id="@+id/tv_pipe_material"
+                    android:layout_width="match_parent"
+                    android:layout_height="25dp"
+                    android:fontFamily="@font/nexon_regular"
+                    android:paddingLeft="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#5d5d5d"
+                    android:gravity="center_vertical|left"
+                    android:text="폴리에틸렌"
+                    tools:ignore="HardcodedText"/>
+            </LinearLayout>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="55dp"
+            android:paddingLeft="27dp"
+            android:paddingRight="27dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="15dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/border_ffffff_840a47_width3dp">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:fontFamily="@font/nexon_bold"
+                    android:paddingRight="10dp"
+                    android:textSize="20dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="세부정보"
+                    tools:ignore="HardcodedText"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
