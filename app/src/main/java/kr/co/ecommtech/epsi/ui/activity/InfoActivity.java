@@ -17,6 +17,7 @@ import android.os.Parcelable;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -55,6 +56,14 @@ public class InfoActivity extends BaseActivity {
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.nfc_write_layout)
     RelativeLayout mNfcWriteLayout;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.nfc_save_layout)
+    RelativeLayout mNfcSaveLayout;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.nfc_dialog_title)
+    TextView mDialogTitle;
 
     InfoPageAdapter mInfoPageAdapter;
 
@@ -120,8 +129,22 @@ public class InfoActivity extends BaseActivity {
         super.onNewIntent(passedIntent);
     }
 
-    public void setVisibleNfcWriteDialog(boolean visible) {
+    public void setVisibleNfcReadDialog(boolean visible) {
+        if (visible) {
+            mDialogTitle.setText("TAG 읽기");
+        }
         mNfcWriteLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    public void setVisibleNfcWriteDialog(boolean visible) {
+        if (visible) {
+            mDialogTitle.setText("TAG 쓰기");
+        }
+        mNfcWriteLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    public void setVisibleNfcSaveDialog(boolean visible) {
+        mNfcSaveLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 }
 

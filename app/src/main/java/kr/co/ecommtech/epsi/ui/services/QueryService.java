@@ -6,6 +6,7 @@ import kr.co.ecommtech.epsi.ui.data.GroupCodeList;
 import kr.co.ecommtech.epsi.ui.data.LogIn;
 import kr.co.ecommtech.epsi.ui.data.MaterialCodeList;
 import kr.co.ecommtech.epsi.ui.data.PipeList;
+import kr.co.ecommtech.epsi.ui.data.Result;
 import kr.co.ecommtech.epsi.ui.data.TypeCodeList;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -35,4 +36,7 @@ public interface QueryService {
     @POST("/api/epsi/epsi")
     Call<PipeList> getPipeList(@Body HashMap<String, Double> map);
 
+    @Headers({"Accept: applcation/json", "Content-Type: application/json; charset=utf-8"})
+    @POST("/api/epsi/store")
+    Call<Result> savePipeInfo(@Body HashMap<String, Object> map);
 }

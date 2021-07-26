@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -61,6 +62,7 @@ public class NfcService {
     private String mBuildCompany;
     private String mBuildPhone;
     private String mSiteImageUrl;
+    private Bitmap mSiteImage;
 
     private NfcAdapter mNfcAdapter;
     private PendingIntent mNfcPendingIntent;
@@ -188,6 +190,7 @@ public class NfcService {
                     Log.d(TAG, "onNewIntentNfcMode() readMode, rawMessages is NULL");
                 }
 
+                setReadMode(false);
                 EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_READ_NFC_PIPEINFO));
             }
         } else if (mIsWriteMode) {
@@ -201,6 +204,7 @@ public class NfcService {
                 Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
                 writeTag(context, buildNdefMessage(), detectedTag);
 
+                setWriteMode(false);
                 EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_PIPEINFO));
             }
         }
@@ -237,6 +241,18 @@ public class NfcService {
             return;
         }
 
+        if (data.contains("setPosition:")) {
+            String value = data.replace("setPosition:", "");
+            setSetPosition(value);
+            return;
+        }
+
+        if (data.contains("DistanceDirection:")) {
+            String value = data.replace("DistanceDirection:", "");
+            setDistanceDirection(value);
+            return;
+        }
+
         if (data.contains("Distance:")) {
             String value = data.replace("Distance:", "");
 
@@ -244,6 +260,16 @@ public class NfcService {
                 setDistance(0.0);
             } else {
                 setDistance(Double.parseDouble(value));
+            }
+            return;
+        }
+        if (data.contains("DistanceLR:")) {
+            String value = data.replace("DistanceLR:", "");
+
+            if (TextUtils.isEmpty(value)) {
+                setDistanceLR(0.0);
+            } else {
+                setDistanceLR(Double.parseDouble(value));
             }
             return;
         }
@@ -902,5 +928,13 @@ public class NfcService {
 
     public void setSiteImageUrl(String siteImageUrl) {
         this.mSiteImageUrl = siteImageUrl;
+    }
+
+    public Bitmap getSiteImage() {
+        return mSiteImage;
+    }
+
+    public void setSiteImage(Bitmap siteImage) {
+        this.mSiteImage = siteImage;
     }
 }

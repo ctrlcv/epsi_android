@@ -39,6 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,10 +51,12 @@ import kr.co.ecommtech.epsi.ui.data.GroupCode;
 import kr.co.ecommtech.epsi.ui.data.GroupCodeList;
 import kr.co.ecommtech.epsi.ui.data.MaterialCode;
 import kr.co.ecommtech.epsi.ui.data.MaterialCodeList;
+import kr.co.ecommtech.epsi.ui.data.Result;
 import kr.co.ecommtech.epsi.ui.data.TypeCode;
 import kr.co.ecommtech.epsi.ui.data.TypeCodeList;
 import kr.co.ecommtech.epsi.ui.network.HttpClientToken;
 import kr.co.ecommtech.epsi.ui.services.DistanceDirection;
+import kr.co.ecommtech.epsi.ui.services.Event;
 import kr.co.ecommtech.epsi.ui.services.EventMessage;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.services.QueryService;
@@ -208,6 +211,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     private TypeListAdapter mTypeListAdapter;
     private DirectionListAdapter mDirectionListAdapter;
 
+    private String mSelectedFilePath;
+    private String mSelectedFileExt;
+
+
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -242,6 +249,9 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         mDirectionRecyclerView.setAdapter(mDirectionListAdapter);
 
         mQueryService = HttpClientToken.getRetrofit().create(QueryService.class);
+
+        mSiteImage.setVisibility(View.GONE);
+        mSelectImageLayout.setVisibility(View.VISIBLE);
 
         return rootView;
     }
@@ -406,6 +416,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                     mSiteImage.setVisibility(View.VISIBLE);
                     mSelectImageLayout.setVisibility(View.GONE);
                     // new File(uri.getPath());
+
+                    mSelectedFilePath = uri.getPath();
+                    String[] fileSplit = mSelectedFilePath.split(".");
+                    mSelectedFileExt = fileSplit[fileSplit.length - 1];
                 }
             }
         });
@@ -422,12 +436,86 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             case EL_EVENT_WRITE_NFC_PIPEINFO:
                 if (getActivity() != null) {
                     ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
+                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(true);
                 }
+                if (TextUtils.isEmpty(mSelectedFilePath)) {
+                    reqSavePipeInfo();
+                } else {
+                    String fileName = mPositionX.getText().toString() + "-" + mPositionY.getText().toString() + "." + mSelectedFileExt;
+                    Log.d(TAG, "save fileName:" + fileName + ", filePath:" + mSelectedFilePath);
+                    uploadSiteImageByFtp(mSelectedFilePath, fileName);
+                }
+                break;
+
+            case EL_EVENT_UPLOADED_PHOTO:
+                reqSavePipeInfo();
+                break;
+
+            case EL_EVENT_DB_SAVE_SUCCESS:
+                Utils.showToast(getActivity(), "저장되었습니다.");
+                break;
+
+            case EL_EVENT_DB_SAVE_FAIL:
+                Utils.showToast(getActivity(), "저장에 실패하였습니다.\n관리자에게 문의 하세요.");
                 break;
 
             default:
                 break;
         }
+    }
+
+    public void reqSavePipeInfo() {
+        if (getActivity() == null) {
+            return;
+        }
+
+        HashMap<String, Object> map = new HashMap<>();
+
+        map.put("serialno", mSerialNumber.getText().toString());
+        map.put("pipegroup", mSelectedPipeGroup);
+        map.put("pipetype", mSelectedPipeType);
+        map.put("setPosition", mPipeType.getText().toString());
+        map.put("distanceDirection", mDistanceDirection.getText().toString());
+        map.put("diameter", mPipeDistance.getText().toString());
+        map.put("material", mSelectedMaterial);
+        map.put("distance", Double.parseDouble(mPipeDistance.getText().toString()));
+        map.put("distanceLr", Double.parseDouble(mPipeDistanceLR.getText().toString()));
+        map.put("pipedepth", Double.parseDouble(mDepth.getText().toString()));
+        map.put("positionx", Double.parseDouble(mPositionX.getText().toString()));
+        map.put("positiony", Double.parseDouble(mPositionY.getText().toString()));
+        map.put("offercompany", mAgency.getText().toString());
+        map.put("companyphone", mPhoneNumber.getText().toString());
+        map.put("memo", mMemo.getText().toString());
+        map.put("buildcompany", mMaker.getText().toString());
+        map.put("buildphone", mMakerPhone.getText().toString());
+
+        Call<Result> call = mQueryService.savePipeInfo(map);
+
+        call.enqueue(new Callback<Result>() {
+            @Override
+            public void onResponse(Call<Result> call, Response<Result> response) {
+                if(response.isSuccessful()){
+                    Result result = response.body();
+
+                    requireActivity().runOnUiThread(new Runnable(){
+                        public void run(){
+                            if (result.isSuccess()) {
+                                EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_DB_SAVE_SUCCESS));
+                            } else {
+                                EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_DB_SAVE_FAIL));
+                            }
+                        }
+                    });
+                } else {
+                    Log.d(TAG,"reqSavePipeInfo() Status Code : " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Result> call, Throwable t) {
+                Log.e(TAG,"reqSavePipeInfo() Fail msg : " + t.getMessage());
+            }
+        });
     }
 
     public void uploadSiteImageByFtp(String filePath, String uploadFileName) {
@@ -453,7 +541,9 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 FileInputStream fileInputStream = null;
 
                 try {
+                    ftpClient.deleteFile("/siteImages" + "/" + uploadFileName);
                     ftpClient.changeWorkingDirectory("/siteImages");
+
                     fileInputStream = new FileInputStream(uploadFile);
                     boolean isSuccess = ftpClient.storeFile(uploadFile.getName(), fileInputStream);
 
@@ -573,6 +663,12 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             mMakerPhone.setText(NfcService.getInstance().getBuildPhone());
         } else {
             mMakerPhone.setText("");
+        }
+
+        if (NfcService.getInstance().getSiteImage() != null) {
+            mSiteImage.setImageBitmap(NfcService.getInstance().getSiteImage());
+            mSiteImage.setVisibility(View.VISIBLE);
+            mSelectImageLayout.setVisibility(View.GONE);
         }
     }
 

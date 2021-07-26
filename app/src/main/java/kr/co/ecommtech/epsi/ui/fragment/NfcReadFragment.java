@@ -174,6 +174,9 @@ public class NfcReadFragment extends Fragment {
         switch (view.getId()) {
             case R.id.read_btn:
                 NfcService.getInstance().enableTagReadMode();
+                if (getActivity() != null) {
+                    ((InfoActivity) getActivity()).setVisibleNfcReadDialog(true);
+                }
                 break;
 
             default:
@@ -188,6 +191,11 @@ public class NfcReadFragment extends Fragment {
         switch (e.what) {
             case EL_EVENT_READ_NFC_PIPEINFO:
                 loadPipeInfo();
+                if (getActivity() != null) {
+                    ((InfoActivity) getActivity()).setVisibleNfcReadDialog(false);
+                }
+                String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
+                sendImageRequest(fileName);
                 break;
 
             default:
@@ -299,8 +307,8 @@ public class NfcReadFragment extends Fragment {
         }
     }
 
-    public void sendImageRequest() {
-        String url = "https://thumb.mt.co.kr/06/2021/06/2021061710222366653_2.jpg/dims/optimize/";
+    public void sendImageRequest(String fileName) {
+        String url = "http://139.150.83.28/siteImages/" + fileName;
 
         LoadImageByUrlTask task = new LoadImageByUrlTask(url);
         task.execute();
@@ -335,6 +343,7 @@ public class NfcReadFragment extends Fragment {
         @Override
         protected void onPostExecute(Bitmap result) {
             mSiteImage.setImageBitmap(result);
+            NfcService.getInstance().setSiteImage(result);
         }
     }
 }
