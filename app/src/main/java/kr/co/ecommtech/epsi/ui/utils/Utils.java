@@ -43,7 +43,7 @@ public class Utils {
 
     public static void showToast(Context context, String message) {
         ((Activity)context).runOnUiThread(() -> {
-            Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
+            Toast toast = Toast.makeText(context, message, Toast.LENGTH_LONG);
             //toast.setGravity(Gravity.CENTER_HORIZONTAL|Gravity.CENTER_VERTICAL, 0,0);
             toast.show();
         });

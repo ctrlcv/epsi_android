@@ -25,11 +25,13 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.SparseArray;
 import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -37,6 +39,26 @@ import kr.co.ecommtech.epsi.ui.utils.Utils;
 
 public class NfcService {
     private final static String TAG = "NfcService";
+
+    private final static String TAG_PIPE_GROUP = "|1:";
+    private final static String TAG_PIPE_GROUP_NAME = "|2:";
+    private final static String TAG_PIPE_TYPE = "|3:";
+    private final static String TAG_PIPE_TYPENAME = "|4:";
+    private final static String TAG_SET_POSITION = "|5:";
+    private final static String TAG_DISTANCE_DIRECTION = "|6:";
+    private final static String TAG_DISTANCE = "|7:";
+    private final static String TAG_DISTANCE_LR = "|8:";
+    private final static String TAG_PIPE_DEPTH = "|9:";
+    private final static String TAG_PIPE_DIAMETER = "|A:";
+    private final static String TAG_MATERIAL = "|B:";
+    private final static String TAG_MATERIAL_NAME = "|C:";
+    private final static String TAG_POSITION_X = "|D:";
+    private final static String TAG_POSITION_Y = "|E:";
+    private final static String TAG_OFFER_COMPANY = "|F:";
+    private final static String TAG_PHONE_NUMBER = "|G:";
+    private final static String TAG_MEMO = "|H:";
+    private final static String TAG_BUILD_COMPANY = "|I:";
+    private final static String TAG_BUILD_PHONE = "|J:";
 
     private static NfcService mSingletonInstance;
 
@@ -71,6 +93,8 @@ public class NfcService {
 
     private boolean mIsReadMode = false;
     private boolean mIsWriteMode = false;
+
+    private boolean mTabChangedFromReadToWrite = false;
 
     public static NfcService getInstance() {
         if (mSingletonInstance == null) {
@@ -137,6 +161,125 @@ public class NfcService {
         }
     }
 
+//    public static boolean appendPagesFromBytes(SparseArray<byte[]> pages_output, byte[] bytes_input) {
+//        int block = 0;
+//        for (int i = 0; i < bytes_input.length; i += 4, block++) {
+//            appendPage(pages_output, bytes_input, block);
+//        }
+//        return true;
+//    }
+
+//    public boolean writeNfcA(NfcA tag, byte[] bytes) {
+//        for (String string : tag.getTag().getTechList()) {
+//            Log.d(TAG, "TechList:" + string);
+//        }
+//
+//        SparseArray<byte[]> pages = new SparseArray<>();
+//        AmiiboHelper.appendPagesFromBytes(pages, bytes);
+//
+//        try {
+//            int error = 0;
+//
+//            for (int key_index = 0; key_index < pages.size(); key_index++) {
+//                boolean continue_with_except = true;
+//
+//                int page_index = pages.keyAt(key_index);
+//                byte[] page = pages.get(page_index);
+//                byte[] response = null;
+//
+//                byte[] write = new byte[]{
+//                        Constants.COMMAND_WRITE, // COMMAND_WRITE
+//                        (byte) (page_index & 0xff),
+//                        page[0],
+//                        page[1],
+//                        page[2],
+//                        page[3],
+//                };
+//                try {
+//                    response = tag.transceive(write);
+//                    Log.d("MainActivity", "write O :: " + IO.byteArrayToLoggableHexString(write) + " OK");
+//                } catch (TagLostException e) {
+//                    response = null;
+//                    continue_with_except = false;
+//                } catch (IOException e) {
+//                    Log.d("MainActivity", "write O :: " + IO.byteArrayToLoggableHexString(write) + " KO");
+//                    response = null;
+//                }
+//
+//                if (response != null) {
+//
+//                } else if (!continue_with_except) {
+//                    return false;
+//                    //throw new TagLostException("having lost completely the tag");
+//                }
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return true;
+//    }
+
+    public boolean authenticateNTag(NfcA tag) {
+        byte[] password = hexToBytes("1111");
+
+        byte[] auth = new byte[]{
+                (byte) 0x1B,
+                password[0],
+                password[1],
+                password[2],
+                password[3]
+        };
+
+        Log.d(TAG, "authenticateNTag() auth: " + auth);
+
+        byte[] response = new byte[0];
+
+        try {
+            response = tag.transceive(auth);
+            Log.d(TAG, "authenticateNTag() return true");
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG, "authenticateNTag() return false");
+        return false;
+    }
+
+    public void tryReadNfcTag(NfcA nTag216, byte[] uid) {
+
+    }
+
+//    public void tryWriteNfcTag(NfcA nTag216, byte[] uid) {
+//        boolean read_successfully = false;
+//        try {
+//            nTag216.connect();
+//
+//            boolean authenticated = authenticateNTag(nTag216);
+//
+//            if (authenticated) {
+//                boolean result = AmiiboIO.writeAmiibo(ntag215, getAmiibo().data.getBlob());
+//
+//                _scan_listener.onWriteResult(result);
+//                read_successfully = result;
+//            } else {
+//                // 비밀번호가 일치하지 않습니다...
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            ntag215.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        if (!read_successfully) {
+//            _please_retry.setVisibility(View.VISIBLE);
+//        }
+//    }
+
+
     public void onNewIntentNfcMode(Context context, Intent intent) {
         if (!mIsReadMode && !mIsWriteMode) {
             return;
@@ -146,6 +289,27 @@ public class NfcService {
             Log.e(TAG, "onNewIntentNfcMode() intent.getAction() is null");
             return;
         }
+
+//        if (mIsReadMode) {
+//            if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction())) {
+//                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+//                byte[] uid = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID);
+//
+//                NfcA nTag216 = NfcA.get(tag);
+//            }
+//            return;
+//        }
+//
+//        if (mIsWriteMode) {
+//
+//
+//            return;
+//        }
+
+        /////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////
 
         String action = intent.getAction();
         Log.d(TAG, "onNewIntentNfcMode() action : " + action);
@@ -202,7 +366,9 @@ public class NfcService {
                 intent.getAction().equals(NfcAdapter.ACTION_NDEF_DISCOVERED)) {
 
                 Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                writeTag(context, buildNdefMessage(), detectedTag);
+
+                writeTag(context, buildNdefMessage1(), detectedTag);
+                Log.d(TAG, "WriteTag message1");
 
                 setWriteMode(false);
                 EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_PIPEINFO));
@@ -216,45 +382,46 @@ public class NfcService {
         }
 
         Log.d(TAG, "parseNfcData() data:" + data);
+        data = data.replaceAll("en", "");
 
-        if (data.contains("PipeGroup:")) {
-            String value = data.replace("PipeGroup:", "");
+        if (data.contains(TAG_PIPE_GROUP)) {
+            String value = data.replace(TAG_PIPE_GROUP, "");
             setPipeGroup(value);
             return;
         }
 
-        if (data.contains("PipeGroupName:")) {
-            String value = data.replace("PipeGroupName:", "");
+        if (data.contains(TAG_PIPE_GROUP_NAME)) {
+            String value = data.replace(TAG_PIPE_GROUP_NAME, "");
             setPipeGroupName(value);
             return;
         }
 
-        if (data.contains("PipeType:")) {
-            String value = data.replace("PipeType:", "");
+        if (data.contains(TAG_PIPE_TYPE)) {
+            String value = data.replace(TAG_PIPE_TYPE, "");
             setPipeType(value);
             return;
         }
 
-        if (data.contains("PipeTypeName:")) {
-            String value = data.replace("PipeTypeName:", "");
+        if (data.contains(TAG_PIPE_TYPENAME)) {
+            String value = data.replace(TAG_PIPE_TYPENAME, "");
             setPipeTypeName(value);
             return;
         }
 
-        if (data.contains("setPosition:")) {
-            String value = data.replace("setPosition:", "");
+        if (data.contains(TAG_SET_POSITION)) {
+            String value = data.replace(TAG_SET_POSITION, "");
             setSetPosition(value);
             return;
         }
 
-        if (data.contains("DistanceDirection:")) {
-            String value = data.replace("DistanceDirection:", "");
+        if (data.contains(TAG_DISTANCE_DIRECTION)) {
+            String value = data.replace(TAG_DISTANCE_DIRECTION, "");
             setDistanceDirection(value);
             return;
         }
 
-        if (data.contains("Distance:")) {
-            String value = data.replace("Distance:", "");
+        if (data.contains(TAG_DISTANCE)) {
+            String value = data.replace(TAG_DISTANCE, "");
 
             if (TextUtils.isEmpty(value)) {
                 setDistance(0.0);
@@ -263,8 +430,8 @@ public class NfcService {
             }
             return;
         }
-        if (data.contains("DistanceLR:")) {
-            String value = data.replace("DistanceLR:", "");
+        if (data.contains(TAG_DISTANCE_LR)) {
+            String value = data.replace(TAG_DISTANCE_LR, "");
 
             if (TextUtils.isEmpty(value)) {
                 setDistanceLR(0.0);
@@ -274,8 +441,8 @@ public class NfcService {
             return;
         }
 
-        if (data.contains("PipeDepth:")) {
-            String value = data.replace("PipeDepth:", "");
+        if (data.contains(TAG_PIPE_DEPTH)) {
+            String value = data.replace(TAG_PIPE_DEPTH, "");
 
             if (TextUtils.isEmpty(value)) {
                 setPipeDepth(0.0);
@@ -285,8 +452,8 @@ public class NfcService {
             return;
         }
 
-        if (data.contains("PipeDiameter:")) {
-            String value = data.replace("PipeDiameter:", "");
+        if (data.contains(TAG_PIPE_DIAMETER)) {
+            String value = data.replace(TAG_PIPE_DIAMETER, "");
 
             if (TextUtils.isEmpty(value)) {
                 setDiameter(0.0);
@@ -296,20 +463,20 @@ public class NfcService {
             return;
         }
 
-        if (data.contains("Material:")) {
-            String value = data.replace("Material:", "");
+        if (data.contains(TAG_MATERIAL)) {
+            String value = data.replace(TAG_MATERIAL, "");
             setMaterial(value);
             return;
         }
 
-        if (data.contains("MaterialName:")) {
-            String value = data.replace("MaterialName:", "");
+        if (data.contains(TAG_MATERIAL_NAME)) {
+            String value = data.replace(TAG_MATERIAL_NAME, "");
             setMaterialName(value);
             return;
         }
 
-        if (data.contains("PositionX:")) {
-            String value = data.replace("PositionX:", "");
+        if (data.contains(TAG_POSITION_X)) {
+            String value = data.replace(TAG_POSITION_X, "");
 
             if (TextUtils.isEmpty(value)) {
                 setPositionX(0.0);
@@ -319,8 +486,8 @@ public class NfcService {
             return;
         }
 
-        if (data.contains("PositionY:")) {
-            String value = data.replace("PositionY:", "");
+        if (data.contains(TAG_POSITION_Y)) {
+            String value = data.replace(TAG_POSITION_Y, "");
 
             if (TextUtils.isEmpty(value)) {
                 setPositionY(0.0);
@@ -330,32 +497,32 @@ public class NfcService {
             return;
         }
 
-        if (data.contains("OfferCompany:")) {
-            String value = data.replace("OfferCompany:", "");
+        if (data.contains(TAG_OFFER_COMPANY)) {
+            String value = data.replace(TAG_OFFER_COMPANY, "");
             setOfferCompany(value);
             return;
         }
 
-        if (data.contains("PhoneNumber:")) {
-            String value = data.replace("PhoneNumber:", "");
+        if (data.contains(TAG_PHONE_NUMBER)) {
+            String value = data.replace(TAG_PHONE_NUMBER, "");
             setCompanyPhone(value);
             return;
         }
 
-        if (data.contains("Memo:")) {
-            String value = data.replace("Memo:", "");
+        if (data.contains(TAG_MEMO)) {
+            String value = data.replace(TAG_MEMO, "");
             setMemo(value);
             return;
         }
 
-        if (data.contains("BuildCompany:")) {
-            String value = data.replace("BuildCompany:", "");
+        if (data.contains(TAG_BUILD_COMPANY)) {
+            String value = data.replace(TAG_BUILD_COMPANY, "");
             setBuildCompany(value);
             return;
         }
 
-        if (data.contains("BuildPhone:")) {
-            String value = data.replace("BuildPhone:", "");
+        if (data.contains(TAG_BUILD_PHONE)) {
+            String value = data.replace(TAG_BUILD_PHONE, "");
             setBuildPhone(value);
         }
     }
@@ -650,22 +817,30 @@ public class NfcService {
         try {
             Ndef ndef = Ndef.get(tag);
             if (ndef != null) {
-                ndef.connect();
+                try {
+                    ndef.connect();
 
-                if (!ndef.isWritable()) {
-                    Utils.showToast(context, "Cannot write to this tag. This tag is read-only.");
+                    if (!ndef.isWritable()) {
+                        Utils.showToast(context, "이 TAG는 읽기전용 모드 입니다. TAG 쓰기가 불가능 합니다.");
+                        return false;
+                    }
+
+                    if (ndef.getMaxSize() < size) {
+                        Utils.showToast(context, "Cannot write to this tag. Message size (" + size
+                                + " bytes) exceeds this tag's capacity of "
+                                + ndef.getMaxSize() + " bytes.");
+                        return false;
+                    }
+
+                    ndef.writeNdefMessage(message);
+                    Utils.showToast(context, "TAG 쓰기에 성공하였습니다.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Utils.showToast(context, "쓰기오류로 인해 TAG 쓰기에 실패하였습니다. 관리자에게 문의하시기 바랍니다.");
                     return false;
+                } finally {
+                    ndef.close();
                 }
-
-                if (ndef.getMaxSize() < size) {
-                    Utils.showToast(context, "Cannot write to this tag. Message size (" + size
-                            + " bytes) exceeds this tag's capacity of "
-                            + ndef.getMaxSize() + " bytes.");
-                    return false;
-                }
-
-                ndef.writeNdefMessage(message);
-                Utils.showToast(context, "A pre-formatted tag was successfully updated.");
                 return true;
             } else {
                 NdefFormatable formatAble = NdefFormatable.get(tag);
@@ -679,54 +854,83 @@ public class NfcService {
                 }
             }
 
-            Utils.showToast(context, "Cannot write to this tag. This tag does not support NDEF.");
+            Utils.showToast(context, "TAG 쓰기에 실패하였습니다. 이 TAG 는 NDEF 를 지원하지 않습니다.");
             return false;
 
         } catch (Exception e) {
-            Utils.showToast(context, "Cannot write to this tag due to an Exception.");
+            Utils.showToast(context, "오류가 발생하여 TAG 쓰기에 실패하였습니다. 관리자에게 문의하세요.");
             e.printStackTrace();
         }
-
         return false;
     }
 
     private NdefRecord textToNdefRecord(String text) {
-        if (text == null || TextUtils.isEmpty(text)) {
-            Log.e(TAG, "getTextAsNdef() text is NULL, return");
-            return null;
+        try {
+            String lang = "en";
+            byte[] textBytes = text.getBytes();
+            byte[] langBytes = lang.getBytes("UTF-8");
+            int langLength = langBytes.length;
+            int textLength = textBytes.length;
+            byte[] payload = new byte[1 + langLength + textLength];
+
+            // set status byte (see NDEF spec for actual bits)
+            payload[0] = (byte) langLength;
+
+            // copy langbytes and textbytes into payload
+            System.arraycopy(langBytes, 0, payload, 1, langLength);
+            System.arraycopy(textBytes, 0, payload, 1 + langLength, textLength);
+
+            NdefRecord recordNFC = new NdefRecord(NdefRecord.TNF_WELL_KNOWN, NdefRecord.RTD_TEXT, new byte[0], payload);
+
+            return recordNFC;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
 
-        byte[] textBytes = text.getBytes(Charset.forName("UTF-8"));
-        return new NdefRecord(NdefRecord.TNF_MIME_MEDIA,
-                "text/plain".getBytes(Charset.forName("UTF-8")),
-                new byte[] {},
-                textBytes);
+        return null;
+//        if (text == null || TextUtils.isEmpty(text)) {
+//            Log.e(TAG, "getTextAsNdef() text is NULL, return");
+//            return null;
+//        }
+//
+//        byte[] textBytes = text.getBytes(Charset.forName("UTF-8"));
+//        return new NdefRecord(NdefRecord.TNF_WELL_KNOWN,
+//                "text/plain".getBytes(Charset.forName("UTF-8")),
+//                new byte[] {},
+//                textBytes);
     }
 
-    public NdefMessage buildNdefMessage() {
+    public NdefMessage buildNdefMessage1() {
         NdefMessage message = new NdefMessage(new NdefRecord[] {
-                textToNdefRecord("PipeGroup:" + mPipeGroup),
-                textToNdefRecord("PipeGroupName:" + mPipeGroupName),
-                textToNdefRecord("PipeType:" + mPipeType),
-                textToNdefRecord("PipeTypeName:" + mPipeTypeName),
-                textToNdefRecord("SetPosition:" + mSetPosition),
-                textToNdefRecord("DistanceDirection:" + mDistanceDirection),
-                textToNdefRecord("Distance:" + mDistance),
-                textToNdefRecord("DistanceLR:" + mDistanceLR),
-                textToNdefRecord("PipeDepth:" + mPipeDepth),
-                textToNdefRecord("PipeDiameter:" + mDiameter),
-                textToNdefRecord("Material:" + mMaterial),
-                textToNdefRecord("MaterialName:" + mMaterialName),
-                textToNdefRecord("PositionX:" + mPositionX),
-                textToNdefRecord("PositionY:" + mPositionY),
-                textToNdefRecord("OfferCompany:" + mOfferCompany),
-                textToNdefRecord("PhoneNumber:" + mCompanyPhone),
-                textToNdefRecord("Memo:" + mMemo),
-                textToNdefRecord("BuildCompany:" + mBuildCompany),
-                textToNdefRecord("BuildPhone:" + mBuildPhone)
-                });
+                textToNdefRecord(TAG_PIPE_GROUP + mPipeGroup),
+                textToNdefRecord(TAG_PIPE_GROUP_NAME + mPipeGroupName),
+                textToNdefRecord(TAG_PIPE_TYPE + mPipeType),
+                textToNdefRecord(TAG_PIPE_TYPENAME + mPipeTypeName),
+                textToNdefRecord(TAG_SET_POSITION + mSetPosition),
+                textToNdefRecord(TAG_DISTANCE_DIRECTION + mDistanceDirection),
+                textToNdefRecord(TAG_DISTANCE + mDistance),
+                textToNdefRecord(TAG_DISTANCE_LR + mDistanceLR),
+                textToNdefRecord(TAG_PIPE_DEPTH + mPipeDepth),
+                textToNdefRecord(TAG_PIPE_DIAMETER + mDiameter),
+                textToNdefRecord(TAG_MATERIAL + mMaterial),
+                textToNdefRecord(TAG_MATERIAL_NAME + mMaterialName),
+                textToNdefRecord(TAG_POSITION_X + mPositionX),
+                textToNdefRecord(TAG_POSITION_Y + mPositionY),
+                textToNdefRecord(TAG_OFFER_COMPANY + mOfferCompany),
+                textToNdefRecord(TAG_PHONE_NUMBER + mCompanyPhone),
+                textToNdefRecord(TAG_MEMO + mMemo),
+                textToNdefRecord(TAG_BUILD_COMPANY + mBuildCompany),
+                textToNdefRecord(TAG_BUILD_PHONE + mBuildPhone)
+            });
 
-        // return the NDEF message
+        return message;
+    }
+
+    public NdefMessage buildNdefMessage2() {
+        NdefMessage message = new NdefMessage(new NdefRecord[] {
+
+        });
+
         return message;
     }
 
@@ -936,5 +1140,35 @@ public class NfcService {
 
     public void setSiteImage(Bitmap siteImage) {
         this.mSiteImage = siteImage;
+    }
+
+
+    public boolean isTabChangedFromReadToWrite() {
+        return mTabChangedFromReadToWrite;
+    }
+
+    public void setTabChangedFromReadToWrite(boolean tabChangedFromReadToWrite) {
+        this.mTabChangedFromReadToWrite = tabChangedFromReadToWrite;
+    }
+
+    public byte[] hexToBytes(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
+    }
+
+    public String bytesToHex(byte[] bytes) {
+        final char[] hexArray = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+        char[] hexChars = new char[bytes.length * 2];
+        int v;
+        for (int j = 0; j < bytes.length; j++) {
+            v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
     }
 }

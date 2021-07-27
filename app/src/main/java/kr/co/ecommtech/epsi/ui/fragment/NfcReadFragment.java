@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -35,6 +36,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -128,6 +130,9 @@ public class NfcReadFragment extends Fragment {
     @BindView(R.id.site_image)
     ImageView mSiteImage;
 
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.no_image)
+    LinearLayout mNoImage;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -144,7 +149,8 @@ public class NfcReadFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_nfcread, container, false);
         ButterKnife.bind(this, rootView);
 
-        sendImageRequest();
+        mSiteImage.setVisibility(View.GONE);
+        mNoImage.setVisibility(View.VISIBLE);
 
         return rootView;
     }
@@ -334,16 +340,29 @@ public class NfcReadFragment extends Fragment {
                 bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
             } catch (MalformedURLException e) {
                 e.printStackTrace();
+                return null;
+            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+                return null;
             } catch (IOException e) {
                 e.printStackTrace();
+                return null;
             }
             return bmp;
         }
 
         @Override
         protected void onPostExecute(Bitmap result) {
-            mSiteImage.setImageBitmap(result);
-            NfcService.getInstance().setSiteImage(result);
+            if (result == null) {
+                mSiteImage.setVisibility(View.GONE);
+                mNoImage.setVisibility(View.VISIBLE);
+            } else {
+                mSiteImage.setImageBitmap(result);
+                NfcService.getInstance().setSiteImage(result);
+
+                mSiteImage.setVisibility(View.VISIBLE);
+                mNoImage.setVisibility(View.GONE);
+            }
         }
     }
 }

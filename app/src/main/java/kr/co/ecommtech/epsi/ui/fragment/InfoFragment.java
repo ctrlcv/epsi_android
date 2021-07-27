@@ -23,6 +23,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import kr.co.ecommtech.epsi.R;
+import kr.co.ecommtech.epsi.ui.services.NfcService;
 
 public class InfoFragment extends Fragment {
     private static String TAG = "InfoFragment";
@@ -62,6 +63,30 @@ public class InfoFragment extends Fragment {
                 tab.setText(mTabElement.get(position));
             }
         }).attach();
+
+        mNfcLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            String prevUnselectedTab;
+
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                Log.d(TAG, "onTabSelected() prevUnselectedTab:" + prevUnselectedTab + ", selectTab:" + tab.getText());
+
+                if (prevUnselectedTab.equals("읽기") && tab.getText().toString().equals("쓰기")) {
+                    NfcService.getInstance().setTabChangedFromReadToWrite(true);
+                }
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+                prevUnselectedTab = tab.getText().toString();
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                Log.d(TAG, "onTabReselected() " + tab.getText());
+            }
+        });
+
 
         mNfcViewPager.setCurrentItem(0);
         return rootView;
