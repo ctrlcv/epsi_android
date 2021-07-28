@@ -59,6 +59,10 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
     TextView mPipeGroupTv;
 
     @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.tv_serialnumber)
+    TextView mSerialNumberTv;
+
+    @SuppressLint("NonConstantResourceId")
     @BindView(R.id.tv_pipe_type)
     TextView mPipeTypeTv;
 
@@ -409,13 +413,19 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
             if (pipe.getPipeGroupName() != null && !TextUtils.isEmpty(pipe.getPipeGroupName())) {
                 mPipeGroupTv.setText(pipe.getPipeGroupName());
             } else {
-                mPipeGroupTv.setText(pipe.getPipeGroupName());
+                mPipeGroupTv.setText("");
+            }
+
+            if (pipe.getSerialNumber() != null && !TextUtils.isEmpty(pipe.getSerialNumber())) {
+                mSerialNumberTv.setText(pipe.getSerialNumber());
+            } else {
+                mSerialNumberTv.setText("");
             }
 
             if (pipe.getPipeTypeName() != null && !TextUtils.isEmpty(pipe.getPipeTypeName())) {
                 mPipeTypeTv.setText(pipe.getPipeTypeName());
             } else {
-                mPipeTypeTv.setText(pipe.getPipeTypeName());
+                mPipeTypeTv.setText("");
             }
 
             if (pipe.getSetPosition() != null && !TextUtils.isEmpty(pipe.getSetPosition())) {

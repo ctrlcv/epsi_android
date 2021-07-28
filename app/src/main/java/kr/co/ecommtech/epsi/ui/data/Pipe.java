@@ -6,6 +6,9 @@ public class Pipe {
     @SerializedName("id")
     int pipeId;
 
+    @SerializedName("Serial_no")
+    String serialNumber;
+
     @SerializedName("pipegroup")
     String pipeGroup;
 
@@ -72,8 +75,9 @@ public class Pipe {
     @SerializedName("locdistance")
     double locDistance;
 
-    public Pipe(int pipeId, String pipeGroup, String pipeGroupName, String pipeGroupColor, String pipeType, String pipeTypeName, String setPosition, String distanceDirection, double diameter, String material, String materialName, double distance, double distanceLr, double pipeDepth, double positionX, double positionY, String offerCompany, String companyPhone, String memo, String buildCompany, String buildPhone, String siteImageUrl, double locDistance) {
+    public Pipe(int pipeId, String serialNumber, String pipeGroup, String pipeGroupName, String pipeGroupColor, String pipeType, String pipeTypeName, String setPosition, String distanceDirection, double diameter, String material, String materialName, double distance, double distanceLr, double pipeDepth, double positionX, double positionY, String offerCompany, String companyPhone, String memo, String buildCompany, String buildPhone, String siteImageUrl, double locDistance) {
         this.pipeId = pipeId;
+        this.serialNumber = serialNumber;
         this.pipeGroup = pipeGroup;
         this.pipeGroupName = pipeGroupName;
         this.pipeGroupColor = pipeGroupColor;
@@ -104,6 +108,14 @@ public class Pipe {
 
     public void setPipeId(int pipeId) {
         this.pipeId = pipeId;
+    }
+
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
     }
 
     public String getPipeGroup() {

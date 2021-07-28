@@ -6,8 +6,11 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
@@ -43,9 +46,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -466,6 +473,11 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                     ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
                     ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(true);
                 }
+
+                NfcService.getInstance().setWriteMode(false);
+                NfcService.getInstance().onPauseNfcMode();
+                mSerialNumber.setText(NfcService.getInstance().getSerialNumber());
+
                 if (mSelectedFilePathUri == null) {
                     reqSavePipeInfo();
                 } else {
@@ -515,7 +527,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         map.put("serialno", mSerialNumber.getText().toString());
         map.put("pipegroup", mSelectedPipeGroup);
         map.put("pipetype", mSelectedPipeType);
-        map.put("setPosition", mPipeType.getText().toString());
+        map.put("setPosition", mSetPosition.getText().toString());
         map.put("distanceDirection", mDistanceDirection.getText().toString());
         map.put("diameter", mPipeDistance.getText().toString());
         map.put("material", mSelectedMaterial);
@@ -733,6 +745,11 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             mSiteImage.setImageBitmap(NfcService.getInstance().getSiteImage());
             mSiteImage.setVisibility(View.VISIBLE);
             mSelectImageLayout.setVisibility(View.GONE);
+        }
+
+        if (NfcService.getInstance().getPositionX() != 0.0 || NfcService.getInstance().getPositionY() != 0.0) {
+            String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
+            sendImageRequest(fileName);
         }
     }
 
@@ -984,5 +1001,58 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         }
 
         mDirectionItemLayout.setVisibility(View.GONE);
+    }
+
+    public void sendImageRequest(String fileName) {
+        String url = "http://139.150.83.28/siteImages/" + fileName;
+
+        LoadImageByUrlTask task = new LoadImageByUrlTask(url);
+        task.execute();
+    }
+
+    private class LoadImageByUrlTask extends AsyncTask<Void, Void, Bitmap> {
+        private String urlStr;
+
+        public LoadImageByUrlTask(String urlStr) {
+            this.urlStr = urlStr;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... voids) {
+            Bitmap bmp = null;
+            try {
+                URL url = new URL(urlStr);
+                bmp = BitmapFactory.decodeStream(url.openConnection().getInputStream());
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                return null;
+            } catch (FileNotFoundException e) {
+//                e.printStackTrace();
+                return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+            return bmp;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            if (result == null) {
+                mSiteImage.setVisibility(View.GONE);
+                mSelectImageLayout.setVisibility(View.VISIBLE);
+            } else {
+                mSiteImage.setImageBitmap(result);
+                NfcService.getInstance().setSiteImage(result);
+
+                mSiteImage.setVisibility(View.VISIBLE);
+                mSelectImageLayout.setVisibility(View.GONE);
+            }
+        }
     }
 }

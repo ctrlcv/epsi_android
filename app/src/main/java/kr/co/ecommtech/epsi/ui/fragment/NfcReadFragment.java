@@ -200,8 +200,15 @@ public class NfcReadFragment extends Fragment {
                 if (getActivity() != null) {
                     ((InfoActivity) getActivity()).setVisibleNfcReadDialog(false);
                 }
-                String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
-                sendImageRequest(fileName);
+
+                NfcService.getInstance().setReadMode(false);
+                NfcService.getInstance().onPauseNfcMode();
+
+                if (NfcService.getInstance().getPositionX() != 0.0 || NfcService.getInstance().getPositionY() != 0.0) {
+                    String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
+                    sendImageRequest(fileName);
+                }
+
                 break;
 
             default:

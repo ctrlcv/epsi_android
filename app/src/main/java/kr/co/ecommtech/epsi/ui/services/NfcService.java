@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.nfc.FormatException;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -93,6 +94,7 @@ public class NfcService {
 
     private boolean mIsReadMode = false;
     private boolean mIsWriteMode = false;
+    private boolean mIsFormatted = false;
 
     private boolean mTabChangedFromReadToWrite = false;
 
@@ -290,27 +292,6 @@ public class NfcService {
             return;
         }
 
-//        if (mIsReadMode) {
-//            if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction())) {
-//                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-//                byte[] uid = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID);
-//
-//                NfcA nTag216 = NfcA.get(tag);
-//            }
-//            return;
-//        }
-//
-//        if (mIsWriteMode) {
-//
-//
-//            return;
-//        }
-
-        /////////////////////////////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////////////
-
         String action = intent.getAction();
         Log.d(TAG, "onNewIntentNfcMode() action : " + action);
         Log.d(TAG, "onNewIntentNfcMode() readMode : " + mIsReadMode + ", writeMode :" + mIsWriteMode);
@@ -329,6 +310,8 @@ public class NfcService {
                 if (!TextUtils.isEmpty(tagId)) {
                     setSerialNumber(tagId.replace(" ", ":").toUpperCase());
                 }
+
+                dumpTagData(tag);
 
                 Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
 
@@ -354,7 +337,6 @@ public class NfcService {
                     Log.d(TAG, "onNewIntentNfcMode() readMode, rawMessages is NULL");
                 }
 
-                setReadMode(false);
                 EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_READ_NFC_PIPEINFO));
             }
         } else if (mIsWriteMode) {
@@ -367,10 +349,15 @@ public class NfcService {
 
                 Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
 
-                writeTag(context, buildNdefMessage1(), detectedTag);
-                Log.d(TAG, "WriteTag message1");
+                byte[] id = detectedTag.getId();
+                String tagId = toHex(id);
 
-                setWriteMode(false);
+                if (!TextUtils.isEmpty(tagId)) {
+                    setSerialNumber(tagId.replace(" ", ":").toUpperCase());
+                }
+
+                writeTag(context, buildNdefMessage1(), detectedTag);
+
                 EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_PIPEINFO));
             }
         }
@@ -815,10 +802,17 @@ public class NfcService {
         int size = message.toByteArray().length;
 
         try {
+            Log.d(TAG, "writeTag()");
+
             Ndef ndef = Ndef.get(tag);
+
             if (ndef != null) {
                 try {
-                    ndef.connect();
+                    if (!ndef.isConnected()) {
+                        ndef.connect();
+                    } else {
+                        Log.d(TAG, "ndef.isConnected() is TRUE");
+                    }
 
                     if (!ndef.isWritable()) {
                         Utils.showToast(context, "이 TAG는 읽기전용 모드 입니다. TAG 쓰기가 불가능 합니다.");
@@ -835,8 +829,16 @@ public class NfcService {
                     ndef.writeNdefMessage(message);
                     Utils.showToast(context, "TAG 쓰기에 성공하였습니다.");
                 } catch (Exception e) {
+                    Log.e(TAG, "writeTag() write Exception");
+
+                    if (!mIsFormatted) {
+                        formatNfcTag(message, tag);
+                        mIsFormatted = true;
+                        return writeTag(context, message, tag);
+                    }
+
                     e.printStackTrace();
-                    Utils.showToast(context, "쓰기오류로 인해 TAG 쓰기에 실패하였습니다. 관리자에게 문의하시기 바랍니다.");
+                    Utils.showToast(context, "TAG 쓰기에 실패하였습니다. 다시 시도하세요. 오류가 반복된다면 TAG에 문제가 있을 수 있습니다. 관리자에게 문의하시기 바랍니다.");
                     return false;
                 } finally {
                     ndef.close();
@@ -848,9 +850,13 @@ public class NfcService {
                     try {
                         formatAble.connect();
                         formatAble.format(message);
-                    } catch (IOException ex) {
+                        formatAble.close();
+                    } catch (IOException | FormatException ex) {
+                        Log.e(TAG, "writeTag() format Exception");
                         ex.printStackTrace();
                     }
+                } else {
+                    Log.e(TAG, "writeTag() formatAble is null");
                 }
             }
 
@@ -858,10 +864,30 @@ public class NfcService {
             return false;
 
         } catch (Exception e) {
+            Log.e(TAG, "writeTag() Exception");
             Utils.showToast(context, "오류가 발생하여 TAG 쓰기에 실패하였습니다. 관리자에게 문의하세요.");
             e.printStackTrace();
         }
         return false;
+    }
+
+    private void formatNfcTag(NdefMessage message, Tag tag) throws IOException {
+        NdefFormatable formatAble = NdefFormatable.get(tag);
+        if (formatAble != null) {
+            Log.d(TAG, "formatNfcTag()");
+
+            try {
+                formatAble.connect();
+                formatAble.format(message);
+                formatAble.close();
+            } catch (IOException | FormatException ex) {
+                Log.e(TAG, "formatNfcTag() Exception");
+                ex.printStackTrace();
+            }
+        } else {
+            Log.e(TAG, "formatNfcTag() formatAble is null");
+            cleanupTag(tag);
+        }
     }
 
     private NdefRecord textToNdefRecord(String text) {
@@ -952,6 +978,8 @@ public class NfcService {
 
     public void setWriteMode(boolean isWriteMode) {
         this.mIsWriteMode = isWriteMode;
+        this.mIsFormatted = false;
+
 
         if (isWriteMode && mIsReadMode) {
             mIsReadMode = false;
