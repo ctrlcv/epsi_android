@@ -6,7 +6,7 @@ public class Pipe {
     @SerializedName("id")
     int pipeId;
 
-    @SerializedName("Serial_no")
+    @SerializedName("serialno")
     String serialNumber;
 
     @SerializedName("pipegroup")
@@ -298,6 +298,7 @@ public class Pipe {
     public String toString() {
         return "Pipe{" +
                 "pipeId=" + pipeId +
+                ", serialNumber='" + serialNumber + '\'' +
                 ", pipeGroup='" + pipeGroup + '\'' +
                 ", pipeGroupName='" + pipeGroupName + '\'' +
                 ", pipeGroupColor='" + pipeGroupColor + '\'' +

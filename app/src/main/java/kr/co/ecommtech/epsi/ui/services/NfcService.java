@@ -96,6 +96,8 @@ public class NfcService {
     private boolean mIsWriteMode = false;
     private boolean mIsFormatted = false;
 
+    private boolean mLoadFromMap = false;
+
     private boolean mTabChangedFromReadToWrite = false;
 
     public static NfcService getInstance() {
@@ -798,6 +800,38 @@ public class NfcService {
         }
     }
 
+    public final static byte CMD_READ = (byte)0x30;
+    public final static byte AUTH0_ADDRESS_216 = (byte)0xE3;
+
+    public byte[] nfcARead(NfcA nfcA, byte address) throws IOException {
+        byte[] cmd = {CMD_READ, address};
+        return nfcA.transceive(cmd);
+    }
+
+    byte[] getAuthConfig(NfcA nfcA) throws IOException {
+        return nfcARead(nfcA, AUTH0_ADDRESS_216);
+    }
+
+    boolean isTagLockByPassword(NfcA nfcA) {
+        try {
+            nfcA.connect();
+
+            byte[] bytes = getAuthConfig(nfcA);
+
+            Log.d(TAG, "isTagLockByPassword():" + bytesToHex(bytes));
+
+            for (int i = 0; i < bytes.length ; i++) {
+                Log.d(TAG, "isTagLockByPassword() bytes[" + i + "] :" + bytes[i]);
+            }
+
+            nfcA.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     public boolean writeTag(Context context, NdefMessage message, Tag tag) {
         int size = message.toByteArray().length;
 
@@ -805,6 +839,9 @@ public class NfcService {
             Log.d(TAG, "writeTag()");
 
             Ndef ndef = Ndef.get(tag);
+            NfcA nfcA = NfcA.get(tag);
+
+            isTagLockByPassword(nfcA);
 
             if (ndef != null) {
                 try {
@@ -914,16 +951,6 @@ public class NfcService {
         }
 
         return null;
-//        if (text == null || TextUtils.isEmpty(text)) {
-//            Log.e(TAG, "getTextAsNdef() text is NULL, return");
-//            return null;
-//        }
-//
-//        byte[] textBytes = text.getBytes(Charset.forName("UTF-8"));
-//        return new NdefRecord(NdefRecord.TNF_WELL_KNOWN,
-//                "text/plain".getBytes(Charset.forName("UTF-8")),
-//                new byte[] {},
-//                textBytes);
     }
 
     public NdefMessage buildNdefMessage1() {
@@ -1198,5 +1225,13 @@ public class NfcService {
             hexChars[j * 2 + 1] = hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    public boolean isLoadFromMap() {
+        return mLoadFromMap;
+    }
+
+    public void setLoadFromMap(boolean loadFromMap) {
+        this.mLoadFromMap = loadFromMap;
     }
 }

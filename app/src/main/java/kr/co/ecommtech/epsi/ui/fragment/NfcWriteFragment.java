@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -75,6 +76,7 @@ import kr.co.ecommtech.epsi.ui.services.Event;
 import kr.co.ecommtech.epsi.ui.services.EventMessage;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.services.QueryService;
+import kr.co.ecommtech.epsi.ui.utils.DecimalDigitsInputFilter;
 import kr.co.ecommtech.epsi.ui.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -263,6 +265,18 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         mSiteImage.setVisibility(View.GONE);
         mSelectImageLayout.setVisibility(View.VISIBLE);
 
+        mPipeDiameter.setFilters(new InputFilter[] {new DecimalDigitsInputFilter(5,2)});
+        mDepth.setFilters(new InputFilter[] {new DecimalDigitsInputFilter(3,2)});
+        mPipeDistance.setFilters(new InputFilter[] {new DecimalDigitsInputFilter(3,2)});
+        mPipeDistanceLR.setFilters(new InputFilter[] {new DecimalDigitsInputFilter(3,2)});
+
+        mPositionX.setFilters(new InputFilter[] {new DecimalDigitsInputFilter(3,6)});
+        mPositionY.setFilters(new InputFilter[] {new DecimalDigitsInputFilter(3,6)});
+
+        reqGetPipeGroupCodes(false);
+        reqGetPipeTypeCodes(false);
+        reqGetPipeMaterialCodes(false);
+
         return rootView;
     }
 
@@ -298,15 +312,51 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.item_pipe_group:
-                reqGetPipeGroupCodes();
+                if (mGroupCodeList != null && mGroupCodeList.size() > 0) {
+
+                    ArrayList<Object> resultList = new ArrayList<>();
+                    for (GroupCode groupCode : mGroupCodeList) {
+                        resultList.add(groupCode);
+                    }
+                    mCodeListAdapter.setItems(resultList);
+                    mCodeListAdapter.notifyDataSetChanged();
+                    mCodeListTitle.setText("관로종류");
+                    mCodeItemLayout.setVisibility(View.VISIBLE);
+                } else {
+                    reqGetPipeGroupCodes(true);
+                }
                 break;
 
             case R.id.item_pipe_type:
-                reqGetPipeTypeCodes();
+                if (mTypeCodeList != null && mTypeCodeList.size() > 0) {
+                    ArrayList<Object> resultList = new ArrayList<>();
+                    for (TypeCode typeCode : mTypeCodeList) {
+                        resultList.add(typeCode);
+                    }
+
+                    mTypeListAdapter.setItems(resultList, mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
+                    mTypeListAdapter.notifyDataSetChanged();
+                    mTypeListTitle.setText("관로형태");
+                    mTypeItemLayout.setVisibility(View.VISIBLE);
+                } else {
+                    reqGetPipeTypeCodes(true);
+                }
                 break;
 
             case R.id.item_material:
-                reqGetPipeMaterialCodes();
+                if (mMaterialCodeList != null && mMaterialCodeList.size() > 0) {
+
+                    ArrayList<Object> resultList = new ArrayList<>();
+                    for (MaterialCode materialCode : mMaterialCodeList) {
+                        resultList.add(materialCode);
+                    }
+                    mCodeListAdapter.setItems(resultList);
+                    mCodeListAdapter.notifyDataSetChanged();
+                    mCodeListTitle.setText("관로재질");
+                    mCodeItemLayout.setVisibility(View.VISIBLE);
+                } else {
+                    reqGetPipeMaterialCodes(true);
+                }
                 break;
 
             case R.id.item_set_position:
@@ -753,11 +803,58 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         }
     }
 
+    private String getPipeTypeCode(String pipeTypeName) {
+        if (pipeTypeName == null || TextUtils.isEmpty(pipeTypeName)) {
+            return null;
+        }
+
+        for (int i = 0; i < mTypeCodeList.size() ; i++) {
+            if (pipeTypeName.equals(mTypeCodeList.get(i).getTypeName())) {
+                return mTypeCodeList.get(i).getTypeCd();
+            }
+        }
+
+        return null;
+    }
+
+    private String getPipeGroupCode(String pipeGroupName) {
+        if (pipeGroupName == null || TextUtils.isEmpty(pipeGroupName)) {
+            return null;
+        }
+
+        for (int i = 0; i < mGroupCodeList.size() ; i++) {
+            if (pipeGroupName.equals(mGroupCodeList.get(i).getGroupName())) {
+                return mGroupCodeList.get(i).getGroupCd();
+            }
+        }
+
+        return null;
+    }
+
+    private String getPipeGroupColor(String pipeGroupName) {
+        if (pipeGroupName == null || TextUtils.isEmpty(pipeGroupName)) {
+            return null;
+        }
+
+        for (int i = 0; i < mGroupCodeList.size() ; i++) {
+            if (pipeGroupName.equals(mGroupCodeList.get(i).getGroupName())) {
+                return mGroupCodeList.get(i).getGroupColor();
+            }
+        }
+
+        return null;
+    }
+
     private void setPipeInfo() {
+        mSelectedPipeGroup = getPipeGroupCode(mPipeGroup.getText().toString());
         NfcService.getInstance().setPipeGroup(mSelectedPipeGroup);
         NfcService.getInstance().setPipeGroupName(mPipeGroup.getText().toString());
+        NfcService.getInstance().setPipeGroupColor(getPipeGroupColor(mPipeGroup.getText().toString()));
+
+        mSelectedPipeType = getPipeTypeCode(mPipeType.getText().toString());
         NfcService.getInstance().setPipeType(mSelectedPipeType);
         NfcService.getInstance().setPipeTypeName(mPipeType.getText().toString());
+
         NfcService.getInstance().setSetPosition(mSetPosition.getText().toString());
         NfcService.getInstance().setDistanceDirection(mDistanceDirection.getText().toString());
 
@@ -780,8 +877,14 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         NfcService.getInstance().setMaterial(mSelectedMaterial);
         NfcService.getInstance().setMaterialName(mMaterial.getText().toString());
 
-        NfcService.getInstance().setPositionX(Double.parseDouble(mPositionX.getText().toString()));
-        NfcService.getInstance().setPositionY(Double.parseDouble(mPositionY.getText().toString()));
+        double positionX = Double.parseDouble(mPositionX.getText().toString());
+        positionX = Math.round(positionX * 1000000) / 1000000;
+
+        double positionY = Double.parseDouble(mPositionY.getText().toString());
+        positionY = Math.round(positionY * 1000000) / 1000000;
+
+        NfcService.getInstance().setPositionX(positionX);
+        NfcService.getInstance().setPositionY(positionY);
         NfcService.getInstance().setOfferCompany(mAgency.getText().toString());
         NfcService.getInstance().setCompanyPhone(mPhoneNumber.getText().toString());
         NfcService.getInstance().setMemo(mMemo.getText().toString());
@@ -789,7 +892,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         NfcService.getInstance().setBuildPhone(mMakerPhone.getText().toString());
     }
 
-    private void reqGetPipeGroupCodes() {
+    private void reqGetPipeGroupCodes(boolean showPopup) {
         if (getActivity() == null) {
             return;
         }
@@ -805,6 +908,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                     requireActivity().runOnUiThread(new Runnable(){
                         public void run(){
                             mGroupCodeList = (ArrayList<GroupCode>)mList.groupCodeList;
+
+                            if (!showPopup) {
+                                return;
+                            }
 
                             if (mGroupCodeList != null && mGroupCodeList.size() > 0) {
 
@@ -831,7 +938,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         });
     }
 
-    private void reqGetPipeTypeCodes() {
+    private void reqGetPipeTypeCodes(boolean showPopup) {
         if (getActivity() == null) {
             return;
         }
@@ -847,6 +954,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                     requireActivity().runOnUiThread(new Runnable(){
                         public void run(){
                             mTypeCodeList = (ArrayList<TypeCode>)mList.typeCodeList;
+
+                            if (!showPopup) {
+                                return;
+                            }
 
                             if (mTypeCodeList != null && mTypeCodeList.size() > 0) {
                                 ArrayList<Object> resultList = new ArrayList<>();
@@ -873,7 +984,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         });
     }
 
-    private void reqGetPipeMaterialCodes() {
+    private void reqGetPipeMaterialCodes(boolean showPopup) {
         if (getActivity() == null) {
             return;
         }
@@ -889,6 +1000,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                     requireActivity().runOnUiThread(new Runnable(){
                         public void run(){
                             mMaterialCodeList = (ArrayList<MaterialCode>)mList.materialCodeList;
+
+                            if (!showPopup) {
+                                return;
+                            }
 
                             if (mMaterialCodeList != null && mMaterialCodeList.size() > 0) {
 

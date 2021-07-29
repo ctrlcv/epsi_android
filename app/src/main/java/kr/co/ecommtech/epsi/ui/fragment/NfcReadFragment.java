@@ -152,6 +152,16 @@ public class NfcReadFragment extends Fragment {
         mSiteImage.setVisibility(View.GONE);
         mNoImage.setVisibility(View.VISIBLE);
 
+        if (NfcService.getInstance().isLoadFromMap()) {
+            NfcService.getInstance().setLoadFromMap(false);
+            loadPipeInfo();
+
+            if (NfcService.getInstance().getPositionX() != 0.0 || NfcService.getInstance().getPositionY() != 0.0) {
+                String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
+                sendImageRequest(fileName);
+            }
+        }
+
         return rootView;
     }
 
@@ -208,7 +218,6 @@ public class NfcReadFragment extends Fragment {
                     String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
                     sendImageRequest(fileName);
                 }
-
                 break;
 
             default:

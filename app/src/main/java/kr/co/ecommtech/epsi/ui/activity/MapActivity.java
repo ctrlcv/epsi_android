@@ -1,6 +1,7 @@
 package kr.co.ecommtech.epsi.ui.activity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
@@ -39,6 +40,7 @@ import kr.co.ecommtech.epsi.R;
 import kr.co.ecommtech.epsi.ui.data.Pipe;
 import kr.co.ecommtech.epsi.ui.data.PipeList;
 import kr.co.ecommtech.epsi.ui.network.HttpClientToken;
+import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.services.QueryService;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -123,6 +125,8 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
     OverlayImage mPipeYellowImage;
     OverlayImage mPipeYellowSelectImage;
 
+    Pipe mSelectedPipe;
+
     @Override
     protected void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -194,11 +198,46 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
     }
 
     @SuppressLint("NonConstantResourceId")
-    @OnClick({R.id.home_btn})
+    @OnClick({R.id.home_btn, R.id.view_detail_layout})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.home_btn:
                 finish();
+                break;
+
+            case R.id.view_detail_layout:
+                if (mSelectedPipe == null) {
+                    return;
+                }
+
+                NfcService.getInstance().setSerialNumber(mSelectedPipe.getSerialNumber());
+                NfcService.getInstance().setPipeGroup(mSelectedPipe.getPipeGroup());
+                NfcService.getInstance().setPipeGroupName(mSelectedPipe.getPipeGroupName());
+                NfcService.getInstance().setPipeGroupColor(mSelectedPipe.getPipeGroupColor());
+                NfcService.getInstance().setPipeType(mSelectedPipe.getPipeType());
+                NfcService.getInstance().setPipeTypeName(mSelectedPipe.getPipeTypeName());
+                NfcService.getInstance().setSetPosition(mSelectedPipe.getSetPosition());
+                NfcService.getInstance().setDistanceDirection(mSelectedPipe.getDistanceDirection());
+                NfcService.getInstance().setDiameter(mSelectedPipe.getDiameter());
+                NfcService.getInstance().setMaterial(mSelectedPipe.getMaterial());
+                NfcService.getInstance().setMaterialName(mSelectedPipe.getMaterialName());
+                NfcService.getInstance().setDistance(mSelectedPipe.getDistance());
+                NfcService.getInstance().setDistanceLR(mSelectedPipe.getDistanceLr());
+                NfcService.getInstance().setPipeDepth(mSelectedPipe.getPipeDepth());
+                NfcService.getInstance().setPositionX(mSelectedPipe.getPositionX());
+                NfcService.getInstance().setPositionY(mSelectedPipe.getPositionY());
+                NfcService.getInstance().setOfferCompany(mSelectedPipe.getOfferCompany());
+                NfcService.getInstance().setCompanyPhone(mSelectedPipe.getCompanyPhone());
+                NfcService.getInstance().setMemo(mSelectedPipe.getMemo());
+                NfcService.getInstance().setBuildCompany(mSelectedPipe.getBuildCompany());
+                NfcService.getInstance().setBuildPhone(mSelectedPipe.getBuildPhone());
+                NfcService.getInstance().setLoadFromMap(true);
+                finish();
+
+                Intent intent = new Intent(this, InfoActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.putExtra("fromMap", true);
+                startActivity(intent);
                 break;
         }
     }
@@ -251,7 +290,7 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
                     break;
             }
 
-            Log.d(TAG, "pipe.getPipeId():" + pipe.getPipeId());
+//            Log.d(TAG, "pipe.getPipeId():" + pipe.getPipeId());
             newMarker.setTag((Integer)pipe.getPipeId());
             newMarker.setWidth(markerWidth);
             newMarker.setHeight(markerHeight);
@@ -388,6 +427,7 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
     @SuppressLint("SetTextI18n")
     private void showDetailInfo() {
         if (mSelectedMarker == null) {
+            mSelectedPipe = null;
             mDetailInfoLayout.setVisibility(View.GONE);
         } else {
             if (mSelectedMarker.getTag() == null) {
@@ -409,6 +449,8 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
                 Log.d(TAG, "showDetailInfo() pipe is NULL, return");
                 return;
             }
+
+            mSelectedPipe = pipe;
 
             if (pipe.getPipeGroupName() != null && !TextUtils.isEmpty(pipe.getPipeGroupName())) {
                 mPipeGroupTv.setText(pipe.getPipeGroupName());
