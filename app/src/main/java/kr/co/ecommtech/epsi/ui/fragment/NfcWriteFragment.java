@@ -878,10 +878,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         NfcService.getInstance().setMaterialName(mMaterial.getText().toString());
 
         double positionX = Double.parseDouble(mPositionX.getText().toString());
-        positionX = Math.round(positionX * 1000000) / 1000000;
+//        positionX = Math.round(positionX * 1000000) / 1000000;
 
         double positionY = Double.parseDouble(mPositionY.getText().toString());
-        positionY = Math.round(positionY * 1000000) / 1000000;
+//        positionY = Math.round(positionY * 1000000) / 1000000;
 
         NfcService.getInstance().setPositionX(positionX);
         NfcService.getInstance().setPositionY(positionY);

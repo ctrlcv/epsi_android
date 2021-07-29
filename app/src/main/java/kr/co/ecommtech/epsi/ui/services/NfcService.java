@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import kr.co.ecommtech.epsi.ui.utils.Utils;
 
@@ -358,7 +359,10 @@ public class NfcService {
                     setSerialNumber(tagId.replace(" ", ":").toUpperCase());
                 }
 
-                writeTag(context, buildNdefMessage1(), detectedTag);
+                //isTagLockByPassword(detectedTag);
+//                isRightPassword(detectedTag, "1111");
+                checkIsLockByPassword(detectedTag, "1111");
+                //writeTag(context, buildNdefMessage1(), detectedTag);
 
                 EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_PIPEINFO));
             }
@@ -802,6 +806,7 @@ public class NfcService {
 
     public final static byte CMD_READ = (byte)0x30;
     public final static byte AUTH0_ADDRESS_216 = (byte)0xE3;
+    public final static byte CMD_PWD_AUTH = (byte)0x1B;         // 암호 쓰기
 
     public byte[] nfcARead(NfcA nfcA, byte address) throws IOException {
         byte[] cmd = {CMD_READ, address};
@@ -812,8 +817,13 @@ public class NfcService {
         return nfcARead(nfcA, AUTH0_ADDRESS_216);
     }
 
-    boolean isTagLockByPassword(NfcA nfcA) {
+    boolean isTagLockByPassword(Tag tag) {
         try {
+            NfcA nfcA = NfcA.get(tag);
+            if (nfcA == null) {
+                return false;
+            }
+
             nfcA.connect();
 
             byte[] bytes = getAuthConfig(nfcA);
@@ -832,6 +842,125 @@ public class NfcService {
         return false;
     }
 
+    boolean isRightPassword(Tag tag, String password) {
+        try {
+            MifareUltralight nfcA = MifareUltralight.get(tag);
+            if (nfcA == null) {
+                return false;
+            }
+
+            nfcA.connect();
+
+            byte[] bytesPassword = password.getBytes();
+            Log.d(TAG, "isRightPassword() bytesPassword:" + bytesToHex(bytesPassword));
+
+            for (int i = 0; i < bytesPassword.length ; i++) {
+                Log.d(TAG, "isRightPassword() bytesPassword[" + i + "] :" + bytesPassword[i]);
+            }
+
+            byte[] cmd = {CMD_PWD_AUTH, bytesPassword[0], bytesPassword[1], bytesPassword[2], bytesPassword[3]};
+
+            byte[] response = nfcA.transceive(cmd);
+
+            Log.d(TAG, "isRightPassword() response:" + bytesToHex(response));
+
+            for (int i = 0; i < response.length ; i++) {
+                Log.d(TAG, "isRightPassword() response[" + i + "] :" + response[i]);
+            }
+
+            nfcA.close();
+
+            if ((response != null) && (response.length >= 2)) {
+                byte[] packResponse = Arrays.copyOf(response, 2);
+                Log.d(TAG, "isRightPassword() packResponse:" + bytesToHex(response));
+
+                for (int i = 0; i < response.length ; i++) {
+                    Log.d(TAG, "isRightPassword() packResponse[" + i + "] :" + response[i]);
+                }
+
+//                if (!(pack[0] == packResponse[0] && pack[1] == packResponse[1])) {
+//                    Toast.makeText(ctx, "Tag could not be authenticated:\n" + packResponse.toString() + "≠" + pack.toString(), Toast.LENGTH_LONG).show();
+//                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static byte[] keygen(byte[] uuid) {
+        byte[] key = new byte[4];
+        int[] uuid_to_ints = new int[uuid.length];
+
+        for (int i = 0; i < uuid.length; i++)
+            uuid_to_ints[i] = (0xFF & uuid[i]);
+
+        if (uuid.length == 7) {
+            key[0] = ((byte) (0xFF & (0xAA ^ (uuid_to_ints[1] ^ uuid_to_ints[3]))));
+            key[1] = ((byte) (0xFF & (0x55 ^ (uuid_to_ints[2] ^ uuid_to_ints[4]))));
+            key[2] = ((byte) (0xFF & (0xAA ^ (uuid_to_ints[3] ^ uuid_to_ints[5]))));
+            key[3] = ((byte) (0xFF & (0x55 ^ (uuid_to_ints[4] ^ uuid_to_ints[6]))));
+            return key;
+        }
+
+        return new byte[]{0};
+    }
+
+    public boolean checkIsLockByPassword(Tag tag, String password) {
+        NfcA nfcA = NfcA.get(tag);
+        if (nfcA == null) {
+            return false;
+        }
+
+        byte[] bytesPassword = password.getBytes();
+        Log.d(TAG, "checkIsLockByPassword() bytesPassword:" + bytesToHex(bytesPassword));
+
+        for (int i = 0; i < bytesPassword.length ; i++) {
+            Log.d(TAG, "checkIsLockByPassword() bytesPassword[" + i + "] :" + bytesPassword[i]);
+        }
+
+        try {
+            nfcA.connect();
+
+            byte[] auth = new byte[]{
+                    (byte) 0x1B,
+                    bytesPassword[0],
+                    bytesPassword[1],
+                    bytesPassword[2],
+                    bytesPassword[3]
+            };
+            byte[] response = new byte[0];
+            try {
+                response = nfcA.transceive(auth);
+
+                Log.d(TAG, "checkIsLockByPassword() response:" + bytesToHex(response));
+
+                for (int i = 0; i < response.length ; i++) {
+                    Log.d(TAG, "checkIsLockByPassword() response[" + i + "] :" + response[i]);
+                }
+
+                Log.d(TAG, "checkIsLockByPassword() return TRUE");
+                return true;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Log.d(TAG, "checkIsLockByPassword() return FALSE");
+            return false;
+        } catch (IOException e) {
+            Log.d(TAG, "checkIsLockByPassword() exception");
+            e.printStackTrace();
+        } finally {
+            try {
+                nfcA.close();
+            } catch (IOException e) {
+                Log.d(TAG, "checkIsLockByPassword() close NfcA close exception");
+                e.printStackTrace();
+            }
+        }
+
+        return false;
+    }
+
     public boolean writeTag(Context context, NdefMessage message, Tag tag) {
         int size = message.toByteArray().length;
 
@@ -839,9 +968,6 @@ public class NfcService {
             Log.d(TAG, "writeTag()");
 
             Ndef ndef = Ndef.get(tag);
-            NfcA nfcA = NfcA.get(tag);
-
-            isTagLockByPassword(nfcA);
 
             if (ndef != null) {
                 try {

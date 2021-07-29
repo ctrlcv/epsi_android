@@ -14,7 +14,7 @@ public class Ntag216Reader implements INTag21xReader {
     public final static byte CMD_READ = (byte)0x30;
     public final static byte CMD_FAST_READ = (byte)0x3A;
     public final static byte CMD_WRITE = (byte)0xA2;
-    public final static byte CMD_PWD_AUTH = (byte)0x1B;
+    public final static byte CMD_PWD_AUTH = (byte)0x1B;         // 암호 쓰기
     public final static byte PWD_ADDRESS_216 = (byte)0xE5;
     public final static byte AUTH0_ADDRESS_216 = (byte)0xE3;
     public final static byte STATIC_LOCK_BITS_ADDRESS = (byte)0x02;
