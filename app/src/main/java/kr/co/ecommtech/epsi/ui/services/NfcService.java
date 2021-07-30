@@ -359,9 +359,10 @@ public class NfcService {
                     setSerialNumber(tagId.replace(" ", ":").toUpperCase());
                 }
 
-                //isTagLockByPassword(detectedTag);
+                isTagLockByPassword(detectedTag);
+
 //                isRightPassword(detectedTag, "1111");
-                checkIsLockByPassword(detectedTag, "1111");
+                //checkIsLockByPassword(detectedTag, "1111");
                 //writeTag(context, buildNdefMessage1(), detectedTag);
 
                 EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_PIPEINFO));
@@ -818,12 +819,12 @@ public class NfcService {
     }
 
     boolean isTagLockByPassword(Tag tag) {
-        try {
-            NfcA nfcA = NfcA.get(tag);
-            if (nfcA == null) {
-                return false;
-            }
+        NfcA nfcA = NfcA.get(tag);
+        if (nfcA == null) {
+            return false;
+        }
 
+        try {
             nfcA.connect();
 
             byte[] bytes = getAuthConfig(nfcA);
@@ -834,11 +835,22 @@ public class NfcService {
                 Log.d(TAG, "isTagLockByPassword() bytes[" + i + "] :" + bytes[i]);
             }
 
-            nfcA.close();
+            if (bytes[3] == 0x00) {
+                Log.d(TAG,  "isTagLockByPassword() return TRUE");
+                return true;
+            }
         } catch (IOException e) {
+            Log.d(TAG,  "isTagLockByPassword() Exception");
             e.printStackTrace();
+        } finally {
+            try {
+                nfcA.close();
+            } catch (IOException e) {
+                Log.d(TAG,  "isTagLockByPassword() close Exception");
+            }
         }
 
+        Log.d(TAG,  "isTagLockByPassword() return FALSE");
         return false;
     }
 
