@@ -96,7 +96,7 @@ public class StartActivity extends BaseActivity {
                     TextView content = dialog.findViewById(R.id.tv_dlg_contents);
                     content.setText("NFC 미지원 단말입니다.");
 
-                    TextView okBtn = dialog.findViewById(R.id.tv_btn_ok);
+                    TextView okBtn = dialog.findViewById(R.id.btn_ok);
                     okBtn.setText("확인");
                     okBtn.setOnClickListener(new View.OnClickListener() {
                         @Override

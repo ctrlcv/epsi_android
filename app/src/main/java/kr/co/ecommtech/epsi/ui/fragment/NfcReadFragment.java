@@ -189,7 +189,16 @@ public class NfcReadFragment extends Fragment {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.read_btn:
-                NfcService.getInstance().enableTagReadMode();
+                NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getActivity());
+                if (nfcAdapter == null) {
+                    Utils.showToast(getActivity(), "NFC 읽기를 사용할 수 없습니다.");
+                    return;
+                } else if (!nfcAdapter.isEnabled()) {
+                    Utils.showToast(getActivity(), "NFC 설정을 확인하세요.");
+                    return;
+                }
+
+                NfcService.getInstance().enableTagReadMode(getActivity());
                 if (getActivity() != null) {
                     ((InfoActivity) getActivity()).setVisibleNfcReadDialog(true);
                 }
@@ -218,6 +227,8 @@ public class NfcReadFragment extends Fragment {
                     String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
                     sendImageRequest(fileName);
                 }
+
+                Utils.showToast(getActivity(), "Tag 읽기를 성공하였습니다.");
                 break;
 
             default:

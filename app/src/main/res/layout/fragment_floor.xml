@@ -30,7 +30,33 @@
                     android:scaleType="centerInside"
                     android:layout_margin="2dp"
                     android:adjustViewBounds="true"
-                    android:src="@drawable/t_type_90_left"/>
+                    android:visibility="gone"
+                    android:src="@drawable/empty_white"/>
+
+            <RelativeLayout
+                android:id="@+id/no_data_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="visible">
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scaleType="centerInside"
+                    android:layout_margin="2dp"
+                    android:adjustViewBounds="true"
+                    android:layout_centerInParent="true"
+                    android:src="@drawable/empty_white" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:fontFamily="@font/nexon_bold"
+                    android:textSize="20dp"
+                    android:gravity="center"
+                    android:text="관로정보의 읽기/쓰기 동작 이후\n평면도가 보여집니다."
+                    android:textColor="#840a47" />
+            </RelativeLayout>
+
             <View
                 android:layout_width="match_parent"
                 android:background="@android:color/transparent"
@@ -133,7 +159,7 @@
                         android:textSize="14dp"
                         android:textColor="#5d5d5d"
                         android:gravity="center_vertical|left"
-                        android:text="T분기형(90)"
+                        android:text=""
                         tools:ignore="HardcodedText"/>
 
                     <TextView
@@ -145,7 +171,7 @@
                         android:textSize="14dp"
                         android:textColor="#5d5d5d"
                         android:gravity="center_vertical|left"
-                        android:text="경계석"
+                        android:text=""
                         tools:ignore="HardcodedText"/>
 
                     <TextView
@@ -157,7 +183,7 @@
                         android:textSize="14dp"
                         android:textColor="#5d5d5d"
                         android:gravity="center_vertical|left"
-                        android:text="CENTER"
+                        android:text=""
                         tools:ignore="HardcodedText"/>
 
                     <TextView
@@ -169,7 +195,7 @@
                         android:textSize="14dp"
                         android:textColor="#5d5d5d"
                         android:gravity="center_vertical|left"
-                        android:text="전 2.34m   좌 4.34m"
+                        android:text=""
                         tools:ignore="HardcodedText"/>
                 </LinearLayout>
             </LinearLayout>

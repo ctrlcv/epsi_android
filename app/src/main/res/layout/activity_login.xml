@@ -180,7 +180,7 @@
                     android:layout_height="match_parent"
                     android:fontFamily="@font/nexon_regular"
                     android:gravity="center_vertical"
-                    android:text="010-0000-0000"
+                    android:text="010-3124-9793"
                     android:textSize="15dp"
                     android:textColor="#840a47"
                     tools:ignore="HardcodedText"/>

@@ -2,6 +2,8 @@ package kr.co.ecommtech.epsi.ui.fragment;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
@@ -10,17 +12,23 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.net.Uri;
+import android.nfc.NfcAdapter;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.text.Editable;
 import android.text.InputFilter;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -56,6 +64,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -70,6 +79,7 @@ import kr.co.ecommtech.epsi.ui.data.MaterialCodeList;
 import kr.co.ecommtech.epsi.ui.data.Result;
 import kr.co.ecommtech.epsi.ui.data.TypeCode;
 import kr.co.ecommtech.epsi.ui.data.TypeCodeList;
+import kr.co.ecommtech.epsi.ui.dialog.CustomDialog;
 import kr.co.ecommtech.epsi.ui.network.HttpClientToken;
 import kr.co.ecommtech.epsi.ui.services.DistanceDirection;
 import kr.co.ecommtech.epsi.ui.services.Event;
@@ -83,6 +93,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.Context.INPUT_METHOD_SERVICE;
 
 public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCodeItemSelectedListener, TypeListAdapter.OnTypeItemSelectedListener, DirectionListAdapter.OnDirectionItemSelectedListener {
     private static String TAG = "NfcWriteFragment";
@@ -270,8 +281,40 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         mPipeDistance.setFilters(new InputFilter[] {new DecimalDigitsInputFilter(3,2)});
         mPipeDistanceLR.setFilters(new InputFilter[] {new DecimalDigitsInputFilter(3,2)});
 
-        mPositionX.setFilters(new InputFilter[] {new DecimalDigitsInputFilter(3,6)});
-        mPositionY.setFilters(new InputFilter[] {new DecimalDigitsInputFilter(3,6)});
+        mPositionX.addTextChangedListener(new TextWatcher() {
+            public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
+
+            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
+
+            public void afterTextChanged(Editable arg0) {
+                String str = mPositionX.getText().toString();
+                if (str.isEmpty()) return;
+                String str2 = PerfectDecimal(str, 3, 6);
+
+                if (!str2.equals(str)) {
+                    mPositionX.setText(str2);
+                    int pos = mPositionX.getText().length();
+                    mPositionX.setSelection(pos);
+                }
+            }
+        });
+        mPositionY.addTextChangedListener(new TextWatcher() {
+            public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
+
+            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {}
+
+            public void afterTextChanged(Editable arg0) {
+                String str = mPositionY.getText().toString();
+                if (str.isEmpty()) return;
+                String str2 = PerfectDecimal(str, 3, 6);
+
+                if (!str2.equals(str)) {
+                    mPositionY.setText(str2);
+                    int pos = mPositionY.getText().length();
+                    mPositionY.setSelection(pos);
+                }
+            }
+        });
 
         reqGetPipeGroupCodes(false);
         reqGetPipeTypeCodes(false);
@@ -308,9 +351,21 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     @SuppressLint("NonConstantResourceId")
     @OnClick({R.id.item_pipe_group, R.id.item_pipe_type, R.id.item_material, R.id.item_set_position,
               R.id.item_distance_direction, R.id.write_btn, R.id.location_btn, R.id.site_image,
-              R.id.select_site_image})
+              R.id.select_site_image, R.id.code_item_layout, R.id.type_item_layout, R.id.direction_item_layout})
     public void onClick(View view) {
         switch (view.getId()) {
+            case R.id.code_item_layout:
+                mCodeItemLayout.setVisibility(View.GONE);
+                break;
+
+            case R.id.type_item_layout:
+                mTypeItemLayout.setVisibility(View.GONE);
+                break;
+
+            case R.id.direction_item_layout:
+                mDirectionItemLayout.setVisibility(View.GONE);
+                break;
+
             case R.id.item_pipe_group:
                 if (mGroupCodeList != null && mGroupCodeList.size() > 0) {
 
@@ -372,6 +427,15 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 break;
 
             case R.id.write_btn:
+                NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getActivity());
+                if (nfcAdapter == null) {
+                    Utils.showToast(getActivity(), "NFC 쓰기를 사용할 수 없습니다.");
+                    return;
+                } else if (!nfcAdapter.isEnabled()) {
+                    Utils.showToast(getActivity(), "NFC 설정을 확인하세요.");
+                    return;
+                }
+
                 if (TextUtils.isEmpty(mPipeGroup.getText())) {
                     Utils.showToast(getActivity(), "관로종류를 선택하세요.");
                     return;
@@ -438,10 +502,61 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 }
 
                 setPipeInfo();
-                NfcService.getInstance().enableTagWriteMode();
+
+                NfcService.getInstance().enableTagWriteMode(getActivity());
                 if (getActivity() != null) {
                     ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(true);
                 }
+
+//                if (false) {
+//                    NfcService.getInstance().setLockPassword("");
+//                    NfcService.getInstance().setNewPassword("");
+//
+//                    new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
+//                        @Override
+//                        public void onCreate(Dialog dialog) {
+//                            dialog.setContentView(R.layout.dialog_password);
+//
+//                            EditText passwordEt = dialog.findViewById(R.id.et_password);
+//                            passwordEt.setFilters(new InputFilter[]{mPasswordFilter});
+//
+//                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(INPUT_METHOD_SERVICE);
+//                            imm.showSoftInput(passwordEt, 0);
+//
+//                            passwordEt.requestFocus();
+//
+//                            TextView contentTv = dialog.findViewById(R.id.tv_content);
+//                            contentTv.setText("암호 4자리를 입력하세요");
+//
+//                            TextView okBtn = dialog.findViewById(R.id.btn_password_ok);
+//                            okBtn.setOnClickListener(new View.OnClickListener() {
+//                                @Override
+//                                public void onClick(View v) {
+//                                    String password = passwordEt.getText().toString();
+//                                    if (TextUtils.isEmpty(password)) {
+//                                        passwordEt.requestFocus();
+//                                    }
+//
+//                                    if (password.length() != 4) {
+//                                        Utils.showToast(getActivity(), "암호는 4자리입니다.");
+//                                        return;
+//                                    }
+//
+//                                    dialog.dismiss();
+//
+//                                    Log.d(TAG, "password :" + password);
+//                                    NfcService.getInstance().setLockPassword(password);
+//                                    setPipeInfo();
+//
+//                                    NfcService.getInstance().enableTagWriteMode(getActivity());
+//                                    if (getActivity() != null) {
+//                                        ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(true);
+//                                    }
+//                                }
+//                            });
+//                        }
+//                    }).show();
+//                }
                 break;
 
             case R.id.location_btn:
@@ -449,8 +564,8 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                     @SuppressLint("DefaultLocale")
                     @Override
                     public void onGpsLocGet(Location location) {
-                        mPositionX.setText(String.format("%10.6f", location.getLatitude()));
-                        mPositionY.setText(String.format("%10.6f", location.getLongitude()));
+                        mPositionX.setText(String.format("%10.6f", location.getLatitude()).trim());
+                        mPositionY.setText(String.format("%10.6f", location.getLongitude()).trim());
                     }
                 });
                 break;
@@ -518,7 +633,151 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 loadPipeInfo();
                 break;
 
-            case EL_EVENT_WRITE_NFC_PIPEINFO:
+            case EL_EVENT_WRITE_NFC_FAIL:
+                if (getActivity() != null) {
+                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
+                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                }
+
+                new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
+                    @Override
+                    public void onCreate(Dialog dialog) {
+                        dialog.setContentView(R.layout.dialog_alert);
+
+                        TextView MessageTv = dialog.findViewById(R.id.tv_dlg_contents);
+                        MessageTv.setText("Tag 쓰기에 실패하였습니다. 다시 시도하시기 바랍니다. 오류가 반복된다면 Tag가 손상되었을 가능성이 있습니다. Tag 상태를 확인하세요.");
+
+                        NfcService.getInstance().onPauseNfcMode();
+                        NfcService.getInstance().setWriteMode(false);
+
+                        TextView okBtn = dialog.findViewById(R.id.btn_ok);
+                        okBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+
+                                NfcService.getInstance().setLockPassword("");
+                                NfcService.getInstance().setNewPassword("");
+                            }
+                        });
+                    }
+                }).show();
+                break;
+
+            case EL_EVENT_WRITE_NFC_SET_PW_FAIL:
+                if (getActivity() != null) {
+                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
+                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                }
+
+                new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
+                    @Override
+                    public void onCreate(Dialog dialog) {
+                        dialog.setContentView(R.layout.dialog_alert);
+
+                        TextView MessageTv = dialog.findViewById(R.id.tv_dlg_contents);
+                        MessageTv.setText("암호 저장에 실패하였습니다. 다시 시도하시기 바랍니다. 오류가 반복된다면 Tag가 손상되었을 가능성이 있습니다. Tag 상태를 확인하세요.");
+
+                        NfcService.getInstance().onPauseNfcMode();
+                        NfcService.getInstance().setWriteMode(false);
+
+                        TextView okBtn = dialog.findViewById(R.id.btn_ok);
+                        okBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+
+                                NfcService.getInstance().setLockPassword("");
+                                NfcService.getInstance().setNewPassword("");
+                            }
+                        });
+                    }
+                }).show();
+                break;
+
+            case EL_EVENT_WRITE_NFC_DEL_PW_OK:
+                if (getActivity() != null) {
+                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
+                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                }
+
+                new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
+                    @Override
+                    public void onCreate(Dialog dialog) {
+                        dialog.setContentView(R.layout.dialog_password);
+
+                        EditText passwordEt = dialog.findViewById(R.id.et_password);
+                        passwordEt.setFilters(new InputFilter[]{mPasswordFilter});
+
+                        InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(INPUT_METHOD_SERVICE);
+                        imm.showSoftInput(passwordEt, 0);
+
+                        passwordEt.requestFocus();
+
+                        TextView contentTv = dialog.findViewById(R.id.tv_content);
+                        contentTv.setText("저장할 암호 4자리를 입력하세요");
+
+                        TextView okBtn = dialog.findViewById(R.id.btn_password_ok);
+                        okBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                String password = passwordEt.getText().toString();
+                                if (TextUtils.isEmpty(password)) {
+                                    passwordEt.requestFocus();
+                                }
+
+                                if (password.length() != 4) {
+                                    Utils.showToast(getActivity(), "암호는 4자리입니다.");
+                                    return;
+                                }
+
+                                dialog.dismiss();
+
+                                NfcService.getInstance().setLockPassword(password);
+                                setPipeInfo();
+
+                                NfcService.getInstance().enableTagWriteMode(getActivity());
+                                if (getActivity() != null) {
+                                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(true);
+                                }
+                            }
+                        });
+                    }
+                }).show();
+                break;
+
+            case EL_EVENT_WRITE_NFC_DEL_PW_FAIL:
+                if (getActivity() != null) {
+                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
+                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                }
+
+                new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
+                    @Override
+                    public void onCreate(Dialog dialog) {
+                        dialog.setContentView(R.layout.dialog_alert);
+
+                        TextView MessageTv = dialog.findViewById(R.id.tv_dlg_contents);
+                        MessageTv.setText("비밀번호가 맞지 않습니다.");
+
+                        TextView okBtn = dialog.findViewById(R.id.btn_ok);
+                        okBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+
+                                NfcService.getInstance().setLockPassword("");
+                                NfcService.getInstance().setNewPassword("");
+
+                                NfcService.getInstance().setWriteMode(false);
+                                NfcService.getInstance().onPauseNfcMode();
+                            }
+                        });
+                    }
+                }).show();
+                break;
+
+            case EL_EVENT_WRITE_NFC_DONE:
                 if (getActivity() != null) {
                     ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
                     ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(true);
@@ -545,21 +804,96 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 if (getActivity() != null) {
                     ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
                 }
-                Utils.showToast(getActivity(), "파일 업로드에 실패하였습니다.\n관리자에게 문의 하세요.");
+
+                new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
+                    @Override
+                    public void onCreate(Dialog dialog) {
+                        dialog.setContentView(R.layout.dialog_alert);
+
+                        TextView MessageTv = dialog.findViewById(R.id.tv_dlg_contents);
+                        MessageTv.setText("파일 업로드에 실패하였습니다.\n관리자에게 문의 하세요.");
+
+                        NfcService.getInstance().onPauseNfcMode();
+                        NfcService.getInstance().setWriteMode(false);
+
+                        TextView okBtn = dialog.findViewById(R.id.btn_ok);
+                        okBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+
+                                NfcService.getInstance().setLockPassword("");
+                                NfcService.getInstance().setNewPassword("");
+                            }
+                        });
+                    }
+                }).show();
                 break;
 
             case EL_EVENT_DB_SAVE_SUCCESS:
                 if (getActivity() != null) {
                     ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
                 }
-                Utils.showToast(getActivity(), "저장되었습니다.");
+
+                new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
+                    @Override
+                    public void onCreate(Dialog dialog) {
+                        dialog.setContentView(R.layout.dialog_alert);
+
+//                        String password = !TextUtils.isEmpty(NfcService.getInstance().getNewPassword())
+//                                            ? NfcService.getInstance().getNewPassword()
+//                                            : NfcService.getInstance().getLockPassword();
+
+                        TextView MessageTv = dialog.findViewById(R.id.tv_dlg_contents);
+                        //MessageTv.setText("저장되었습니다.\n\n [주의] 저장된 암호는'" + password + "'입니다. 암호 분실시 Tag 정보를 수정할 수 없습니다. 암호 관리에 유의하시기 바랍니다.");
+                        MessageTv.setText("저장되었습니다");
+
+                        mSelectedFilePathUri = null;
+                        NfcService.getInstance().onPauseNfcMode();
+                        NfcService.getInstance().setWriteMode(false);
+
+                        TextView okBtn = dialog.findViewById(R.id.btn_ok);
+                        okBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+
+                                NfcService.getInstance().setLockPassword("");
+                                NfcService.getInstance().setNewPassword("");
+                            }
+                        });
+                    }
+                }).show();
                 break;
 
             case EL_EVENT_DB_SAVE_FAIL:
                 if (getActivity() != null) {
                     ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
                 }
-                Utils.showToast(getActivity(), "저장에 실패하였습니다.\n관리자에게 문의 하세요.");
+
+                new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
+                    @Override
+                    public void onCreate(Dialog dialog) {
+                        dialog.setContentView(R.layout.dialog_alert);
+
+                        TextView MessageTv = dialog.findViewById(R.id.tv_dlg_contents);
+                        MessageTv.setText("DB 저장에 실패하였습니다.\n관리자에게 문의 하세요.");
+
+                        NfcService.getInstance().onPauseNfcMode();
+                        NfcService.getInstance().setWriteMode(false);
+
+                        TextView okBtn = dialog.findViewById(R.id.btn_ok);
+                        okBtn.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                dialog.dismiss();
+
+                                NfcService.getInstance().setLockPassword("");
+                                NfcService.getInstance().setNewPassword("");
+                            }
+                        });
+                    }
+                }).show();
                 break;
 
             default:
@@ -845,6 +1179,20 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         return null;
     }
 
+    private String getMaterialCode(String materialName) {
+        if (materialName == null || TextUtils.isEmpty(materialName)) {
+            return null;
+        }
+
+        for (int i = 0; i < mMaterialCodeList.size() ; i++) {
+            if (materialName.equals(mMaterialCodeList.get(i).getMaterialName())) {
+                return mMaterialCodeList.get(i).getMaterialCd();
+            }
+        }
+
+        return null;
+    }
+
     private void setPipeInfo() {
         mSelectedPipeGroup = getPipeGroupCode(mPipeGroup.getText().toString());
         NfcService.getInstance().setPipeGroup(mSelectedPipeGroup);
@@ -874,6 +1222,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             NfcService.getInstance().setDiameter(Double.parseDouble(mPipeDiameter.getText().toString()));
         }
 
+        mSelectedMaterial = getMaterialCode(mMaterial.getText().toString());
         NfcService.getInstance().setMaterial(mSelectedMaterial);
         NfcService.getInstance().setMaterialName(mMaterial.getText().toString());
 
@@ -1169,5 +1518,39 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 mSelectImageLayout.setVisibility(View.GONE);
             }
         }
+    }
+
+    public InputFilter mPasswordFilter = new InputFilter() {
+        public CharSequence filter(CharSequence source, int start, int end, Spanned dest, int dstart, int dend) {
+            Pattern ps = Pattern.compile("^[a-zA-Z0-9]+$");
+            if (!ps.matcher(source).matches()) {
+                return "";
+            }
+            return null;
+        }
+    };
+
+    public String PerfectDecimal(String str, int MAX_BEFORE_POINT, int MAX_DECIMAL){
+        if(str.charAt(0) == '.') str = "0"+str;
+        int max = str.length();
+
+        String rFinal = "";
+        boolean after = false;
+        int i = 0, up = 0, decimal = 0; char t;
+        while(i < max){
+            t = str.charAt(i);
+            if(t != '.' && after == false){
+                up++;
+                if(up > MAX_BEFORE_POINT) return rFinal;
+            }else if(t == '.'){
+                after = true;
+            }else{
+                decimal++;
+                if(decimal > MAX_DECIMAL)
+                    return rFinal;
+            }
+            rFinal = rFinal + t;
+            i++;
+        }return rFinal;
     }
 }

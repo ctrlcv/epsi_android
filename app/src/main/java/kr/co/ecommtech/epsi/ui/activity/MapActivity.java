@@ -1,10 +1,13 @@
 package kr.co.ecommtech.epsi.ui.activity;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.PointF;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -19,6 +22,8 @@ import androidx.fragment.app.FragmentManager;
 
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.map.CameraPosition;
+import com.naver.maps.map.LocationSource;
+import com.naver.maps.map.LocationTrackingMode;
 import com.naver.maps.map.MapFragment;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
@@ -26,6 +31,7 @@ import com.naver.maps.map.UiSettings;
 import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.overlay.Overlay;
 import com.naver.maps.map.overlay.OverlayImage;
+import com.naver.maps.map.util.FusedLocationSource;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -39,6 +45,7 @@ import butterknife.OnClick;
 import kr.co.ecommtech.epsi.R;
 import kr.co.ecommtech.epsi.ui.data.Pipe;
 import kr.co.ecommtech.epsi.ui.data.PipeList;
+import kr.co.ecommtech.epsi.ui.dialog.CustomDialog;
 import kr.co.ecommtech.epsi.ui.network.HttpClientToken;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.services.QueryService;
@@ -51,6 +58,12 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
 
     private final static int markerWidth = 77;
     private final static int markerHeight = 80;
+
+    private static final int PERMISSION_REQUEST_CODE = 9621;
+    private static final String[] PERMISSIONS = {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+    };
 
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.detail_info_layout)
@@ -126,12 +139,50 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
     OverlayImage mPipeYellowSelectImage;
 
     Pipe mSelectedPipe;
+    FusedLocationSource mLocationSource;
 
     @Override
     protected void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
         ButterKnife.bind(this);
+
+        if (!isGPSEnable()) {
+            new CustomDialog(this, new CustomDialog.CustomDialogListener() {
+                @Override
+                public void onCreate(Dialog dialog) {
+                    dialog.setContentView(R.layout.dialog_setting);
+
+                    TextView titleTv = dialog.findViewById(R.id.tv_dialog_setting_title);
+                    titleTv.setText("GPS 설정");
+
+                    TextView contentTitleTv = dialog.findViewById(R.id.tv_content_title);
+                    contentTitleTv.setText("GPS 설정안내");
+
+                    TextView contentBodyTv = dialog.findViewById(R.id.tv_content_body);
+                    contentBodyTv.setText("현재 위치 정보를 확인하기 위해 GPS 를 ON 해 주시기 바랍니다. GPS OFF일 경우 서비스 일부가 제한될 수 있습니다.");
+
+                    TextView cancelBtn = dialog.findViewById(R.id.btn_cancel);
+                    cancelBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+
+                        }
+                    });
+
+                    TextView okBtn = dialog.findViewById(R.id.btn_ok);
+                    okBtn.setText("GPS 설정");
+                    okBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    });
+                }
+            }).show();
+        }
 
         mQueryService = HttpClientToken.getRetrofit().create(QueryService.class);
         mIsMapReady = false;
@@ -153,6 +204,9 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
         mPipeRedSelectImage = OverlayImage.fromResource(R.drawable.pipe_red_sel);
         mPipeYellowImage = OverlayImage.fromResource(R.drawable.pipe_yellow);
         mPipeYellowSelectImage = OverlayImage.fromResource(R.drawable.pipe_yellow_sel);
+
+        mLocationSource = new FusedLocationSource(this, PERMISSION_REQUEST_CODE);
+
 
         findMyLocation(new OnGpsLocGetListener() {
             @Override
@@ -306,6 +360,11 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
     public void onMapReady(@NonNull @NotNull NaverMap naverMap) {
         Log.d(TAG, "onMapReady()");
         mNaverMap = naverMap;
+
+        if (mCurrentLatLng != null) {
+            updateCurrentPosition(mCurrentLatLng);
+        }
+
         if (mMarkerList == null || mMarkerList.size() == 0) {
             makeMakerList();
         }
@@ -314,27 +373,21 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
 
     public void updateCurrentPosition(LatLng latLng) {
         if (latLng == null) {
-            Log.e(TAG, "updateMap() latLng is NULL");
+            Log.e(TAG, "updateCurrentPosition() latLng is NULL");
             return;
         }
 
-        Log.d(TAG, "updateMap() latLng:" + latLng);
-
-        if (mCurrentMarker == null) {
-            mCurrentMarker = new Marker();
-            mCurrentLatLng = latLng;
-        }
-
-        mCurrentMarker.setIcon(mCenterImage);
-        mCurrentMarker.setPosition(latLng);
-        mCurrentMarker.setWidth(80);
-        mCurrentMarker.setHeight(80);
-        mCurrentMarker.setAlpha(0.95f);
-        mCurrentMarker.setMap(mNaverMap);
+        Log.d(TAG, "updateCurrentPosition() latLng:" + latLng);
 
         mCameraPosition = new CameraPosition(latLng, 10);
         if (mNaverMap != null) {
+            mNaverMap.setLocationSource(mLocationSource);
+            mNaverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
+
             UiSettings uiSettings = mNaverMap.getUiSettings();
+            uiSettings.setCompassEnabled(true);
+            uiSettings.setScaleBarEnabled(true);
+            uiSettings.setZoomControlEnabled(true);
             uiSettings.setLocationButtonEnabled(true);
 
             mNaverMap.setCameraPosition(mCameraPosition);

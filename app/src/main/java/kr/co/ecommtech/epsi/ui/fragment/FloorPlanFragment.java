@@ -3,9 +3,11 @@ package kr.co.ecommtech.epsi.ui.fragment;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -22,10 +24,15 @@ import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.utils.CommUtils;
 
 public class FloorPlanFragment extends Fragment {
+    private static final String TAG = "FloorPlanFragment";
 
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.floor_image)
     FloorImageView mFloorImage;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.no_data_layout)
+    RelativeLayout mNoDataLayout;
 
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.tv_pipe_type)
@@ -63,12 +70,34 @@ public class FloorPlanFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_floor, container, false);
         ButterKnife.bind(this, rootView);
 
-        loadValues();
-
         return rootView;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadValues();
+    }
+
     public void loadValues() {
+        if (TextUtils.isEmpty(NfcService.getInstance().getSetPosition()) &&
+            TextUtils.isEmpty(NfcService.getInstance().getPipeTypeName()) &&
+            TextUtils.isEmpty(NfcService.getInstance().getDistanceDirection())) {
+            mFloorImage.setText("","","");
+
+            mPipeTypeTv.setText("");
+            mPipeSetPositionTv.setText("");
+            mPipeDistanceDirectionTv.setText("");
+            mPipeDistanceTv.setText("");
+
+            mFloorImage.setVisibility(View.GONE);
+            mNoDataLayout.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        mFloorImage.setVisibility(View.VISIBLE);
+        mNoDataLayout.setVisibility(View.GONE);
+
         mFloorImage.setImageResource(CommUtils.getImageResourceId(
                 NfcService.getInstance().getSetPosition(),
                 NfcService.getInstance().getPipeTypeName(),

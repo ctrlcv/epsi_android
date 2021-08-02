@@ -55,9 +55,9 @@
             android:longClickable="false"
             android:textColor="#840a47"
             android:textStyle="bold"
-            android:textSize="22dp"
+            android:textSize="20dp"
             android:lineSpacingExtra="2.6dp"
-            android:text="ESPI 앱 사용을 위해\n다음 권한들을 허용하여 주십시오." />
+            android:text="스마트 관로 시설정보 시스템 사용을\n위해 다음 권한들을 허용하여 주십시오." />
 
         <ImageView
             android:layout_width="match_parent"
@@ -77,7 +77,7 @@
             android:textColor="#840a47"
             android:textSize="15dp"
             android:lineSpacingExtra="2.6dp"
-            android:text="ESPI 앱은 반드시 필요한 권한만\n사용하고 있으며, 단순 정보수집의 목적으로\n서비스에 불필요한 권한은 요구하지 않습니다." />
+            android:text="스마트 관로 시설정보 시스템은 반드시 필요한\n권한만 사용하고 있으며, 단순 정보수집의 목적으로\n서비스에 불필요한 권한은 요구하지 않습니다." />
 
     </LinearLayout>
 

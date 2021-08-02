@@ -2,6 +2,7 @@ package kr.co.ecommtech.epsi.ui.services;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -27,6 +28,8 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.greenrobot.eventbus.EventBus;
@@ -37,6 +40,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import kr.co.ecommtech.epsi.R;
+import kr.co.ecommtech.epsi.ui.dialog.CustomDialog;
 import kr.co.ecommtech.epsi.ui.utils.Utils;
 
 public class NfcService {
@@ -61,6 +66,20 @@ public class NfcService {
     private final static String TAG_MEMO = "|H:";
     private final static String TAG_BUILD_COMPANY = "|I:";
     private final static String TAG_BUILD_PHONE = "|J:";
+
+    public final static byte CMD_READ = (byte)0x30;
+    public final static byte CMD_WRITE = (byte)0xA2;
+
+    public final static byte CMD_PWD_AUTH = (byte)0x1B;         // 암호 쓰기
+    public final static byte AUTH0_ADDRESS_216 = (byte)0xE3;
+    public final static byte PROT_ADDRESS_216 = (byte)0xE4;
+    public final static byte PWD_ADDRESS_216 = (byte)0xE5;
+    public final static byte PACK_ADDRESS_216 = (byte)0xE6;
+
+    public static byte[] DEFAULT_PACK = new byte[] { (byte)0xFF, (byte)0xFF };
+    public final static byte[] DEFAULT_PASSWORD = new byte[] {(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
+    public final static byte[] PACK = new byte[] {(byte) 0x22, (byte) 0x22};
+    private final static String USER_PASSWORD = "9621";
 
     private static NfcService mSingletonInstance;
 
@@ -88,6 +107,9 @@ public class NfcService {
     private String mSiteImageUrl;
     private Bitmap mSiteImage;
 
+    private String mLockPassword;
+    private String mNewPassword;
+
     private NfcAdapter mNfcAdapter;
     private PendingIntent mNfcPendingIntent;
     private IntentFilter[] mNfcTagFilters;
@@ -96,9 +118,7 @@ public class NfcService {
     private boolean mIsReadMode = false;
     private boolean mIsWriteMode = false;
     private boolean mIsFormatted = false;
-
     private boolean mLoadFromMap = false;
-
     private boolean mTabChangedFromReadToWrite = false;
 
     public static NfcService getInstance() {
@@ -159,131 +179,12 @@ public class NfcService {
         }
 
         if (mNfcAdapter != null) {
-            Log.d(TAG, "onPauseNfcMode()");
+            Log.d(TAG, "onPauseNfcMode() - disableForegroundDispatch()");
             mNfcAdapter.disableForegroundDispatch(mActivity);
         } else {
             Log.e(TAG, "onPauseNfcMode() mNfcAdapter is NULL");
         }
     }
-
-//    public static boolean appendPagesFromBytes(SparseArray<byte[]> pages_output, byte[] bytes_input) {
-//        int block = 0;
-//        for (int i = 0; i < bytes_input.length; i += 4, block++) {
-//            appendPage(pages_output, bytes_input, block);
-//        }
-//        return true;
-//    }
-
-//    public boolean writeNfcA(NfcA tag, byte[] bytes) {
-//        for (String string : tag.getTag().getTechList()) {
-//            Log.d(TAG, "TechList:" + string);
-//        }
-//
-//        SparseArray<byte[]> pages = new SparseArray<>();
-//        AmiiboHelper.appendPagesFromBytes(pages, bytes);
-//
-//        try {
-//            int error = 0;
-//
-//            for (int key_index = 0; key_index < pages.size(); key_index++) {
-//                boolean continue_with_except = true;
-//
-//                int page_index = pages.keyAt(key_index);
-//                byte[] page = pages.get(page_index);
-//                byte[] response = null;
-//
-//                byte[] write = new byte[]{
-//                        Constants.COMMAND_WRITE, // COMMAND_WRITE
-//                        (byte) (page_index & 0xff),
-//                        page[0],
-//                        page[1],
-//                        page[2],
-//                        page[3],
-//                };
-//                try {
-//                    response = tag.transceive(write);
-//                    Log.d("MainActivity", "write O :: " + IO.byteArrayToLoggableHexString(write) + " OK");
-//                } catch (TagLostException e) {
-//                    response = null;
-//                    continue_with_except = false;
-//                } catch (IOException e) {
-//                    Log.d("MainActivity", "write O :: " + IO.byteArrayToLoggableHexString(write) + " KO");
-//                    response = null;
-//                }
-//
-//                if (response != null) {
-//
-//                } else if (!continue_with_except) {
-//                    return false;
-//                    //throw new TagLostException("having lost completely the tag");
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return true;
-//    }
-
-    public boolean authenticateNTag(NfcA tag) {
-        byte[] password = hexToBytes("1111");
-
-        byte[] auth = new byte[]{
-                (byte) 0x1B,
-                password[0],
-                password[1],
-                password[2],
-                password[3]
-        };
-
-        Log.d(TAG, "authenticateNTag() auth: " + auth);
-
-        byte[] response = new byte[0];
-
-        try {
-            response = tag.transceive(auth);
-            Log.d(TAG, "authenticateNTag() return true");
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Log.d(TAG, "authenticateNTag() return false");
-        return false;
-    }
-
-    public void tryReadNfcTag(NfcA nTag216, byte[] uid) {
-
-    }
-
-//    public void tryWriteNfcTag(NfcA nTag216, byte[] uid) {
-//        boolean read_successfully = false;
-//        try {
-//            nTag216.connect();
-//
-//            boolean authenticated = authenticateNTag(nTag216);
-//
-//            if (authenticated) {
-//                boolean result = AmiiboIO.writeAmiibo(ntag215, getAmiibo().data.getBlob());
-//
-//                _scan_listener.onWriteResult(result);
-//                read_successfully = result;
-//            } else {
-//                // 비밀번호가 일치하지 않습니다...
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        try {
-//            ntag215.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//
-//        if (!read_successfully) {
-//            _please_retry.setVisibility(View.VISIBLE);
-//        }
-//    }
-
 
     public void onNewIntentNfcMode(Context context, Intent intent) {
         if (!mIsReadMode && !mIsWriteMode) {
@@ -297,76 +198,134 @@ public class NfcService {
 
         String action = intent.getAction();
         Log.d(TAG, "onNewIntentNfcMode() action : " + action);
+
+        if (!NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) &&
+            !NfcAdapter.ACTION_TECH_DISCOVERED.equals(action) &&
+            !NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            return;
+        }
+
         Log.d(TAG, "onNewIntentNfcMode() readMode : " + mIsReadMode + ", writeMode :" + mIsWriteMode);
 
         if (mIsReadMode) {
             Log.d(TAG, "onNewIntentNfcMode() readMode");
 
-            if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action) ||
-                NfcAdapter.ACTION_TECH_DISCOVERED.equals(action) ||
-                NfcAdapter.ACTION_NDEF_DISCOVERED.equals(action)) {
+            Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+            byte[] id = tag.getId();
+            String tagId = toReversedHex(id);
 
-                Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-                byte[] id = tag.getId();
-                String tagId = toHex(id);
+            if (!TextUtils.isEmpty(tagId)) {
+                setSerialNumber(tagId.replace(" ", ":").toUpperCase());
+            }
 
-                if (!TextUtils.isEmpty(tagId)) {
-                    setSerialNumber(tagId.replace(" ", ":").toUpperCase());
+            Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+
+            if (rawMessages != null) {
+                Log.d(TAG, "onNewIntentNfcMode() readMode, rawMessages.length :" + rawMessages.length);
+
+                NdefMessage[] messages = new NdefMessage[rawMessages.length];
+                for (int i = 0; i < rawMessages.length; i++) {
+                    messages[i] = (NdefMessage)rawMessages[i];
                 }
 
-                dumpTagData(tag);
+                for (int i = 0; i < messages.length; i++) {
+                    NdefRecord[] nDefRecords = messages[i].getRecords();
 
-                Parcelable[] rawMessages = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
-
-                if (rawMessages != null) {
-                    Log.d(TAG, "onNewIntentNfcMode() readMode, rawMessages.length :" + rawMessages.length);
-
-                    NdefMessage[] messages = new NdefMessage[rawMessages.length];
-                    for (int i = 0; i < rawMessages.length; i++) {
-                        messages[i] = (NdefMessage)rawMessages[i];
-                    }
-
-                    for (int i = 0; i < messages.length; i++) {
-                        NdefRecord[] nDefRecords = messages[i].getRecords();
-
-                        for (int j = 0; j < nDefRecords.length; j++) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                                String nfcValue = new String(nDefRecords[j].getPayload(), StandardCharsets.UTF_8);
-                                parseNfcData(nfcValue);
-                            }
+                    for (int j = 0; j < nDefRecords.length; j++) {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                            String nfcValue = new String(nDefRecords[j].getPayload(), StandardCharsets.UTF_8);
+                            parseNfcData(nfcValue);
                         }
                     }
-                } else {
-                    Log.d(TAG, "onNewIntentNfcMode() readMode, rawMessages is NULL");
+                }
+            } else {
+                Log.d(TAG, "onNewIntentNfcMode() readMode, rawMessages is NULL");
+            }
+
+            EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_READ_NFC_PIPEINFO));
+            return;
+        }
+
+        if (mIsWriteMode) {
+            Log.d(TAG, "onNewIntentNfcMode() writeMode");
+            Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+
+            byte[] id = detectedTag.getId();
+            String tagId = toReversedHex(id);
+
+            if (!TextUtils.isEmpty(tagId)) {
+                setSerialNumber(tagId.replace(" ", ":").toUpperCase());
+            }
+
+            boolean isTagLock = isTagLockByPassword(detectedTag);
+            Log.d(TAG, "onNewIntentNfcMode() isTagLock:" + isTagLock);
+
+            if (isTagLock) {
+                if (!removeTagPassword(detectedTag, USER_PASSWORD)) {
+                    Log.e(TAG, "onNewIntentNfcMode() removeTagPassword() return false");
+                    EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_DEL_PW_FAIL));
+                    return;
                 }
 
-                EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_READ_NFC_PIPEINFO));
+                Log.d(TAG, "onNewIntentNfcMode() removeTagPassword() return true");
             }
-        } else if (mIsWriteMode) {
-            // Currently in tag WRITING mode
-            Log.d(TAG, "onNewIntentNfcMode() writeMode : " + intent.getAction());
 
-            if (intent.getAction().equals(NfcAdapter.ACTION_TAG_DISCOVERED) ||
-                intent.getAction().equals(NfcAdapter.ACTION_TECH_DISCOVERED) ||
-                intent.getAction().equals(NfcAdapter.ACTION_NDEF_DISCOVERED)) {
-
-                Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-
-                byte[] id = detectedTag.getId();
-                String tagId = toHex(id);
-
-                if (!TextUtils.isEmpty(tagId)) {
-                    setSerialNumber(tagId.replace(" ", ":").toUpperCase());
-                }
-
-                isTagLockByPassword(detectedTag);
-
-//                isRightPassword(detectedTag, "1111");
-                //checkIsLockByPassword(detectedTag, "1111");
-                //writeTag(context, buildNdefMessage1(), detectedTag);
-
-                EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_PIPEINFO));
+            if (!writeTag(context, buildNdefMessage(), detectedTag)) {
+                Log.e(TAG, "onNewIntentNfcMode() writeTag() return false");
+                EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_FAIL));
+                return;
             }
+
+            if (!setTagPassword(detectedTag, USER_PASSWORD)) {
+                Log.e(TAG, "onNewIntentNfcMode() setTagPassword() return false");
+                EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_SET_PW_FAIL));
+                return;
+            }
+
+            EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_DONE));
+
+//            if (false) {
+//                if (!TextUtils.isEmpty(mLockPassword) && TextUtils.isEmpty(mNewPassword)) {
+//                    Log.d(TAG, "onNewIntentNfcMode() lockPassword:" + mLockPassword + ", NewPassword is Empty");
+//
+//                    boolean isTagLock = isTagLockByPassword(detectedTag);
+//                    Log.d(TAG, "onNewIntentNfcMode() isTagLock:" + isTagLock);
+//
+//                    if (!isTagLock) {
+//                        if (!writeTag(context, buildNdefMessage(), detectedTag)) {
+//                            EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_FAIL));
+//                            return;
+//                        }
+//
+//                        if (!setTagPassword(detectedTag, getLockPassword())) {
+//                            EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_SET_PW_FAIL));
+//                            return;
+//                        }
+//                        EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_DONE));
+//                    } else {
+//                        if (!removeTagPassword(detectedTag, getLockPassword())) {
+//                            EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_DEL_PW_FAIL));
+//                            return;
+//                        }
+//                        EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_DEL_PW_OK));
+//                    }
+//                } else if (!TextUtils.isEmpty(mLockPassword) && !TextUtils.isEmpty(mNewPassword)) {
+//                    Log.d(TAG, "onNewIntentNfcMode() lockPassword:" + mLockPassword + ", NewPassword:" + mNewPassword);
+//
+//                    if (!writeTag(context, buildNdefMessage(), detectedTag)) {
+//                        EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_FAIL));
+//                        return;
+//                    }
+//
+//                    if (!setTagPassword(detectedTag, getNewPassword())) {
+//                        EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_SET_PW_FAIL));
+//                        return;
+//                    }
+//                    EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_DONE));
+//                } else {
+//                    Log.d(TAG, "onNewIntentNfcMode() lockPassword: '" + mLockPassword + "', NewPassword: '" + mNewPassword + "'");
+//                }
+//            }
         }
     }
 
@@ -380,37 +339,37 @@ public class NfcService {
 
         if (data.contains(TAG_PIPE_GROUP)) {
             String value = data.replace(TAG_PIPE_GROUP, "");
-            setPipeGroup(value);
+            setPipeGroup(value.trim());
             return;
         }
 
         if (data.contains(TAG_PIPE_GROUP_NAME)) {
             String value = data.replace(TAG_PIPE_GROUP_NAME, "");
-            setPipeGroupName(value);
+            setPipeGroupName(value.trim());
             return;
         }
 
         if (data.contains(TAG_PIPE_TYPE)) {
             String value = data.replace(TAG_PIPE_TYPE, "");
-            setPipeType(value);
+            setPipeType(value.trim());
             return;
         }
 
         if (data.contains(TAG_PIPE_TYPENAME)) {
             String value = data.replace(TAG_PIPE_TYPENAME, "");
-            setPipeTypeName(value);
+            setPipeTypeName(value.trim());
             return;
         }
 
         if (data.contains(TAG_SET_POSITION)) {
             String value = data.replace(TAG_SET_POSITION, "");
-            setSetPosition(value);
+            setSetPosition(value.trim());
             return;
         }
 
         if (data.contains(TAG_DISTANCE_DIRECTION)) {
             String value = data.replace(TAG_DISTANCE_DIRECTION, "");
-            setDistanceDirection(value);
+            setDistanceDirection(value.trim());
             return;
         }
 
@@ -459,13 +418,13 @@ public class NfcService {
 
         if (data.contains(TAG_MATERIAL)) {
             String value = data.replace(TAG_MATERIAL, "");
-            setMaterial(value);
+            setMaterial(value.trim());
             return;
         }
 
         if (data.contains(TAG_MATERIAL_NAME)) {
             String value = data.replace(TAG_MATERIAL_NAME, "");
-            setMaterialName(value);
+            setMaterialName(value.trim());
             return;
         }
 
@@ -493,31 +452,31 @@ public class NfcService {
 
         if (data.contains(TAG_OFFER_COMPANY)) {
             String value = data.replace(TAG_OFFER_COMPANY, "");
-            setOfferCompany(value);
+            setOfferCompany(value.trim());
             return;
         }
 
         if (data.contains(TAG_PHONE_NUMBER)) {
             String value = data.replace(TAG_PHONE_NUMBER, "");
-            setCompanyPhone(value);
+            setCompanyPhone(value.trim());
             return;
         }
 
         if (data.contains(TAG_MEMO)) {
             String value = data.replace(TAG_MEMO, "");
-            setMemo(value);
+            setMemo(value.trim());
             return;
         }
 
         if (data.contains(TAG_BUILD_COMPANY)) {
             String value = data.replace(TAG_BUILD_COMPANY, "");
-            setBuildCompany(value);
+            setBuildCompany(value.trim());
             return;
         }
 
         if (data.contains(TAG_BUILD_PHONE)) {
             String value = data.replace(TAG_BUILD_PHONE, "");
-            setBuildPhone(value);
+            setBuildPhone(value.trim());
         }
     }
 
@@ -602,22 +561,42 @@ public class NfcService {
         return sb.toString();
     }
 
-
     private void checkNfcEnabled(Context context) {
         boolean nfcEnabled = mNfcAdapter.isEnabled();
         if (!nfcEnabled) {
-            new AlertDialog.Builder(context)
-                    .setTitle("NFC is currently turned off")
-                    .setMessage("Please turn on NFC in the Settings and then use the back button to return to this app.")
-                    .setCancelable(false)
-                    .setPositiveButton("Update Settings",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id){
-                                    ((Activity)context).startActivity(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
-                                }
-                            })
-                    .create()
-                    .show();
+            new CustomDialog(context, new CustomDialog.CustomDialogListener() {
+                @Override
+                public void onCreate(Dialog dialog) {
+                    dialog.setContentView(R.layout.dialog_setting);
+
+                    TextView titleTv = dialog.findViewById(R.id.tv_dialog_setting_title);
+                    titleTv.setText("NFC 설정");
+
+                    TextView contentTitleTv = dialog.findViewById(R.id.tv_content_title);
+                    contentTitleTv.setText("NFC 설정안내");
+
+                    TextView contentBodyTv = dialog.findViewById(R.id.tv_content_body);
+                    contentBodyTv.setText("NFC 기능을 사용하기 위해 NFC 를 ON 해 주시기 바랍니다. NFC OFF일 경우 서비스 일부가 제한될 수 있습니다.");
+
+                    TextView cancelBtn = dialog.findViewById(R.id.btn_cancel);
+                    cancelBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+
+                        }
+                    });
+
+                    TextView okBtn = dialog.findViewById(R.id.btn_ok);
+                    okBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                            ((Activity)context).startActivity(new Intent(Settings.ACTION_NFC_SETTINGS));
+                        }
+                    });
+                }
+            }).show();
         }
     }
 
@@ -789,33 +768,40 @@ public class NfcService {
         return nTag;
     }
 
-    public void enableTagReadMode() {
+    public void enableTagReadMode(Context context) {
         Log.d(TAG, "enableTagReadMode()");
-        setReadMode(true);
-        if (mNfcAdapter != null) {
-            mNfcAdapter.enableForegroundDispatch(mActivity, mNfcPendingIntent, null, null);
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(context);
+        if (mNfcAdapter == null) {
+            return;
         }
+
+        boolean nfcEnabled = mNfcAdapter.isEnabled();
+        if (!nfcEnabled) {
+            Utils.showToast(context, "NFC 설정을 확인하세요.");
+            return;
+        }
+
+        setReadMode(true);
+        mNfcAdapter.enableForegroundDispatch(mActivity, mNfcPendingIntent, null, null);
     }
 
-    public void enableTagWriteMode() {
+    public void enableTagWriteMode(Context context) {
         Log.d(TAG, "enableTagWriteMode()");
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(context);
+        if (mNfcAdapter == null) {
+            return;
+        }
+
+        boolean nfcEnabled = mNfcAdapter.isEnabled();
+        if (!nfcEnabled) {
+            Utils.showToast(context, "NFC 설정을 확인하세요.");
+            return;
+        }
+
         setWriteMode(true);
         if (mNfcAdapter != null) {
             mNfcAdapter.enableForegroundDispatch(mActivity, mNfcPendingIntent, null, null);
         }
-    }
-
-    public final static byte CMD_READ = (byte)0x30;
-    public final static byte AUTH0_ADDRESS_216 = (byte)0xE3;
-    public final static byte CMD_PWD_AUTH = (byte)0x1B;         // 암호 쓰기
-
-    public byte[] nfcARead(NfcA nfcA, byte address) throws IOException {
-        byte[] cmd = {CMD_READ, address};
-        return nfcA.transceive(cmd);
-    }
-
-    byte[] getAuthConfig(NfcA nfcA) throws IOException {
-        return nfcARead(nfcA, AUTH0_ADDRESS_216);
     }
 
     boolean isTagLockByPassword(Tag tag) {
@@ -827,146 +813,161 @@ public class NfcService {
         try {
             nfcA.connect();
 
-            byte[] bytes = getAuthConfig(nfcA);
+            byte[] cmd = {CMD_READ, AUTH0_ADDRESS_216};
+            byte[] response = nfcA.transceive(cmd);
 
-            Log.d(TAG, "isTagLockByPassword():" + bytesToHex(bytes));
+            Log.d(TAG, "isTagLockByPassword():" + bytesToHex(response));
 
-            for (int i = 0; i < bytes.length ; i++) {
-                Log.d(TAG, "isTagLockByPassword() bytes[" + i + "] :" + bytes[i]);
-            }
-
-            if (bytes[3] == 0x00) {
-                Log.d(TAG,  "isTagLockByPassword() return TRUE");
+            if (response[3] == 0x00) {
                 return true;
             }
         } catch (IOException e) {
-            Log.d(TAG,  "isTagLockByPassword() Exception");
+            Log.e(TAG,  "isTagLockByPassword() Exception");
             e.printStackTrace();
         } finally {
             try {
                 nfcA.close();
             } catch (IOException e) {
-                Log.d(TAG,  "isTagLockByPassword() close Exception");
+                Log.e(TAG,  "isTagLockByPassword() close Exception");
             }
-        }
-
-        Log.d(TAG,  "isTagLockByPassword() return FALSE");
-        return false;
-    }
-
-    boolean isRightPassword(Tag tag, String password) {
-        try {
-            MifareUltralight nfcA = MifareUltralight.get(tag);
-            if (nfcA == null) {
-                return false;
-            }
-
-            nfcA.connect();
-
-            byte[] bytesPassword = password.getBytes();
-            Log.d(TAG, "isRightPassword() bytesPassword:" + bytesToHex(bytesPassword));
-
-            for (int i = 0; i < bytesPassword.length ; i++) {
-                Log.d(TAG, "isRightPassword() bytesPassword[" + i + "] :" + bytesPassword[i]);
-            }
-
-            byte[] cmd = {CMD_PWD_AUTH, bytesPassword[0], bytesPassword[1], bytesPassword[2], bytesPassword[3]};
-
-            byte[] response = nfcA.transceive(cmd);
-
-            Log.d(TAG, "isRightPassword() response:" + bytesToHex(response));
-
-            for (int i = 0; i < response.length ; i++) {
-                Log.d(TAG, "isRightPassword() response[" + i + "] :" + response[i]);
-            }
-
-            nfcA.close();
-
-            if ((response != null) && (response.length >= 2)) {
-                byte[] packResponse = Arrays.copyOf(response, 2);
-                Log.d(TAG, "isRightPassword() packResponse:" + bytesToHex(response));
-
-                for (int i = 0; i < response.length ; i++) {
-                    Log.d(TAG, "isRightPassword() packResponse[" + i + "] :" + response[i]);
-                }
-
-//                if (!(pack[0] == packResponse[0] && pack[1] == packResponse[1])) {
-//                    Toast.makeText(ctx, "Tag could not be authenticated:\n" + packResponse.toString() + "≠" + pack.toString(), Toast.LENGTH_LONG).show();
-//                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return false;
     }
 
-    public static byte[] keygen(byte[] uuid) {
-        byte[] key = new byte[4];
-        int[] uuid_to_ints = new int[uuid.length];
-
-        for (int i = 0; i < uuid.length; i++)
-            uuid_to_ints[i] = (0xFF & uuid[i]);
-
-        if (uuid.length == 7) {
-            key[0] = ((byte) (0xFF & (0xAA ^ (uuid_to_ints[1] ^ uuid_to_ints[3]))));
-            key[1] = ((byte) (0xFF & (0x55 ^ (uuid_to_ints[2] ^ uuid_to_ints[4]))));
-            key[2] = ((byte) (0xFF & (0xAA ^ (uuid_to_ints[3] ^ uuid_to_ints[5]))));
-            key[3] = ((byte) (0xFF & (0x55 ^ (uuid_to_ints[4] ^ uuid_to_ints[6]))));
-            return key;
-        }
-
-        return new byte[]{0};
-    }
-
-    public boolean checkIsLockByPassword(Tag tag, String password) {
+    boolean removeTagPassword(Tag tag, String password) {
         NfcA nfcA = NfcA.get(tag);
+
         if (nfcA == null) {
             return false;
         }
 
-        byte[] bytesPassword = password.getBytes();
-        Log.d(TAG, "checkIsLockByPassword() bytesPassword:" + bytesToHex(bytesPassword));
+        byte[] pwd = new byte[]{ password.getBytes()[0],
+                                 password.getBytes()[1],
+                                 password.getBytes()[2],
+                                 password.getBytes()[3]};
 
-        for (int i = 0; i < bytesPassword.length ; i++) {
-            Log.d(TAG, "checkIsLockByPassword() bytesPassword[" + i + "] :" + bytesPassword[i]);
+        try {
+            nfcA.connect();
+
+            byte[] pwd_auth_result = nfcA.transceive((new byte[] {
+                    CMD_PWD_AUTH, // PWD_AUTH
+                    pwd[0], pwd[1], pwd[2], pwd[3]}));
+
+            Log.d(TAG, "removeTagPassword() pwd_auth_result:" + bytesToHex(pwd_auth_result));
+
+            byte[] set_pwd_result = nfcA.transceive((new byte[] {
+                    CMD_WRITE,
+                    PWD_ADDRESS_216,
+                    DEFAULT_PASSWORD[0], DEFAULT_PASSWORD[1], DEFAULT_PASSWORD[2], DEFAULT_PASSWORD[3]}));
+
+            Log.d(TAG, "removeTagPassword() set_pwd_result:" + bytesToHex(set_pwd_result));
+
+            byte[] set_pack_result = nfcA.transceive((new byte[] {
+                    CMD_WRITE,
+                    PACK_ADDRESS_216,
+                    DEFAULT_PACK[0], DEFAULT_PACK[1], 0, 0}));
+
+            Log.d(TAG, "removeTagPassword() set_pack_result:" + bytesToHex(set_pack_result));
+
+            byte[] response = nfcA.transceive(new byte[] {
+                    CMD_READ, // READ
+                    PROT_ADDRESS_216  // page address
+            });
+
+            Log.d(TAG, "removeTagPassword() response:" + bytesToHex(response));
+
+            byte[] response_pageprot = nfcA.transceive(new byte[] {
+                    CMD_READ, // READ
+                    AUTH0_ADDRESS_216     // page address
+            });
+
+            Log.d(TAG, "removeTagPassword() response_pageprot:" + bytesToHex(response_pageprot));
+
+            if ((response_pageprot != null) && (response_pageprot.length >= 16)) {  // read always returns 4 pages
+                response_pageprot = nfcA.transceive(new byte[] {
+                        CMD_WRITE, // WRITE
+                        AUTH0_ADDRESS_216 ,   // page address
+                        response_pageprot[0], // keep old value for byte 0
+                        response_pageprot[1], // keep old value for byte 1
+                        response_pageprot[2], // keep old value for byte 2
+                        (byte) (0x0ff)
+                });
+            }
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG,  "removeTagPassword() Exception");
+            e.printStackTrace();
+        } finally {
+            try {
+                nfcA.close();
+                Log.d(TAG,  "removeTagPassword() call close())");
+            } catch (IOException e) {
+                Log.e(TAG,  "removeTagPassword() close Exception");
+            }
+        }
+
+        return false;
+    }
+
+    boolean setTagPassword(Tag tag, String password) {
+        NfcA nfcA = NfcA.get(tag);
+
+        if (nfcA == null) {
+            return false;
         }
 
         try {
             nfcA.connect();
 
-            byte[] auth = new byte[]{
-                    (byte) 0x1B,
-                    bytesPassword[0],
-                    bytesPassword[1],
-                    bytesPassword[2],
-                    bytesPassword[3]
-            };
-            byte[] response = new byte[0];
-            try {
-                response = nfcA.transceive(auth);
+            byte[] pwd = new byte[]{
+                    password.getBytes()[0],
+                    password.getBytes()[1],
+                    password.getBytes()[2],
+                    password.getBytes()[3]};
 
-                Log.d(TAG, "checkIsLockByPassword() response:" + bytesToHex(response));
+            byte[] set_pwd_result = nfcA.transceive((new byte[] {
+                    CMD_WRITE,
+                    PWD_ADDRESS_216,
+                    pwd[0], pwd[1], pwd[2], pwd[3]}));
 
-                for (int i = 0; i < response.length ; i++) {
-                    Log.d(TAG, "checkIsLockByPassword() response[" + i + "] :" + response[i]);
-                }
+            Log.d(TAG, "setTagPassword() set_pwd_result:" + bytesToHex(set_pwd_result));
 
-                Log.d(TAG, "checkIsLockByPassword() return TRUE");
-                return true;
-            } catch (IOException e) {
-                e.printStackTrace();
+            byte[] set_pack_result = nfcA.transceive((new byte[] {
+                    CMD_WRITE,
+                    PACK_ADDRESS_216,
+                    PACK[0], PACK[1], 0, 0}));
+
+            Log.d(TAG, "setTagPassword() set_pack_result:" + bytesToHex(set_pack_result));
+
+            byte[] response_pageprot = nfcA.transceive(new byte[] {
+                    CMD_READ, // READ
+                    AUTH0_ADDRESS_216     // page address
+            });
+
+            Log.d(TAG, "setTagPassword() response_pageprot:" + bytesToHex(response_pageprot));
+
+            if ((response_pageprot != null) && (response_pageprot.length >= 16)) {  // read always returns 4 pages
+                boolean prot1 = false;  // false = PWD_AUTH for write only, true = PWD_AUTH for read and write
+                int auth0 = 0; // first page to be protected, set to a value between 0 and 37 for NTAG212
+                response_pageprot = nfcA.transceive(new byte[] {
+                        CMD_WRITE, // WRITE
+                        AUTH0_ADDRESS_216 ,   // page address
+                        response_pageprot[0], // keep old value for byte 0
+                        response_pageprot[1], // keep old value for byte 1
+                        response_pageprot[2], // keep old value for byte 2
+                        (byte) (auth0 & 0x0ff)
+                });
             }
-            Log.d(TAG, "checkIsLockByPassword() return FALSE");
-            return false;
+
+            return true;
         } catch (IOException e) {
-            Log.d(TAG, "checkIsLockByPassword() exception");
+            Log.e(TAG,  "setTagPassword() Exception");
             e.printStackTrace();
         } finally {
             try {
                 nfcA.close();
             } catch (IOException e) {
-                Log.d(TAG, "checkIsLockByPassword() close NfcA close exception");
-                e.printStackTrace();
+                Log.e(TAG,  "setTagPassword() close Exception");
             }
         }
 
@@ -1002,13 +1003,16 @@ public class NfcService {
                     }
 
                     ndef.writeNdefMessage(message);
-                    Utils.showToast(context, "TAG 쓰기에 성공하였습니다.");
+                    return true;
+//                    Utils.showToast(context, "TAG 쓰기에 성공하였습니다.");
                 } catch (Exception e) {
                     Log.e(TAG, "writeTag() write Exception");
 
                     if (!mIsFormatted) {
                         formatNfcTag(message, tag);
                         mIsFormatted = true;
+                        ndef.close();
+
                         return writeTag(context, message, tag);
                     }
 
@@ -1018,7 +1022,6 @@ public class NfcService {
                 } finally {
                     ndef.close();
                 }
-                return true;
             } else {
                 NdefFormatable formatAble = NdefFormatable.get(tag);
                 if (formatAble != null) {
@@ -1091,7 +1094,7 @@ public class NfcService {
         return null;
     }
 
-    public NdefMessage buildNdefMessage1() {
+    public NdefMessage buildNdefMessage() {
         NdefMessage message = new NdefMessage(new NdefRecord[] {
                 textToNdefRecord(TAG_PIPE_GROUP + mPipeGroup),
                 textToNdefRecord(TAG_PIPE_GROUP_NAME + mPipeGroupName),
@@ -1144,7 +1147,6 @@ public class NfcService {
     public void setWriteMode(boolean isWriteMode) {
         this.mIsWriteMode = isWriteMode;
         this.mIsFormatted = false;
-
 
         if (isWriteMode && mIsReadMode) {
             mIsReadMode = false;
@@ -1371,5 +1373,25 @@ public class NfcService {
 
     public void setLoadFromMap(boolean loadFromMap) {
         this.mLoadFromMap = loadFromMap;
+    }
+
+    public String getLockPassword() {
+        return mLockPassword;
+    }
+
+    public void setLockPassword(String lockPassword) {
+        this.mLockPassword = lockPassword;
+    }
+
+    public String getNewPassword() {
+        return mNewPassword;
+    }
+
+    public void setNewPassword(String newPassword) {
+        this.mNewPassword = newPassword;
+    }
+
+    public NfcAdapter getNfcAdapter() {
+        return mNfcAdapter;
     }
 }

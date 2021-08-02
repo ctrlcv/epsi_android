@@ -1,11 +1,13 @@
 package kr.co.ecommtech.epsi.ui.activity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
@@ -123,6 +125,12 @@ public class InfoActivity extends BaseActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        initInputData();
+    }
+
+    @Override
     public void onNewIntent(Intent passedIntent) {
         Log.d(TAG, "onNewIntent(): " + passedIntent);
         NfcService.getInstance().onNewIntentNfcMode(this, passedIntent);
@@ -145,6 +153,42 @@ public class InfoActivity extends BaseActivity {
 
     public void setVisibleNfcSaveDialog(boolean visible) {
         mNfcSaveLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    public void initInputData() {
+        Log.d(TAG, "initInputData()");
+
+        NfcService.getInstance().setSerialNumber("");
+        NfcService.getInstance().setPipeGroup("");
+        NfcService.getInstance().setPipeGroupName("");
+        NfcService.getInstance().setPipeGroupColor("");
+        NfcService.getInstance().setPipeType("");
+        NfcService.getInstance().setPipeTypeName("");
+        NfcService.getInstance().setSetPosition("");
+        NfcService.getInstance().setDistanceDirection("");
+        NfcService.getInstance().setDistance(0.0);
+        NfcService.getInstance().setDistanceLR(0.0);
+        NfcService.getInstance().setDiameter(0.0);
+        NfcService.getInstance().setMaterial("");
+        NfcService.getInstance().setMaterialName("");
+        NfcService.getInstance().setPipeDepth(0.0);
+        NfcService.getInstance().setPositionX(0.0);
+        NfcService.getInstance().setPositionY(0.0);
+        NfcService.getInstance().setOfferCompany("");
+        NfcService.getInstance().setCompanyPhone("");
+        NfcService.getInstance().setMemo("");
+        NfcService.getInstance().setBuildCompany("");
+        NfcService.getInstance().setBuildPhone("");
+        NfcService.getInstance().setSiteImageUrl("");
+        NfcService.getInstance().setSiteImage(null);
+        NfcService.getInstance().setLockPassword("");
+        NfcService.getInstance().setNewPassword("");
+
+        NfcService.getInstance().setReadMode(false);
+        NfcService.getInstance().setWriteMode(false);
+
+        setVisibleNfcReadDialog(false);
+        setVisibleNfcWriteDialog(false);
     }
 }
 

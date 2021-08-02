@@ -1,7 +1,10 @@
 package kr.co.ecommtech.epsi.ui.activity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -9,8 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +28,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.Timer;
 import java.util.TimerTask;
+
+import kr.co.ecommtech.epsi.R;
+import kr.co.ecommtech.epsi.ui.dialog.CustomDialog;
 
 public class BaseActivity  extends AppCompatActivity implements LocationListener {
     private final String TAG = "BaseActivity";
@@ -50,6 +58,7 @@ public class BaseActivity  extends AppCompatActivity implements LocationListener
     @Override
     protected void onResume() {
         super.onResume();
+
     }
 
     @Override
@@ -79,6 +88,21 @@ public class BaseActivity  extends AppCompatActivity implements LocationListener
             mMinAccuracy = location.getAccuracy();
             mLocGetListener.onGpsLocGet(mLocation);
         }
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras) {
+
+    }
+
+    @Override
+    public void onProviderEnabled(@NonNull String provider) {
+
+    }
+
+    @Override
+    public void onProviderDisabled(@NonNull String provider) {
+
     }
 
     @SuppressLint("MissingPermission")
@@ -205,4 +229,18 @@ public class BaseActivity  extends AppCompatActivity implements LocationListener
             Log.e(TAG, "Exception on showProgressDialog() 2" + e.getMessage());
         }
     }
+
+    public boolean isGPSEnable() {
+        if (mLocationManager == null) {
+            mLocationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        }
+
+        if (mLocationManager == null) {
+            return false;
+        }
+
+        return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package kr.co.ecommtech.epsi.ui.utils;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import kr.co.ecommtech.epsi.R;
 
@@ -8,6 +9,8 @@ public class CommUtils {
     private final static String TAG = "CommUtils";
 
     public static int getImageResourceId(String setPosition, String pipeType, String distanceDirection) {
+        Log.d(TAG, "getImageResourceId() setPosition:'" + setPosition + "', pipeType:'" + pipeType + "', distanceDirection:'" + distanceDirection + "'");
+
         if (!TextUtils.isEmpty(setPosition) && setPosition.equals("경계석")) {
             if (!TextUtils.isEmpty(pipeType)) {
                 switch (pipeType) {

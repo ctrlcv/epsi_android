@@ -48,6 +48,6 @@ public class CustomDialog extends Dialog {
                 view.setLayoutParams(params);
             }
         }
-        setCancelable(false);
+        setCancelable(true);
     }
 }
