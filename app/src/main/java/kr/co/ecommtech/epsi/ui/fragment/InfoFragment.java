@@ -23,6 +23,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import kr.co.ecommtech.epsi.R;
+import kr.co.ecommtech.epsi.ui.services.LoginManager;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 
 public class InfoFragment extends Fragment {
@@ -38,7 +39,7 @@ public class InfoFragment extends Fragment {
 
     NfcPageAdapter mNfcPageAdapter;
 
-    final List<String> mTabElement = Arrays.asList("읽기", "쓰기");
+    List<String> mTabElement;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -53,6 +54,12 @@ public class InfoFragment extends Fragment {
         ButterKnife.bind(this, rootView);
 
         Log.d(TAG, "onCreateView()");
+
+        if (!LoginManager.getInstance().getLogInInfo().getAuth().equals("사용자")) {
+            mTabElement = Arrays.asList("읽기", "쓰기");
+        } else {
+            mTabElement = Arrays.asList("읽기");
+        }
 
         mNfcPageAdapter = new NfcPageAdapter(this);
         mNfcViewPager.setAdapter(mNfcPageAdapter);

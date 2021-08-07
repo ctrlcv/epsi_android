@@ -263,8 +263,18 @@ public class NfcService {
             if (isTagLock) {
                 if (!removeTagPassword(detectedTag, USER_PASSWORD)) {
                     Log.e(TAG, "onNewIntentNfcMode() removeTagPassword() return false");
-                    EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_DEL_PW_FAIL));
-                    return;
+
+//                    try {
+//                        Thread.sleep(3000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+
+                    if (!removeTagBytePassword(detectedTag, DEFAULT_PASSWORD)) {
+                        Log.e(TAG, "onNewIntentNfcMode() removeTagBytePassword() return false");
+                        EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_DEL_PW_FAIL));
+                        return;
+                    }
                 }
 
                 Log.d(TAG, "onNewIntentNfcMode() removeTagPassword() return true");
@@ -909,6 +919,75 @@ public class NfcService {
         return false;
     }
 
+    boolean removeTagBytePassword(Tag tag, byte[] pwd) {
+        NfcA nfcA = NfcA.get(tag);
+
+        if (nfcA == null) {
+            return false;
+        }
+
+        try {
+            nfcA.connect();
+
+            byte[] pwd_auth_result = nfcA.transceive((new byte[] {
+                    CMD_PWD_AUTH, // PWD_AUTH
+                    pwd[0], pwd[1], pwd[2], pwd[3]}));
+
+            Log.d(TAG, "removeTagBytePassword() pwd_auth_result:" + bytesToHex(pwd_auth_result));
+
+            byte[] set_pwd_result = nfcA.transceive((new byte[] {
+                    CMD_WRITE,
+                    PWD_ADDRESS_216,
+                    DEFAULT_PASSWORD[0], DEFAULT_PASSWORD[1], DEFAULT_PASSWORD[2], DEFAULT_PASSWORD[3]}));
+
+            Log.d(TAG, "removeTagBytePassword() set_pwd_result:" + bytesToHex(set_pwd_result));
+
+            byte[] set_pack_result = nfcA.transceive((new byte[] {
+                    CMD_WRITE,
+                    PACK_ADDRESS_216,
+                    DEFAULT_PACK[0], DEFAULT_PACK[1], 0, 0}));
+
+            Log.d(TAG, "removeTagBytePassword() set_pack_result:" + bytesToHex(set_pack_result));
+
+            byte[] response = nfcA.transceive(new byte[] {
+                    CMD_READ, // READ
+                    PROT_ADDRESS_216  // page address
+            });
+
+            Log.d(TAG, "removeTagBytePassword() response:" + bytesToHex(response));
+
+            byte[] response_pageprot = nfcA.transceive(new byte[] {
+                    CMD_READ, // READ
+                    AUTH0_ADDRESS_216     // page address
+            });
+
+            Log.d(TAG, "removeTagBytePassword() response_pageprot:" + bytesToHex(response_pageprot));
+
+            if ((response_pageprot != null) && (response_pageprot.length >= 16)) {  // read always returns 4 pages
+                response_pageprot = nfcA.transceive(new byte[] {
+                        CMD_WRITE, // WRITE
+                        AUTH0_ADDRESS_216 ,   // page address
+                        response_pageprot[0], // keep old value for byte 0
+                        response_pageprot[1], // keep old value for byte 1
+                        response_pageprot[2], // keep old value for byte 2
+                        (byte) (0x0ff)
+                });
+            }
+            return true;
+        } catch (IOException e) {
+            Log.e(TAG,  "removeTagBytePassword() Exception");
+            e.printStackTrace();
+        } finally {
+            try {
+                nfcA.close();
+            } catch (IOException e) {
+                Log.e(TAG,  "removeTagBytePassword() close Exception");
+            }
+        }
+
+        return false;
+    }
+
     boolean setTagPassword(Tag tag, String password) {
         NfcA nfcA = NfcA.get(tag);
 
@@ -929,6 +1008,7 @@ public class NfcService {
                     CMD_WRITE,
                     PWD_ADDRESS_216,
                     pwd[0], pwd[1], pwd[2], pwd[3]}));
+                    //DEFAULT_PASSWORD[0], DEFAULT_PASSWORD[1], DEFAULT_PASSWORD[2], DEFAULT_PASSWORD[3]}));
 
             Log.d(TAG, "setTagPassword() set_pwd_result:" + bytesToHex(set_pwd_result));
 

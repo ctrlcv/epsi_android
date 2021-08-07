@@ -9,6 +9,8 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import org.jetbrains.annotations.NotNull;
 
+import kr.co.ecommtech.epsi.ui.services.LoginManager;
+
 public class NfcPageAdapter extends FragmentStateAdapter {
     private NfcReadFragment mNfcReadFragment = null;
     private NfcWriteFragment mNfcWriteFragment = null;
@@ -48,6 +50,10 @@ public class NfcPageAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
+        if (LoginManager.getInstance().getLogInInfo().getAuth().equals("사용자")) {
+            return 1;
+        }
+
         return 2;
     }
 }
