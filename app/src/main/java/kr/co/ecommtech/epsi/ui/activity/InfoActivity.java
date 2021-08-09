@@ -37,10 +37,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import kr.co.ecommtech.epsi.R;
-import kr.co.ecommtech.epsi.ui.nfc.NdefMessageParser;
-import kr.co.ecommtech.epsi.ui.nfc.ParsedRecord;
-import kr.co.ecommtech.epsi.ui.nfc.TextRecord;
-import kr.co.ecommtech.epsi.ui.nfc.UriRecord;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.utils.Utils;
 
