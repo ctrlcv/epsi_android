@@ -84,6 +84,7 @@ import kr.co.ecommtech.epsi.ui.network.HttpClientToken;
 import kr.co.ecommtech.epsi.ui.services.DistanceDirection;
 import kr.co.ecommtech.epsi.ui.services.Event;
 import kr.co.ecommtech.epsi.ui.services.EventMessage;
+import kr.co.ecommtech.epsi.ui.services.NetworkStatus;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.services.QueryService;
 import kr.co.ecommtech.epsi.ui.utils.DecimalDigitsInputFilter;
@@ -316,9 +317,14 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             }
         });
 
-        reqGetPipeGroupCodes(false);
-        reqGetPipeTypeCodes(false);
-        reqGetPipeMaterialCodes(false);
+        int status = NetworkStatus.getConnectivityStatus(getActivity());
+        if (status != NetworkStatus.TYPE_NOT_CONNECTED) {
+            reqGetPipeGroupCodes(false);
+            reqGetPipeTypeCodes(false);
+            reqGetPipeMaterialCodes(false);
+        } else {
+            Utils.showToast(getActivity(), "Network 이 연결되지 않아 코드정보를 읽어 올 수 없습니다. Network 상태 확인 후 다시 시작하세요.");
+        }
 
         return rootView;
     }
@@ -427,6 +433,34 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 break;
 
             case R.id.write_btn:
+                int status = NetworkStatus.getConnectivityStatus(getActivity());
+                if(status == NetworkStatus.TYPE_NOT_CONNECTED) {
+                    new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
+                        @Override
+                        public void onCreate(Dialog dialog) {
+                            dialog.setContentView(R.layout.dialog_alert);
+
+                            TextView MessageTv = dialog.findViewById(R.id.tv_dlg_contents);
+                            MessageTv.setText("Network에 연결되어 있지 않습니다. 저장할 수 없습니다. Netwrok 상태를 확인하세요.");
+
+                            NfcService.getInstance().onPauseNfcMode();
+                            NfcService.getInstance().setWriteMode(false);
+
+                            TextView okBtn = dialog.findViewById(R.id.btn_ok);
+                            okBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dialog.dismiss();
+
+                                    NfcService.getInstance().setLockPassword("");
+                                    NfcService.getInstance().setNewPassword("");
+                                }
+                            });
+                        }
+                    }).show();
+                    return;
+                }
+
                 NfcAdapter nfcAdapter = NfcAdapter.getDefaultAdapter(getActivity());
                 if (nfcAdapter == null) {
                     Utils.showToast(getActivity(), "NFC 쓰기를 사용할 수 없습니다.");
@@ -1142,6 +1176,11 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             return null;
         }
 
+        if (mTypeCodeList.size() == 0) {
+            Log.e(TAG, "getPipeTypeCode() mTypeCodeList.size() is Zero!");
+            return null;
+        }
+
         for (int i = 0; i < mTypeCodeList.size() ; i++) {
             if (pipeTypeName.equals(mTypeCodeList.get(i).getTypeName())) {
                 return mTypeCodeList.get(i).getTypeCd();
@@ -1153,6 +1192,11 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
     private String getPipeGroupCode(String pipeGroupName) {
         if (pipeGroupName == null || TextUtils.isEmpty(pipeGroupName)) {
+            return null;
+        }
+
+        if (mGroupCodeList.size() == 0) {
+            Log.e(TAG, "getPipeGroupCode() mGroupCodeList.size() is Zero!");
             return null;
         }
 
@@ -1170,6 +1214,11 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             return null;
         }
 
+        if (mGroupCodeList.size() == 0) {
+            Log.e(TAG, "getPipeGroupColor() mGroupCodeList.size() is Zero!");
+            return null;
+        }
+
         for (int i = 0; i < mGroupCodeList.size() ; i++) {
             if (pipeGroupName.equals(mGroupCodeList.get(i).getGroupName())) {
                 return mGroupCodeList.get(i).getGroupColor();
@@ -1181,6 +1230,11 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
     private String getMaterialCode(String materialName) {
         if (materialName == null || TextUtils.isEmpty(materialName)) {
+            return null;
+        }
+
+        if (mMaterialCodeList.size() == 0) {
+            Log.e(TAG, "getMaterialCode() mMaterialCodeList.size() is Zero!");
             return null;
         }
 

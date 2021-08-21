@@ -89,7 +89,7 @@ public class InfoActivity extends BaseActivity {
     }
 
     @SuppressLint("NonConstantResourceId")
-    @OnClick({R.id.home_btn})
+    @OnClick({R.id.home_btn, R.id.btn_nfc_write_cancel})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.home_btn:
@@ -97,6 +97,10 @@ public class InfoActivity extends BaseActivity {
                 break;
 
             case R.id.btn_nfc_write_cancel:
+                if (NfcService.getInstance().isDisableCancel()) {
+                    return;
+                }
+
                 mNfcWriteLayout.setVisibility(View.GONE);
                 NfcService.getInstance().onPauseNfcMode();
                 break;

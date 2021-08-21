@@ -123,13 +123,19 @@ public class FloorPlanFragment extends Fragment {
                 mPipeDistanceTv.setText("전 " + String.valueOf(NfcService.getInstance().getDistance()) + "m");
                 mFloorImage.setText("", String.valueOf(NfcService.getInstance().getDistance()) + "m", "");
             } else {
-                mPipeDistanceTv.setText("전 " + String.valueOf(NfcService.getInstance().getDistance()) + "m  " + "좌 " + String.valueOf(NfcService.getInstance().getDistanceLR()) + "m");
+                String pipeDistanceStr = "전 " + String.valueOf(NfcService.getInstance().getDistance()) + "m  ";
 
                 if (NfcService.getInstance().getDistanceDirection().equals("LEFT")) {
+                    pipeDistanceStr = pipeDistanceStr + "좌 ";
                     mFloorImage.setText(String.valueOf(NfcService.getInstance().getDistanceLR()) + "m", String.valueOf(NfcService.getInstance().getDistance()) + "m", "");
                 } else {
+                    pipeDistanceStr = pipeDistanceStr + "우 ";
                     mFloorImage.setText("", String.valueOf(NfcService.getInstance().getDistance()) + "m", String.valueOf(NfcService.getInstance().getDistanceLR()) + "m");
                 }
+
+                pipeDistanceStr = pipeDistanceStr + String.valueOf(NfcService.getInstance().getDistanceLR()) + "m";
+
+                mPipeDistanceTv.setText(pipeDistanceStr);
             }
         }
     }

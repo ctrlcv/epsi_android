@@ -1,27 +1,16 @@
 package kr.co.ecommtech.epsi.ui.fragment;
 
 import android.annotation.SuppressLint;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.nfc.NdefMessage;
 import android.nfc.NfcAdapter;
-import android.nfc.Tag;
-import android.nfc.tech.IsoDep;
-import android.nfc.tech.NfcA;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -40,7 +29,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,6 +36,7 @@ import butterknife.OnClick;
 import kr.co.ecommtech.epsi.R;
 import kr.co.ecommtech.epsi.ui.activity.InfoActivity;
 import kr.co.ecommtech.epsi.ui.services.EventMessage;
+import kr.co.ecommtech.epsi.ui.services.NetworkStatus;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.utils.Utils;
 
@@ -172,6 +161,15 @@ public class NfcReadFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "onResume()");
+
+        if (NfcService.getInstance().isTabChangedFromWriteToRead()) {
+            if (!TextUtils.isEmpty(NfcService.getInstance().getPipeTypeName()) &&
+                !TextUtils.isEmpty(NfcService.getInstance().getSetPosition())) {
+                loadPipeInfo();
+            }
+        }
+
+        NfcService.getInstance().setTabChangedFromWriteToRead(false);
     }
 
     @Override
@@ -337,6 +335,12 @@ public class NfcReadFragment extends Fragment {
     }
 
     public void sendImageRequest(String fileName) {
+        int status = NetworkStatus.getConnectivityStatus(getActivity());
+        if(status == NetworkStatus.TYPE_NOT_CONNECTED) {
+            Utils.showToast(getActivity(), "Network 이 연결되지 않아 사진 정보를 읽어 올 수가 없습니다. Network 상태 확인 후 다시 시작하세요.");
+            return;
+        }
+
         String url = "http://139.150.83.28/siteImages/" + fileName;
 
         LoadImageByUrlTask task = new LoadImageByUrlTask(url);

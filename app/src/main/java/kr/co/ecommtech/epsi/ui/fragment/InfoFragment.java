@@ -81,6 +81,10 @@ public class InfoFragment extends Fragment {
                 if (prevUnselectedTab.equals("읽기") && tab.getText().toString().equals("쓰기")) {
                     NfcService.getInstance().setTabChangedFromReadToWrite(true);
                 }
+
+                if (prevUnselectedTab.equals("쓰기") && tab.getText().toString().equals("읽기")) {
+                    NfcService.getInstance().setTabChangedFromWriteToRead(true);
+                }
             }
 
             @Override

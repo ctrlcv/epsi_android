@@ -119,7 +119,11 @@ public class NfcService {
     private boolean mIsWriteMode = false;
     private boolean mIsFormatted = false;
     private boolean mLoadFromMap = false;
+
     private boolean mTabChangedFromReadToWrite = false;
+    private boolean mTabChangedFromWriteToRead = false;
+
+    private boolean mIsDisableCancel = false;
 
     public static NfcService getInstance() {
         if (mSingletonInstance == null) {
@@ -207,8 +211,12 @@ public class NfcService {
 
         Log.d(TAG, "onNewIntentNfcMode() readMode : " + mIsReadMode + ", writeMode :" + mIsWriteMode);
 
+        mIsDisableCancel = true;
+
         if (mIsReadMode) {
             Log.d(TAG, "onNewIntentNfcMode() readMode");
+
+            initTagInfo();
 
             Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
             byte[] id = tag.getId();
@@ -243,6 +251,7 @@ public class NfcService {
             }
 
             EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_READ_NFC_PIPEINFO));
+            mIsDisableCancel = false;
             return;
         }
 
@@ -273,6 +282,7 @@ public class NfcService {
                     if (!removeTagBytePassword(detectedTag, DEFAULT_PASSWORD)) {
                         Log.e(TAG, "onNewIntentNfcMode() removeTagBytePassword() return false");
                         EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_DEL_PW_FAIL));
+                        mIsDisableCancel = false;
                         return;
                     }
                 }
@@ -283,12 +293,14 @@ public class NfcService {
             if (!writeTag(context, buildNdefMessage(), detectedTag)) {
                 Log.e(TAG, "onNewIntentNfcMode() writeTag() return false");
                 EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_FAIL));
+                mIsDisableCancel = false;
                 return;
             }
 
             if (!setTagPassword(detectedTag, USER_PASSWORD)) {
                 Log.e(TAG, "onNewIntentNfcMode() setTagPassword() return false");
                 EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_WRITE_NFC_SET_PW_FAIL));
+                mIsDisableCancel = false;
                 return;
             }
 
@@ -337,6 +349,8 @@ public class NfcService {
 //                }
 //            }
         }
+
+        mIsDisableCancel = false;
     }
 
     private void parseNfcData(String data) {
@@ -1426,6 +1440,14 @@ public class NfcService {
         this.mTabChangedFromReadToWrite = tabChangedFromReadToWrite;
     }
 
+    public boolean isTabChangedFromWriteToRead() {
+        return mTabChangedFromWriteToRead;
+    }
+
+    public void setTabChangedFromWriteToRead(boolean tabChangedFromWriteToRead) {
+        this.mTabChangedFromWriteToRead = tabChangedFromWriteToRead;
+    }
+
     public byte[] hexToBytes(String s) {
         int len = s.length();
         byte[] data = new byte[len / 2];
@@ -1473,5 +1495,37 @@ public class NfcService {
 
     public NfcAdapter getNfcAdapter() {
         return mNfcAdapter;
+    }
+
+    public boolean isDisableCancel() {
+        return mIsDisableCancel;
+    }
+
+    public void initTagInfo() {
+        setSerialNumber("");
+        setPipeGroup("");
+        setPipeGroupName("");
+        setPipeGroupColor("");
+        setPipeType("");
+        setPipeTypeName("");
+        setSetPosition("");
+        setDistanceDirection("");
+        setDistance(0.0);
+        setDistanceLR(0.0);
+        setDiameter(0.0);
+        setMaterial("");
+        setMaterialName("");
+        setPipeDepth(0.0);
+        setPositionX(0.0);
+        setPositionY(0.0);
+        setOfferCompany("");
+        setCompanyPhone("");
+        setMemo("");
+        setBuildCompany("");
+        setBuildPhone("");
+        setSiteImageUrl("");
+        setSiteImage(null);
+        setLockPassword("");
+        setNewPassword("");
     }
 }
