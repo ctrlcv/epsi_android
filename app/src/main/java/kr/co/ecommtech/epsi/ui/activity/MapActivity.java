@@ -324,7 +324,12 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
             Pipe pipe = mPipeList.get(i);
 
             newMarker = new Marker();
-            newMarker.setPosition(new LatLng(pipe.getPositionX(), pipe.getPositionY()));
+
+            if (pipe.getPositionX() > 100 && pipe.getPositionY() < 100) {
+                newMarker.setPosition(new LatLng(pipe.getPositionY(), pipe.getPositionX()));
+            } else {
+                newMarker.setPosition(new LatLng(pipe.getPositionX(), pipe.getPositionY()));
+            }
 
             switch (pipe.getPipeGroup()) {
                 case "1":
@@ -353,6 +358,8 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
 
             mMarkerList.add(newMarker);
         }
+
+        Log.d(TAG, "makeMarkerList() mMarkerList: " + mMarkerList.size());
     }
 
     @UiThread
@@ -573,7 +580,7 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
                     runOnUiThread(new Runnable(){
                         public void run(){
                             mPipeList = (ArrayList<Pipe>)mList.pipeList;
-                            Log.d(TAG, "Load PipeList()");
+                            Log.d(TAG, "Load PipeList() mPipeList: " + mPipeList.size());
                             if (mIsMapReady) {
                                 makeMakerList();
                             }

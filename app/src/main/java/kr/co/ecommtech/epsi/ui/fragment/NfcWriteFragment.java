@@ -1169,6 +1169,19 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
             sendImageRequest(fileName);
         }
+
+        String setPosition = mSetPosition.getText().toString();
+
+        if (!TextUtils.isEmpty(setPosition) && "관로위".equals(setPosition)) {
+            mDistanceDirection.setText("");
+            mPipeDistance.setText("");
+            mPipeDistanceLR.setText("");
+            mDistanceDirectionLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
+            mDistanceLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
+            mDistanceLRLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
+            mPipeDistance.setEnabled(false);
+            mPipeDistanceLR.setEnabled(false);
+        }
     }
 
     private String getPipeTypeCode(String pipeTypeName) {
@@ -1262,10 +1275,14 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
         if (!TextUtils.isEmpty(mPipeDistance.getText().toString())) {
             NfcService.getInstance().setDistance(Double.parseDouble(mPipeDistance.getText().toString()));
+        } else {
+            NfcService.getInstance().setDistance(0.0);
         }
 
         if (!TextUtils.isEmpty(mPipeDistanceLR.getText().toString())) {
             NfcService.getInstance().setDistanceLR(Double.parseDouble(mPipeDistanceLR.getText().toString()));
+        } else {
+            NfcService.getInstance().setDistanceLR(0.0);
         }
 
         if (!TextUtils.isEmpty(mDepth.getText().toString())) {

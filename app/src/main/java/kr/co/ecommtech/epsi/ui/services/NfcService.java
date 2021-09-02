@@ -400,20 +400,28 @@ public class NfcService {
         if (data.contains(TAG_DISTANCE)) {
             String value = data.replace(TAG_DISTANCE, "");
 
-            if (TextUtils.isEmpty(value)) {
+            try {
+                if ("".equals(value) || TextUtils.isEmpty(value)) {
+                    setDistance(0.0);
+                } else {
+                    setDistance(Double.parseDouble(value));
+                }
+            } catch (NumberFormatException e) {
                 setDistance(0.0);
-            } else {
-                setDistance(Double.parseDouble(value));
             }
             return;
         }
         if (data.contains(TAG_DISTANCE_LR)) {
             String value = data.replace(TAG_DISTANCE_LR, "");
 
-            if (TextUtils.isEmpty(value)) {
+            try {
+                if ("".equals(value) || TextUtils.isEmpty(value)) {
+                    setDistanceLR(0.0);
+                } else {
+                    setDistanceLR(Double.parseDouble(value));
+                }
+            } catch (NumberFormatException e) {
                 setDistanceLR(0.0);
-            } else {
-                setDistanceLR(Double.parseDouble(value));
             }
             return;
         }
@@ -1196,8 +1204,8 @@ public class NfcService {
                 textToNdefRecord(TAG_PIPE_TYPENAME + mPipeTypeName),
                 textToNdefRecord(TAG_SET_POSITION + mSetPosition),
                 textToNdefRecord(TAG_DISTANCE_DIRECTION + mDistanceDirection),
-                textToNdefRecord(TAG_DISTANCE + mDistance),
-                textToNdefRecord(TAG_DISTANCE_LR + mDistanceLR),
+                textToNdefRecord(TAG_DISTANCE + ((mDistance != 0.0) ? mDistance : "")),
+                textToNdefRecord(TAG_DISTANCE_LR + ((mDistanceLR != 0.0) ? mDistanceLR : "")),
                 textToNdefRecord(TAG_PIPE_DEPTH + mPipeDepth),
                 textToNdefRecord(TAG_PIPE_DIAMETER + mDiameter),
                 textToNdefRecord(TAG_MATERIAL + mMaterial),

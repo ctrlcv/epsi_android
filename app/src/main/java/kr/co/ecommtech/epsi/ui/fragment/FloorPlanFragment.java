@@ -80,6 +80,8 @@ public class FloorPlanFragment extends Fragment {
     }
 
     public void loadValues() {
+        mFloorImage.setText("","","");
+
         if (TextUtils.isEmpty(NfcService.getInstance().getSetPosition()) &&
             TextUtils.isEmpty(NfcService.getInstance().getPipeTypeName()) &&
             TextUtils.isEmpty(NfcService.getInstance().getDistanceDirection())) {
