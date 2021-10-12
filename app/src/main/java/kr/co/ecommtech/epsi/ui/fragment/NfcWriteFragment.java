@@ -947,7 +947,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         map.put("pipetype", mSelectedPipeType);
         map.put("setPosition", mSetPosition.getText().toString());
         map.put("distanceDirection", mDistanceDirection.getText().toString());
-        map.put("diameter", mPipeDistance.getText().toString());
+        map.put("diameter", mPipeDiameter.getText().toString());
         map.put("material", mSelectedMaterial);
 
         if (!TextUtils.isEmpty(mPipeDistance.getText().toString())) {
