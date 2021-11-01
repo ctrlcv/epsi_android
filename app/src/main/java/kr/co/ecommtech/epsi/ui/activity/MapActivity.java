@@ -56,7 +56,7 @@ import retrofit2.Response;
 public class MapActivity extends BaseActivity implements NaverMap.OnMapClickListener, OnMapReadyCallback {
     private final static String TAG = "MapActivity";
 
-    private final static int markerWidth = 77;
+    private final static int markerWidth = 56;
     private final static int markerHeight = 80;
 
     private static final int PERMISSION_REQUEST_CODE = 9621;
@@ -286,10 +286,11 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
                 NfcService.getInstance().setBuildCompany(mSelectedPipe.getBuildCompany());
                 NfcService.getInstance().setBuildPhone(mSelectedPipe.getBuildPhone());
                 NfcService.getInstance().setLoadFromMap(true);
-                finish();
+//                finish();
 
                 Intent intent = new Intent(this, InfoActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 intent.putExtra("fromMap", true);
                 startActivity(intent);
                 break;
@@ -556,7 +557,7 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
                 }
             }
 
-            mPipeDiameter.setText(String.valueOf(pipe.getDiameter()) + "m");
+            mPipeDiameter.setText(String.valueOf(pipe.getDiameter()) + "mm");
             mPipeDepth.setText(String.valueOf(pipe.getPipeDepth()) + "m");
             mPipeMaterial.setText(pipe.getMaterialName());
 

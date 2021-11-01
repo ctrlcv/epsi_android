@@ -157,7 +157,7 @@
                     android:textSize="14dp"
                     android:textColor="#840a47"
                     android:gravity="center_vertical|right"
-                    android:text="매설심도"
+                    android:text="관경"
                     tools:ignore="HardcodedText"/>
 
                 <TextView
@@ -168,7 +168,7 @@
                     android:textSize="14dp"
                     android:textColor="#840a47"
                     android:gravity="center_vertical|right"
-                    android:text="관경"
+                    android:text="매설심도"
                     tools:ignore="HardcodedText"/>
 
                 <TextView

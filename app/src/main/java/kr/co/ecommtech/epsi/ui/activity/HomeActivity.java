@@ -36,6 +36,7 @@ public class HomeActivity extends BaseActivity {
             case R.id.viewmap_btn:
                 Intent mapIntent = new Intent(getApplicationContext(), MapActivity.class);
                 mapIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                mapIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
                 startActivity(mapIntent);
                 break;
 
