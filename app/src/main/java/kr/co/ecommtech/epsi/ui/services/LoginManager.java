@@ -107,6 +107,23 @@ public class LoginManager {
         });
     }
 
+    public synchronized boolean isPreferServerData(Context context) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        boolean isPreferServer = sharedPreferences.getBoolean("isPreferServer", false);
+
+        Log.d(TAG, "isPreferServer:" + isPreferServer);
+        return isPreferServer;
+    }
+
+    public synchronized  void setPreferServerData(Context context, boolean set) {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        Log.d(TAG, "setPreferServerData set:" + set);
+        editor.putBoolean("isPreferServer", set);
+        editor.apply();
+    }
+
     public synchronized boolean isAutoLogIn(Context context) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
         boolean isAutoLogin = sharedPreferences.getBoolean("isAutoLogin", false);

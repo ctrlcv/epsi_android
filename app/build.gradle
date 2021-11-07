@@ -10,8 +10,8 @@ android {
         applicationId "kr.co.ecommtech.epsi"
         minSdkVersion 16
         targetSdkVersion 30
-        versionCode 7
-        versionName "1.0.6"
+        versionCode 8
+        versionName "1.0.7"
         multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -40,13 +40,14 @@ dependencies {
     implementation 'com.jakewharton:butterknife:10.2.3'
     implementation 'org.jetbrains:annotations:15.0'
     implementation 'com.google.android.gms:play-services-location:18.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
     implementation 'com.karumi:dexter:6.2.2'
     implementation 'com.google.guava:guava:30.1.1-android'
     implementation 'org.greenrobot:eventbus:3.2.0'
     implementation 'com.naver.maps:map-sdk:3.12.0'
 
-    compile files('libs/commons-net-3.8.0.jar')
+    implementation files('libs/commons-net-3.8.0.jar')
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="#840a47"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_horizontal|bottom"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/readinfo_image"
+            android:layout_width="224dp"
+            android:layout_height="200dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/border_840a47_ffffff_4dp">
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/info" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:fontFamily="@font/nexon_bold"
+                android:textSize="32dp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:lineSpacingExtra="6.6sp"
+                android:text="정보읽기"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/readinfo_btn"
+            android:layout_width="224dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="30dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:background="@drawable/border_ffffff_ffffff_3dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nexon_bold"
+                android:textSize="20dp"
+                android:textColor="#840a47"
+                android:textStyle="bold"
+                android:lineSpacingExtra="6.6sp"
+                android:text="GO"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="30dp"
+        android:gravity="center_horizontal|top"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/viewmap_image"
+            android:layout_width="224dp"
+            android:layout_height="200dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/border_840a47_ffffff_4dp">
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:src="@drawable/map" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:fontFamily="@font/nexon_bold"
+                android:textSize="32dp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:lineSpacingExtra="6.6sp"
+                android:text="지도보기"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/viewmap_btn"
+            android:layout_width="224dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="12dp"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:background="@drawable/border_ffffff_ffffff_3dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nexon_bold"
+                android:textSize="20dp"
+                android:textColor="#840a47"
+                android:textStyle="bold"
+                android:lineSpacingExtra="6.6sp"
+                android:text="GO"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="45dp" />
+</LinearLayout>

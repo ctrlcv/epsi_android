@@ -55,7 +55,7 @@ public class InfoFragment extends Fragment {
 
         Log.d(TAG, "onCreateView()");
 
-        if (!LoginManager.getInstance().getLogInInfo().getAuth().equals("사용자")) {
+        if (LoginManager.getInstance().isLoggedIn(getContext()) && !LoginManager.getInstance().getLogInInfo().getAuth().equals("사용자")) {
             mTabElement = Arrays.asList("읽기", "쓰기");
         } else {
             mTabElement = Arrays.asList("읽기");

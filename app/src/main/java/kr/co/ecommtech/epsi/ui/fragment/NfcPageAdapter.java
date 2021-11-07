@@ -1,5 +1,7 @@
 package kr.co.ecommtech.epsi.ui.fragment;
 
+import android.content.Context;
+
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -14,6 +16,7 @@ import kr.co.ecommtech.epsi.ui.services.LoginManager;
 public class NfcPageAdapter extends FragmentStateAdapter {
     private NfcReadFragment mNfcReadFragment = null;
     private NfcWriteFragment mNfcWriteFragment = null;
+    private Context mContext = null;
 
     public NfcPageAdapter(@NonNull @NotNull FragmentActivity fragmentActivity) {
         super(fragmentActivity);
@@ -21,6 +24,7 @@ public class NfcPageAdapter extends FragmentStateAdapter {
 
     public NfcPageAdapter(@NonNull @NotNull Fragment fragment) {
         super(fragment);
+        mContext = fragment.getContext();
     }
 
     public NfcPageAdapter(@NonNull @NotNull FragmentManager fragmentManager, @NonNull @NotNull Lifecycle lifecycle) {
@@ -50,7 +54,7 @@ public class NfcPageAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        if (LoginManager.getInstance().getLogInInfo().getAuth().equals("사용자")) {
+        if (!LoginManager.getInstance().isLoggedIn(mContext) || LoginManager.getInstance().getLogInInfo().getAuth().equals("사용자")) {
             return 1;
         }
 

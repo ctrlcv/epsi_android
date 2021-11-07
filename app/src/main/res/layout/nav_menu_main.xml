@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <TableLayout
+        android:id="@+id/layout_top_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TableLayout
+            android:id="@+id/layout_menu_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/white_bg_bottom_border">
+
+            <LinearLayout
+                android:id="@+id/btn_app_info_list"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="17dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"
+                    android:src="@drawable/ic_outline_info_24" />
+
+                <TextView
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:layout_marginStart="13dp"
+                    android:layout_weight="1"
+                    android:lineSpacingExtra="7.6dp"
+                    android:text="앱 정보"
+                    android:textColor="#6a6f7d"
+                    android:textSize="16dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btn_login_list"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="17dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"
+                    android:src="@drawable/ic_outline_login_24" />
+
+                <TextView
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:layout_marginStart="13dp"
+                    android:layout_weight="1"
+                    android:lineSpacingExtra="7.6dp"
+                    android:text="로그인"
+                    android:textColor="#6a6f7d"
+                    android:textSize="16dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btn_server_list"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="17dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"
+                    android:src="@drawable/ic_outline_storage_24" />
+
+                <TextView
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:layout_marginStart="13dp"
+                    android:layout_weight="1"
+                    android:lineSpacingExtra="7.6dp"
+                    android:text="서버 데이터 우선"
+                    android:textColor="#6a6f7d"
+                    android:textSize="16dp" />
+
+                <ImageView
+                    android:id="@+id/switch_server"
+                    android:layout_width="40dp"
+                    android:layout_height="22dp"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"
+                    android:src="@drawable/switch_off"
+                    android:scaleType="fitCenter"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btn_manual_list"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:padding="17dp">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"
+                    android:src="@drawable/ic_outline_help_center_24" />
+
+                <TextView
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="13dp"
+                    android:layout_marginStart="13dp"
+                    android:layout_weight="1"
+                    android:lineSpacingExtra="7.6dp"
+                    android:text="사용자 매뉴얼"
+                    android:textColor="#6a6f7d"
+                    android:textSize="16dp" />
+            </LinearLayout>
+        </TableLayout>
+    </TableLayout>
+</ScrollView>

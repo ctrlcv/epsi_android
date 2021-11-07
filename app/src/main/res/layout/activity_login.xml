@@ -207,7 +207,7 @@
                     android:layout_height="match_parent"
                     android:fontFamily="@font/nexon_regular"
                     android:gravity="center_vertical"
-                    android:text="psj1411@ecommtech.com"
+                    android:text="psj1411@ecommtech.co.kr"
                     android:textSize="16dp"
                     android:textColor="#840a47"
                     tools:ignore="HardcodedText"/>
@@ -238,6 +238,4 @@
             </LinearLayout>
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 </LinearLayout>

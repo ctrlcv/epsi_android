@@ -86,7 +86,7 @@ public class LoginActivity extends BaseActivity implements LoginManager.OnChange
     @Override
     public void onChangedLogIn(boolean isLogin, String message) {
         if (isLogin) {
-            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
+            Intent intent = new Intent(getApplicationContext(), DefaultMainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
             finish();
