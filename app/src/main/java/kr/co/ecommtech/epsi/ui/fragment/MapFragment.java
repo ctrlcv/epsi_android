@@ -19,13 +19,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.map.CameraPosition;
 import com.naver.maps.map.LocationTrackingMode;
+import com.naver.maps.map.MapView;
 import com.naver.maps.map.NaverMap;
 import com.naver.maps.map.OnMapReadyCallback;
 import com.naver.maps.map.UiSettings;
@@ -46,6 +47,7 @@ import kr.co.ecommtech.epsi.R;
 import kr.co.ecommtech.epsi.ui.activity.BaseActivity;
 import kr.co.ecommtech.epsi.ui.activity.DefaultMainActivity;
 import kr.co.ecommtech.epsi.ui.activity.InfoActivity;
+import kr.co.ecommtech.epsi.ui.activity.LoginActivity;
 import kr.co.ecommtech.epsi.ui.data.Pipe;
 import kr.co.ecommtech.epsi.ui.data.PipeList;
 import kr.co.ecommtech.epsi.ui.dialog.CustomDialog;
@@ -56,7 +58,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MapFragment extends Fragment implements NaverMap.OnMapClickListener, OnMapReadyCallback,  DefaultMainActivity.OnBackPressedListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, DefaultMainActivity.OnBackPressedListener {
     private final static String TAG = "MapFragment";
 
     private final static int markerWidth = 56;
@@ -118,13 +120,8 @@ public class MapFragment extends Fragment implements NaverMap.OnMapClickListener
 
     protected QueryService mQueryService;
 
-    com.naver.maps.map.MapFragment mMapFragment;
-    NaverMap mNaverMap;
-
-    Marker mCurrentMarker;
     Marker mSelectedMarker;
     LatLng mCurrentLatLng = new LatLng(37.49833833333333, 127.06261666666666);
-    CameraPosition mCameraPosition;
 
     ArrayList<Pipe> mPipeList = null;
     ArrayList<Marker> mMarkerList = null;
@@ -143,6 +140,9 @@ public class MapFragment extends Fragment implements NaverMap.OnMapClickListener
 
     Pipe mSelectedPipe;
     FusedLocationSource mLocationSource;
+
+    MapView mMapView;
+    NaverMap mNaverMap;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -201,13 +201,9 @@ public class MapFragment extends Fragment implements NaverMap.OnMapClickListener
         mQueryService = HttpClientToken.getRetrofit().create(QueryService.class);
         mIsMapReady = false;
 
-        FragmentManager fm = getActivity().getSupportFragmentManager();
-        mMapFragment = (com.naver.maps.map.MapFragment)fm.findFragmentById(R.id.map_fragment);
-        if (mMapFragment == null) {
-            mMapFragment = com.naver.maps.map.MapFragment.newInstance();
-            fm.beginTransaction().add(R.id.map_fragment, mMapFragment).commit();
-        }
-        mMapFragment.getMapAsync(this);
+        mMapView = (MapView) rootView.findViewById(R.id.naver_map);
+        mMapView.onCreate(savedInstanceState);
+        mMapView.getMapAsync(this);
 
         mCenterImage = OverlayImage.fromResource(R.drawable.map_center);
         mPipeBlackImage = OverlayImage.fromResource(R.drawable.pipe_black);
@@ -221,19 +217,31 @@ public class MapFragment extends Fragment implements NaverMap.OnMapClickListener
 
         mLocationSource = new FusedLocationSource(this, PERMISSION_REQUEST_CODE);
 
+        ((DefaultMainActivity)getActivity()).findMyLocation(new BaseActivity.OnGpsLocGetListener() {
+            @Override
+            public void onGpsLocGet(Location location) {
+                mCurrentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                Log.d(TAG, "get Current Position!");
+                updateCurrentPosition(mCurrentLatLng);
+            }
+        });
+
         return rootView;
     }
 
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy()");
         super.onDestroy();
         if (getActivity() != null) {
             ((DefaultMainActivity)getActivity()).setTitle("");
             ((DefaultMainActivity)getActivity()).setHomeBtnVisible(false);
+            ((DefaultMainActivity)getActivity()).stopGpsSearch();
         }
+
         mPipeList = null;
         mMarkerList = null;
-        mNaverMap = null;
+        mLocationSource = null;
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -275,11 +283,6 @@ public class MapFragment extends Fragment implements NaverMap.OnMapClickListener
 //                startActivity(intent);
                 break;
         }
-    }
-
-    @Override
-    public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
-        //
     }
 
     public void makeMakerList() {
@@ -325,7 +328,6 @@ public class MapFragment extends Fragment implements NaverMap.OnMapClickListener
                     break;
             }
 
-//            Log.d(TAG, "pipe.getPipeId():" + pipe.getPipeId());
             newMarker.setTag((Integer)pipe.getPipeId());
             newMarker.setWidth(markerWidth);
             newMarker.setHeight(markerHeight);
@@ -334,56 +336,51 @@ public class MapFragment extends Fragment implements NaverMap.OnMapClickListener
 
             mMarkerList.add(newMarker);
         }
-
         Log.d(TAG, "makeMarkerList() mMarkerList: " + mMarkerList.size());
     }
 
     @Override
-    public void onMapReady(@NonNull NaverMap naverMap) {
+    public void onMapReady(@NonNull @NotNull NaverMap naverMap) {
         Log.d(TAG, "onMapReady()");
         mNaverMap = naverMap;
-
-        ((DefaultMainActivity)getActivity()).findMyLocation(new BaseActivity.OnGpsLocGetListener() {
-            @Override
-            public void onGpsLocGet(Location location) {
-                Log.d(TAG, "get Current Position location:" + location);
-                mCurrentLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                updateCurrentPosition(mCurrentLatLng);
-            }
-        });
-
-//        if (mCurrentLatLng != null) {
-//            updateCurrentPosition(mCurrentLatLng);
-//        }
-
-        Log.d(TAG, "onMapReady() mMarkerList is NULL :" + mMarkerList);
         mIsMapReady = true;
+
+        naverMap.setLocationSource(mLocationSource);
+        naverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
+        naverMap.setOnMapClickListener(mMapClickListener);
+
+        UiSettings uiSettings = naverMap.getUiSettings();
+        uiSettings.setCompassEnabled(true);
+        uiSettings.setScaleBarEnabled(true);
+        uiSettings.setZoomControlEnabled(true);
+        uiSettings.setLocationButtonEnabled(true);
+
+        if (mCurrentLatLng != null) {
+            CameraPosition cameraPosition = new CameraPosition(mCurrentLatLng, 9);
+            naverMap.setCameraPosition(cameraPosition);
+        }
         reqGetPipeLists();
     }
 
+    @UiThread
     public void updateCurrentPosition(LatLng latLng) {
         if (latLng == null) {
             Log.e(TAG, "updateCurrentPosition() latLng is NULL");
             return;
         }
 
-        Log.d(TAG, "updateCurrentPosition() latLng:" + latLng);
-        Log.d(TAG, "updateCurrentPosition() mNaverMap:" + mNaverMap);
-
-        mCameraPosition = new CameraPosition(latLng, 10);
+        CameraPosition cameraPosition = new CameraPosition(latLng, 9);
         if (mNaverMap != null) {
-            mNaverMap.setLocationSource(mLocationSource);
-            mNaverMap.setLocationTrackingMode(LocationTrackingMode.Follow);
-
-            UiSettings uiSettings = mNaverMap.getUiSettings();
-            uiSettings.setCompassEnabled(true);
-            uiSettings.setScaleBarEnabled(true);
-            uiSettings.setZoomControlEnabled(true);
-            uiSettings.setLocationButtonEnabled(true);
-
-            mNaverMap.setCameraPosition(mCameraPosition);
+            mNaverMap.setCameraPosition(cameraPosition);
         }
     }
+
+    NaverMap.OnMapClickListener mMapClickListener = new NaverMap.OnMapClickListener() {
+        @Override
+        public void onMapClick(@NonNull PointF pointF, @NonNull LatLng latLng) {
+            deSelectMarker();
+        }
+    };
 
     Overlay.OnClickListener mMarkerClickListener = new Overlay.OnClickListener() {
         @Override
@@ -566,8 +563,11 @@ public class MapFragment extends Fragment implements NaverMap.OnMapClickListener
                             mPipeList = (ArrayList<Pipe>)mList.pipeList;
                             Log.d(TAG, "LoadPipeList() mPipeList: " + mPipeList.size());
                             if (mIsMapReady) {
-                                Log.d(TAG, "reqGetPipeLists() call mMarkerList()");
                                 makeMakerList();
+                                if (mCurrentLatLng != null) {
+                                    Log.d(TAG, "LoadPipeList() mCurrentLatLng: " + mCurrentLatLng);
+                                    updateCurrentPosition(mCurrentLatLng);
+                                }
                             }
                         }
                     });
@@ -583,11 +583,50 @@ public class MapFragment extends Fragment implements NaverMap.OnMapClickListener
         });
     }
 
+    public void deSelectMarker() {
+        if (mSelectedMarker == null) {
+            return;
+        }
+
+        for (int i = 0; i < mPipeList.size(); i++) {
+            Pipe pipe = mPipeList.get(i);
+            Marker marker = mMarkerList.get(i);
+
+            switch (pipe.getPipeGroup()) {
+                case "1":
+                    marker.setIcon(mPipeBlueImage);
+                    break;
+
+                case "2":
+                    marker.setIcon(mPipeBlackImage);
+                    break;
+
+                case "3":
+                    marker.setIcon(mPipeRedImage);
+                    break;
+
+                case "4":
+                    marker.setIcon(mPipeYellowImage);
+                    break;
+            }
+        }
+        mSelectedMarker = null;
+        showDetailInfo();
+    }
+
     @Override
     public void onBack() {
-        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragmentHodler, new HomeFragment());
-        fragmentTransaction.commit();
+        if (mSelectedMarker != null) {
+            deSelectMarker();
+            return;
+        }
+
+        if (getActivity() != null) {
+            FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.remove(this);
+            fragmentTransaction.replace(R.id.fragmentHodler, new HomeFragment());
+            fragmentTransaction.commit();
+        }
     }
 
     @Override

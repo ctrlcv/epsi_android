@@ -15,10 +15,11 @@ import android.view.ViewGroup;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import kr.co.ecommtech.epsi.R;
+import kr.co.ecommtech.epsi.ui.activity.DefaultMainActivity;
 import kr.co.ecommtech.epsi.ui.activity.InfoActivity;
 import kr.co.ecommtech.epsi.ui.activity.MapActivity;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements DefaultMainActivity.OnBackPressedListener {
     private static String TAG = "HomeFragment";
 
     @Override
@@ -40,7 +41,7 @@ public class HomeFragment extends Fragment {
         switch(view.getId()) {
             case R.id.readinfo_image:
             case R.id.readinfo_btn:
-                {
+                if (getActivity() != null) {
                     FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
                     fragmentTransaction.replace(R.id.fragmentHodler, new NfcFragment());
                     fragmentTransaction.commit();
@@ -49,7 +50,7 @@ public class HomeFragment extends Fragment {
 
             case R.id.viewmap_image:
             case R.id.viewmap_btn:
-                {
+                if (getActivity() != null) {
                     FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
                     fragmentTransaction.replace(R.id.fragmentHodler, new MapFragment());
                     fragmentTransaction.commit();
@@ -58,6 +59,13 @@ public class HomeFragment extends Fragment {
 
             default:
                 break;
+        }
+    }
+
+    @Override
+    public void onBack() {
+        if (getActivity() != null) {
+            ((DefaultMainActivity) getActivity()).finish();
         }
     }
 }

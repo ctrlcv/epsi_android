@@ -71,7 +71,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import kr.co.ecommtech.epsi.R;
 import kr.co.ecommtech.epsi.ui.activity.BaseActivity;
-import kr.co.ecommtech.epsi.ui.activity.InfoActivity;
+import kr.co.ecommtech.epsi.ui.activity.DefaultMainActivity;
 import kr.co.ecommtech.epsi.ui.data.GroupCode;
 import kr.co.ecommtech.epsi.ui.data.GroupCodeList;
 import kr.co.ecommtech.epsi.ui.data.MaterialCode;
@@ -539,7 +539,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
                 NfcService.getInstance().enableTagWriteMode(getActivity());
                 if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(true);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcWriteDialog(true);
                 }
 
 //                if (false) {
@@ -594,7 +594,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 break;
 
             case R.id.location_btn:
-                ((InfoActivity)getActivity()).findMyLocation(new BaseActivity.OnGpsLocGetListener() {
+                ((DefaultMainActivity)getActivity()).findMyLocation(new BaseActivity.OnGpsLocGetListener() {
                     @SuppressLint("DefaultLocale")
                     @Override
                     public void onGpsLocGet(Location location) {
@@ -669,8 +669,8 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
             case EL_EVENT_WRITE_NFC_FAIL:
                 if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
-                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcWriteDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcSaveDialog(false);
                 }
 
                 new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
@@ -700,8 +700,8 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
             case EL_EVENT_WRITE_NFC_SET_PW_FAIL:
                 if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
-                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcWriteDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcSaveDialog(false);
                 }
 
                 new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
@@ -731,8 +731,8 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
             case EL_EVENT_WRITE_NFC_DEL_PW_OK:
                 if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
-                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcWriteDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcSaveDialog(false);
                 }
 
                 new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
@@ -772,7 +772,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
                                 NfcService.getInstance().enableTagWriteMode(getActivity());
                                 if (getActivity() != null) {
-                                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(true);
+                                    ((DefaultMainActivity)getActivity()).setVisibleNfcWriteDialog(true);
                                 }
                             }
                         });
@@ -782,8 +782,8 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
             case EL_EVENT_WRITE_NFC_DEL_PW_FAIL:
                 if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
-                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcWriteDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcSaveDialog(false);
                 }
 
                 new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
@@ -813,8 +813,8 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
             case EL_EVENT_WRITE_NFC_DONE:
                 if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcWriteDialog(false);
-                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(true);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcWriteDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcSaveDialog(true);
                 }
 
                 NfcService.getInstance().setWriteMode(false);
@@ -836,7 +836,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
             case EL_EVENT_UPLOADED_PHOTO_FAIL:
                 if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcSaveDialog(false);
                 }
 
                 new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
@@ -866,7 +866,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
             case EL_EVENT_DB_SAVE_SUCCESS:
                 if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcSaveDialog(false);
                 }
 
                 new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
@@ -902,7 +902,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
             case EL_EVENT_DB_SAVE_FAIL:
                 if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcSaveDialog(false);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcSaveDialog(false);
                 }
 
                 new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {

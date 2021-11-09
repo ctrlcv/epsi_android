@@ -12,7 +12,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -20,7 +24,9 @@ import butterknife.OnClick;
 import kr.co.ecommtech.epsi.R;
 import kr.co.ecommtech.epsi.ui.fragment.AppInfoFragment;
 import kr.co.ecommtech.epsi.ui.fragment.HomeFragment;
-import kr.co.ecommtech.epsi.ui.fragment.NfcFragment;
+import kr.co.ecommtech.epsi.ui.fragment.WebViewFragment;
+import kr.co.ecommtech.epsi.ui.services.Event;
+import kr.co.ecommtech.epsi.ui.services.EventMessage;
 import kr.co.ecommtech.epsi.ui.services.LoginManager;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 
@@ -43,6 +49,18 @@ public class DefaultMainActivity extends BaseActivity {
     @BindView(R.id.switch_server)
     ImageView mSwitchServer;
 
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.nfc_write_layout)
+    RelativeLayout mNfcWriteLayout;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.nfc_save_layout)
+    RelativeLayout mNfcSaveLayout;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.nfc_dialog_title)
+    TextView mDialogTitle;
+
     public interface OnBackPressedListener {
         public void onBack();
     }
@@ -58,7 +76,7 @@ public class DefaultMainActivity extends BaseActivity {
         if(mBackListener != null) {
             mBackListener.onBack();
         } else {
-            //
+            finish();
         }
     }
 
@@ -84,10 +102,15 @@ public class DefaultMainActivity extends BaseActivity {
         drawerLayout.closeDrawer(GravityCompat.START);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
     @SuppressLint("NonConstantResourceId")
     @OnClick({R.id.btn_main_menu_linear_layout, R.id.btn_menu_close_imagebutton,
               R.id.btn_app_info_list, R.id.btn_login_list, R.id.btn_server_list,
-              R.id.btn_manual_list, R.id.home_btn})
+              R.id.btn_manual_list, R.id.home_btn, R.id.btn_nfc_write_cancel})
     public void OnButtonClick(View view) {
         switch (view.getId()) {
             case R.id.btn_main_menu_linear_layout:
@@ -128,11 +151,15 @@ public class DefaultMainActivity extends BaseActivity {
                     mSwitchServer.setImageResource(R.drawable.switch_on);
                     LoginManager.getInstance().setPreferServerData(this, true);
                 }
+                EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_REFRESH));
                 break;
 
-            case R.id.btn_manual_list:
-                Log.d(TAG, "MENU - btn_manual_list");
-                drawerLayout.closeDrawer(GravityCompat.START);
+            case R.id.btn_manual_list: {
+                    FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.fragmentHodler, new WebViewFragment());
+                    fragmentTransaction.commit();
+                    drawerLayout.closeDrawer(GravityCompat.START);
+                }
                 break;
 
             case R.id.home_btn: {
@@ -140,6 +167,15 @@ public class DefaultMainActivity extends BaseActivity {
                     fragmentTransaction.replace(R.id.fragmentHodler, new HomeFragment());
                     fragmentTransaction.commit();
                 }
+                break;
+
+            case R.id.btn_nfc_write_cancel:
+                if (NfcService.getInstance().isDisableCancel()) {
+                    return;
+                }
+
+                mNfcWriteLayout.setVisibility(View.GONE);
+                NfcService.getInstance().onPauseNfcMode();
                 break;
 
             default:
@@ -175,4 +211,59 @@ public class DefaultMainActivity extends BaseActivity {
     public void setHomeBtnVisible(boolean visible) {
         mHomeBtn.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
+
+    public void setVisibleNfcReadDialog(boolean visible) {
+        if (visible) {
+            mDialogTitle.setText("TAG 읽기");
+        }
+        mNfcWriteLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    public void setVisibleNfcWriteDialog(boolean visible) {
+        if (visible) {
+            mDialogTitle.setText("TAG 쓰기");
+        }
+        mNfcWriteLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    public void setVisibleNfcSaveDialog(boolean visible) {
+        mNfcSaveLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
+    }
+
+    public void initInputData() {
+        Log.d(TAG, "initInputData()");
+
+        NfcService.getInstance().setSerialNumber("");
+        NfcService.getInstance().setPipeGroup("");
+        NfcService.getInstance().setPipeGroupName("");
+        NfcService.getInstance().setPipeGroupColor("");
+        NfcService.getInstance().setPipeType("");
+        NfcService.getInstance().setPipeTypeName("");
+        NfcService.getInstance().setSetPosition("");
+        NfcService.getInstance().setDistanceDirection("");
+        NfcService.getInstance().setDistance(0.0);
+        NfcService.getInstance().setDistanceLR(0.0);
+        NfcService.getInstance().setDiameter(0.0);
+        NfcService.getInstance().setMaterial("");
+        NfcService.getInstance().setMaterialName("");
+        NfcService.getInstance().setPipeDepth(0.0);
+        NfcService.getInstance().setPositionX(0.0);
+        NfcService.getInstance().setPositionY(0.0);
+        NfcService.getInstance().setOfferCompany("");
+        NfcService.getInstance().setCompanyPhone("");
+        NfcService.getInstance().setMemo("");
+        NfcService.getInstance().setBuildCompany("");
+        NfcService.getInstance().setBuildPhone("");
+        NfcService.getInstance().setSiteImageUrl("");
+        NfcService.getInstance().setSiteImage(null);
+        NfcService.getInstance().setLockPassword("");
+        NfcService.getInstance().setNewPassword("");
+
+        NfcService.getInstance().setReadMode(false);
+        NfcService.getInstance().setWriteMode(false);
+
+        setVisibleNfcReadDialog(false);
+        setVisibleNfcWriteDialog(false);
+    }
+
 }

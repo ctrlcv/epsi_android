@@ -378,6 +378,7 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
         mIsMapReady = true;
     }
 
+    @UiThread
     public void updateCurrentPosition(LatLng latLng) {
         if (latLng == null) {
             Log.e(TAG, "updateCurrentPosition() latLng is NULL");
@@ -580,9 +581,13 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
                     runOnUiThread(new Runnable(){
                         public void run(){
                             mPipeList = (ArrayList<Pipe>)mList.pipeList;
-                            Log.d(TAG, "Load PipeList() mPipeList: " + mPipeList.size());
+                            Log.d(TAG, "LoadPipeList() mPipeList: " + mPipeList.size());
                             if (mIsMapReady) {
                                 makeMakerList();
+                                Log.d(TAG, "LoadPipeList() mCurrentLatLng: " + mCurrentLatLng);
+                                if (mCurrentLatLng != null) {
+                                    updateCurrentPosition(mCurrentLatLng);
+                                }
                             }
                         }
                     });

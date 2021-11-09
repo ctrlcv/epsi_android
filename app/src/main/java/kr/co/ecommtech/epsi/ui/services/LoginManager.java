@@ -108,7 +108,7 @@ public class LoginManager {
     }
 
     public synchronized boolean isPreferServerData(Context context) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences sharedPreferences = context.getSharedPreferences("server", Context.MODE_PRIVATE);
         boolean isPreferServer = sharedPreferences.getBoolean("isPreferServer", false);
 
         Log.d(TAG, "isPreferServer:" + isPreferServer);
@@ -116,8 +116,8 @@ public class LoginManager {
     }
 
     public synchronized  void setPreferServerData(Context context, boolean set) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = sharedPreferences.edit();
+        SharedPreferences sharedPreferences = context.getSharedPreferences("server", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
 
         Log.d(TAG, "setPreferServerData set:" + set);
         editor.putBoolean("isPreferServer", set);

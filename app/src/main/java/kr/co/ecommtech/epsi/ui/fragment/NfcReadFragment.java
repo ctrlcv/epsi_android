@@ -1,6 +1,7 @@
 package kr.co.ecommtech.epsi.ui.fragment;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.nfc.NfcAdapter;
@@ -29,16 +30,28 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import kr.co.ecommtech.epsi.R;
+import kr.co.ecommtech.epsi.ui.activity.DefaultMainActivity;
+import kr.co.ecommtech.epsi.ui.activity.ImageViewActivity;
 import kr.co.ecommtech.epsi.ui.activity.InfoActivity;
+import kr.co.ecommtech.epsi.ui.data.Pipe;
+import kr.co.ecommtech.epsi.ui.data.PipeList;
+import kr.co.ecommtech.epsi.ui.network.HttpClientToken;
 import kr.co.ecommtech.epsi.ui.services.EventMessage;
+import kr.co.ecommtech.epsi.ui.services.LoginManager;
 import kr.co.ecommtech.epsi.ui.services.NetworkStatus;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
+import kr.co.ecommtech.epsi.ui.services.QueryService;
 import kr.co.ecommtech.epsi.ui.utils.Utils;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class NfcReadFragment extends Fragment {
     private static String TAG = "NfcReadFragment";
@@ -119,6 +132,17 @@ public class NfcReadFragment extends Fragment {
     @BindView(R.id.no_image)
     LinearLayout mNoImage;
 
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.server_label)
+    TextView mServerLabel;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.nfc_label)
+    TextView mNfcLabel;
+
+    private ArrayList<Pipe> mPipeList = null;
+    protected QueryService mQueryService;
+
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,6 +160,8 @@ public class NfcReadFragment extends Fragment {
 
         mSiteImage.setVisibility(View.GONE);
         mNoImage.setVisibility(View.VISIBLE);
+
+        mQueryService = HttpClientToken.getRetrofit().create(QueryService.class);
 
         if (NfcService.getInstance().isLoadFromMap()) {
             NfcService.getInstance().setLoadFromMap(false);
@@ -169,6 +195,14 @@ public class NfcReadFragment extends Fragment {
             }
         }
 
+        if (LoginManager.getInstance().isPreferServerData(getActivity())) {
+            mServerLabel.setVisibility(View.VISIBLE);
+            mNfcLabel.setVisibility(View.GONE);
+        } else {
+            mServerLabel.setVisibility(View.GONE);
+            mNfcLabel.setVisibility(View.VISIBLE);
+        }
+
         NfcService.getInstance().setTabChangedFromWriteToRead(false);
     }
 
@@ -179,7 +213,7 @@ public class NfcReadFragment extends Fragment {
     }
 
     @SuppressLint("NonConstantResourceId")
-    @OnClick({R.id.read_btn})
+    @OnClick({R.id.read_btn, R.id.site_image})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.read_btn:
@@ -194,7 +228,15 @@ public class NfcReadFragment extends Fragment {
 
                 NfcService.getInstance().enableTagReadMode(getActivity());
                 if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcReadDialog(true);
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcReadDialog(true);
+                }
+                break;
+
+            case R.id.site_image:
+                if (NfcService.getInstance().getSiteImage() != null) {
+                    Intent intent = new Intent(getActivity(), ImageViewActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
                 }
                 break;
 
@@ -209,25 +251,119 @@ public class NfcReadFragment extends Fragment {
 
         switch (e.what) {
             case EL_EVENT_READ_NFC_PIPEINFO:
-                loadPipeInfo();
-                if (getActivity() != null) {
-                    ((InfoActivity) getActivity()).setVisibleNfcReadDialog(false);
-                }
-
                 NfcService.getInstance().setReadMode(false);
                 NfcService.getInstance().onPauseNfcMode();
 
-                if (NfcService.getInstance().getPositionX() != 0.0 || NfcService.getInstance().getPositionY() != 0.0) {
-                    String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
-                    sendImageRequest(fileName);
-                }
+                if (LoginManager.getInstance().isPreferServerData(getActivity())) {
+                    double lat = NfcService.getInstance().getPositionX();
+                    double lon = NfcService.getInstance().getPositionY();
+                    reqGetPipeLists(lat, lon);
+                } else {
+                    loadPipeInfo();
 
-                Utils.showToast(getActivity(), "Tag 읽기를 성공하였습니다.");
+                    if (getActivity() != null) {
+                        ((DefaultMainActivity)getActivity()).setVisibleNfcReadDialog(false);
+                    }
+
+                    if (NfcService.getInstance().getPositionX() != 0.0 || NfcService.getInstance().getPositionY() != 0.0) {
+                        String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
+                        sendImageRequest(fileName);
+                    }
+
+                    Utils.showToast(getActivity(), "Tag 읽기를 성공하였습니다.");
+                }
+                break;
+
+            case EL_EVENT_REFRESH:
+                if (LoginManager.getInstance().isPreferServerData(getActivity())) {
+                    mServerLabel.setVisibility(View.VISIBLE);
+                    mNfcLabel.setVisibility(View.GONE);
+                } else {
+                    mServerLabel.setVisibility(View.GONE);
+                    mNfcLabel.setVisibility(View.VISIBLE);
+                }
                 break;
 
             default:
                 break;
         }
+    }
+
+    private void reqGetPipeLists(double lat, double lon) {
+        Log.d(TAG, "reqGetPipeLists() lat:" + lat + ", lon:" + lon);
+
+        HashMap<String, Double> map = new HashMap<>();
+        map.put("lat", lat);
+        map.put("lon", lon);
+
+        Call<PipeList> call = mQueryService.getPipeOne(map);
+
+        call.enqueue(new Callback<PipeList>() {
+            @Override
+            public void onResponse(Call<PipeList> call, Response<PipeList> response) {
+                if(response.isSuccessful()){
+                    PipeList mList = response.body();
+
+                    getActivity().runOnUiThread(new Runnable(){
+                        public void run(){
+                            mPipeList = (ArrayList<Pipe>)mList.pipeList;
+                            Log.d(TAG, "reqGetPipeLists() mPipeList: " + mPipeList.size());
+
+                            if (mPipeList.size() >= 1) {
+                                Pipe pipe = mPipeList.get(0);
+                                NfcService.getInstance().setSerialNumber(pipe.getSerialNumber());
+                                NfcService.getInstance().setPipeGroup(pipe.getPipeGroup());
+                                NfcService.getInstance().setPipeGroupName(pipe.getPipeGroupName());
+                                NfcService.getInstance().setPipeGroupColor(pipe.getPipeGroupColor());
+                                NfcService.getInstance().setPipeType(pipe.getPipeType());
+                                NfcService.getInstance().setPipeTypeName(pipe.getPipeTypeName());
+                                NfcService.getInstance().setSetPosition(pipe.getSetPosition());
+                                NfcService.getInstance().setDistanceDirection(pipe.getDistanceDirection());
+                                NfcService.getInstance().setDiameter(pipe.getDiameter());
+                                NfcService.getInstance().setMaterial(pipe.getMaterial());
+                                NfcService.getInstance().setMaterialName(pipe.getMaterialName());
+                                NfcService.getInstance().setDistance(pipe.getDistance());
+                                NfcService.getInstance().setDistanceLR(pipe.getDistanceLr());
+                                NfcService.getInstance().setPipeDepth(pipe.getPipeDepth());
+                                NfcService.getInstance().setPositionX(pipe.getPositionX());
+                                NfcService.getInstance().setPositionY(pipe.getPositionY());
+                                NfcService.getInstance().setOfferCompany(pipe.getOfferCompany());
+                                NfcService.getInstance().setCompanyPhone(pipe.getCompanyPhone());
+                                NfcService.getInstance().setMemo(pipe.getMemo());
+                                NfcService.getInstance().setBuildCompany(pipe.getBuildCompany());
+                                NfcService.getInstance().setBuildPhone(pipe.getBuildPhone());
+                                loadPipeInfo();
+
+                                if (getActivity() != null) {
+                                    ((DefaultMainActivity)getActivity()).setVisibleNfcReadDialog(false);
+                                }
+
+                                if (NfcService.getInstance().getPositionX() != 0.0 || NfcService.getInstance().getPositionY() != 0.0) {
+                                    String fileName = String.valueOf(NfcService.getInstance().getPositionX()) + "-" + String.valueOf(NfcService.getInstance().getPositionY()) + ".JPG";
+                                    sendImageRequest(fileName);
+                                }
+                                Utils.showToast(getActivity(), "서버에서 Tag 정보 가져오기를 성공하였습니다.");
+                            }
+                        }
+                    });
+                } else {
+                    Log.d(TAG,"reqGetPipeLists() Status Code : " + response.code());
+                    if (getActivity() != null) {
+                        ((DefaultMainActivity)getActivity()).setVisibleNfcReadDialog(false);
+                    }
+                    Utils.showToast(getActivity(), "서버에서 Tag 정보 가져오기에 실패하였습니다.");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<PipeList> call, Throwable t) {
+                Log.e(TAG,"reqGetPipeLists() Fail msg : " + t.getMessage());
+                if (getActivity() != null) {
+                    ((DefaultMainActivity)getActivity()).setVisibleNfcReadDialog(false);
+                }
+                Utils.showToast(getActivity(), "서버에서 Tag 정보 가져오기에 실패하였습니다.");
+            }
+        });
     }
 
     private void loadPipeInfo() {
@@ -381,6 +517,7 @@ public class NfcReadFragment extends Fragment {
         @Override
         protected void onPostExecute(Bitmap result) {
             if (result == null) {
+
                 mSiteImage.setVisibility(View.GONE);
                 mNoImage.setVisibility(View.VISIBLE);
             } else {

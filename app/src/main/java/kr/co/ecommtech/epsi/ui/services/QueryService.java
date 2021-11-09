@@ -37,6 +37,10 @@ public interface QueryService {
     Call<PipeList> getPipeList(@Body HashMap<String, Double> map);
 
     @Headers({"Accept: applcation/json", "Content-Type: application/json; charset=utf-8"})
+    @POST("/api/epsi/epsione")
+    Call<PipeList> getPipeOne(@Body HashMap<String, Double> map);
+
+    @Headers({"Accept: applcation/json", "Content-Type: application/json; charset=utf-8"})
     @POST("/api/epsi/store")
     Call<Result> savePipeInfo(@Body HashMap<String, Object> map);
 }

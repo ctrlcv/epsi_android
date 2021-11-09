@@ -122,7 +122,6 @@ public class NfcService {
 
     private boolean mTabChangedFromReadToWrite = false;
     private boolean mTabChangedFromWriteToRead = false;
-
     private boolean mIsDisableCancel = false;
 
     public static NfcService getInstance() {
@@ -1438,7 +1437,6 @@ public class NfcService {
     public void setSiteImage(Bitmap siteImage) {
         this.mSiteImage = siteImage;
     }
-
 
     public boolean isTabChangedFromReadToWrite() {
         return mTabChangedFromReadToWrite;

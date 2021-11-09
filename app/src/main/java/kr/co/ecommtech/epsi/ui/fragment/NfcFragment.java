@@ -43,18 +43,6 @@ public class NfcFragment extends Fragment implements DefaultMainActivity.OnBackP
     @BindView(R.id.readinfo_viewpager)
     ViewPager2 mReadInfoViewPager;
 
-    @SuppressLint("NonConstantResourceId")
-    @BindView(R.id.nfc_write_layout)
-    RelativeLayout mNfcWriteLayout;
-
-    @SuppressLint("NonConstantResourceId")
-    @BindView(R.id.nfc_save_layout)
-    RelativeLayout mNfcSaveLayout;
-
-    @SuppressLint("NonConstantResourceId")
-    @BindView(R.id.nfc_dialog_title)
-    TextView mDialogTitle;
-
     InfoPageAdapter mInfoPageAdapter;
 
     final List<String> mTabElement = Arrays.asList("관로정보", "평면도", "단면도");
@@ -101,89 +89,19 @@ public class NfcFragment extends Fragment implements DefaultMainActivity.OnBackP
     @Override
     public void onDestroy() {
         super.onDestroy();
-        initInputData();
+        ((DefaultMainActivity)getActivity()).initInputData();
         if (getActivity() != null) {
             ((DefaultMainActivity)getActivity()).setHomeBtnVisible(false);
         }
     }
 
-    @SuppressLint("NonConstantResourceId")
-    @OnClick({R.id.btn_nfc_write_cancel})
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.btn_nfc_write_cancel:
-                if (NfcService.getInstance().isDisableCancel()) {
-                    return;
-                }
-
-                mNfcWriteLayout.setVisibility(View.GONE);
-                NfcService.getInstance().onPauseNfcMode();
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    public void setVisibleNfcReadDialog(boolean visible) {
-        if (visible) {
-            mDialogTitle.setText("TAG 읽기");
-        }
-        mNfcWriteLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    public void setVisibleNfcWriteDialog(boolean visible) {
-        if (visible) {
-            mDialogTitle.setText("TAG 쓰기");
-        }
-        mNfcWriteLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    public void setVisibleNfcSaveDialog(boolean visible) {
-        mNfcSaveLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
-    }
-
-    public void initInputData() {
-        Log.d(TAG, "initInputData()");
-
-        NfcService.getInstance().setSerialNumber("");
-        NfcService.getInstance().setPipeGroup("");
-        NfcService.getInstance().setPipeGroupName("");
-        NfcService.getInstance().setPipeGroupColor("");
-        NfcService.getInstance().setPipeType("");
-        NfcService.getInstance().setPipeTypeName("");
-        NfcService.getInstance().setSetPosition("");
-        NfcService.getInstance().setDistanceDirection("");
-        NfcService.getInstance().setDistance(0.0);
-        NfcService.getInstance().setDistanceLR(0.0);
-        NfcService.getInstance().setDiameter(0.0);
-        NfcService.getInstance().setMaterial("");
-        NfcService.getInstance().setMaterialName("");
-        NfcService.getInstance().setPipeDepth(0.0);
-        NfcService.getInstance().setPositionX(0.0);
-        NfcService.getInstance().setPositionY(0.0);
-        NfcService.getInstance().setOfferCompany("");
-        NfcService.getInstance().setCompanyPhone("");
-        NfcService.getInstance().setMemo("");
-        NfcService.getInstance().setBuildCompany("");
-        NfcService.getInstance().setBuildPhone("");
-        NfcService.getInstance().setSiteImageUrl("");
-        NfcService.getInstance().setSiteImage(null);
-        NfcService.getInstance().setLockPassword("");
-        NfcService.getInstance().setNewPassword("");
-
-        NfcService.getInstance().setReadMode(false);
-        NfcService.getInstance().setWriteMode(false);
-
-        setVisibleNfcReadDialog(false);
-        setVisibleNfcWriteDialog(false);
-    }
-
     @Override
     public void onBack() {
-        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragmentHodler, new HomeFragment());
-        fragmentTransaction.commit();
+        if (getActivity() != null) {
+            FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragmentHodler, new HomeFragment());
+            fragmentTransaction.commit();
+        }
     }
 
     @Override

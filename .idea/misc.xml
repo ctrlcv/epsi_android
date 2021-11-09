@@ -3,10 +3,14 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/border_002551_002551_3dp.xml" value="0.26944444444444443" />
+        <entry key="app/src/main/res/drawable/border_840a47_840a47_3dp.xml" value="0.26944444444444443" />
+        <entry key="app/src/main/res/drawable/border_f49b22_f49b22_3dp.xml" value="0.26944444444444443" />
         <entry key="app/src/main/res/drawable/ic_outline_info_24.xml" value="0.2361111111111111" />
         <entry key="app/src/main/res/drawable/white_bg_bottom_border.xml" value="0.21296296296296297" />
         <entry key="app/src/main/res/layout/activity_default_main.xml" value="0.33106884057971014" />
         <entry key="app/src/main/res/layout/activity_home.xml" value="0.2859375" />
+        <entry key="app/src/main/res/layout/activity_imageview.xml" value="0.29483695652173914" />
         <entry key="app/src/main/res/layout/activity_info.xml" value="0.1" />
         <entry key="app/src/main/res/layout/activity_login.xml" value="0.33469202898550726" />
         <entry key="app/src/main/res/layout/activity_map.xml" value="0.1" />
@@ -17,6 +21,8 @@
         <entry key="app/src/main/res/layout/fragment_info.xml" value="0.23125" />
         <entry key="app/src/main/res/layout/fragment_map.xml" value="0.23177083333333334" />
         <entry key="app/src/main/res/layout/fragment_nfc.xml" value="0.23177083333333334" />
+        <entry key="app/src/main/res/layout/fragment_nfcread.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/fragment_webview.xml" value="0.128125" />
         <entry key="app/src/main/res/layout/nav_header_default_main.xml" value="0.1" />
         <entry key="app/src/main/res/layout/nav_menu_main.xml" value="0.33106884057971014" />
       </map>

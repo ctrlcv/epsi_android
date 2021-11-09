@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,7 +38,6 @@ public class InfoFragment extends Fragment {
     @SuppressLint("NonConstantResourceId")
     @BindView(R.id.nfc_viewpager)
     ViewPager2 mNfcViewPager;
-
     NfcPageAdapter mNfcPageAdapter;
 
     List<String> mTabElement;
@@ -97,7 +98,6 @@ public class InfoFragment extends Fragment {
                 Log.d(TAG, "onTabReselected() " + tab.getText());
             }
         });
-
 
         mNfcViewPager.setCurrentItem(0);
         return rootView;
