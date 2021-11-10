@@ -2,6 +2,7 @@ package kr.co.ecommtech.epsi.ui.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,11 +30,6 @@ public class AppInfoFragment extends Fragment implements DefaultMainActivity.OnB
         View rootView = inflater.inflate(R.layout.fragment_appinfo, container, false);
         ButterKnife.bind(this, rootView);
 
-        if (getActivity() != null) {
-            ((DefaultMainActivity)getActivity()).setTitle("앱정보");
-            ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
-        }
-
         return rootView;
     }
 
@@ -44,6 +40,17 @@ public class AppInfoFragment extends Fragment implements DefaultMainActivity.OnB
         if (getActivity() != null) {
             ((DefaultMainActivity)getActivity()).setTitle("");
             ((DefaultMainActivity)getActivity()).setHomeBtnVisible(false);
+            ((DefaultMainActivity)getActivity()).setOnBackPressedListener(null);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getActivity() != null) {
+            ((DefaultMainActivity)getActivity()).setTitle("앱정보");
+            ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
+            ((DefaultMainActivity)getActivity()).setOnBackPressedListener(this);
         }
     }
 
@@ -54,13 +61,17 @@ public class AppInfoFragment extends Fragment implements DefaultMainActivity.OnB
 
     @Override
     public void onBack() {
-        FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.fragmentHodler, new HomeFragment());
-        fragmentTransaction.commit();
+        if (getActivity() != null) {
+            Log.d(TAG, "onBack()");
+            FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+            fragmentTransaction.replace(R.id.fragmentHodler, new HomeFragment());
+            fragmentTransaction.commit();
+        }
     }
 
     @Override
     public void onAttach(Context context) {
+        Log.d(TAG, "onAttach");
         super.onAttach(context);
         ((DefaultMainActivity)context).setOnBackPressedListener(this);
     }

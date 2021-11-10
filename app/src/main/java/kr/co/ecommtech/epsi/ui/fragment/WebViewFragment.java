@@ -44,11 +44,6 @@ public class WebViewFragment extends Fragment implements DefaultMainActivity.OnB
         View rootView = inflater.inflate(R.layout.fragment_webview, container, false);
         ButterKnife.bind(this, rootView);
 
-        if (getActivity() != null) {
-            ((DefaultMainActivity)getActivity()).setTitle("사용자 매뉴얼");
-            ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
-        }
-
         mWebView.loadUrl("http://139.150.83.28/manual/Manual.html");
         mWebView.setWebViewClient(new WebViewClient());
 
@@ -69,12 +64,24 @@ public class WebViewFragment extends Fragment implements DefaultMainActivity.OnB
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        if (getActivity() != null) {
+            ((DefaultMainActivity)getActivity()).setTitle("사용자 매뉴얼");
+            ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
+            ((DefaultMainActivity)getActivity()).setOnBackPressedListener(this);
+        }
+    }
+
+    @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()");
         super.onDestroy();
         if (getActivity() != null) {
             ((DefaultMainActivity) getActivity()).setTitle("");
             ((DefaultMainActivity) getActivity()).setHomeBtnVisible(false);
+            ((DefaultMainActivity)getActivity()).setOnBackPressedListener(null);
         }
     }
 

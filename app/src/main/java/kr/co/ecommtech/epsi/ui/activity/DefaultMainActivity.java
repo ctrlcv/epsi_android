@@ -73,10 +73,16 @@ public class DefaultMainActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            Log.d(TAG, "onBackPressed() - isDrawerOpen()");
+            drawerLayout.closeDrawer(GravityCompat.START);
+            return;
+        }
+
         if(mBackListener != null) {
             mBackListener.onBack();
         } else {
-            finish();
+            super.onBackPressed();
         }
     }
 

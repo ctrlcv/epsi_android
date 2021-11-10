@@ -119,6 +119,7 @@ public class NfcService {
     private boolean mIsWriteMode = false;
     private boolean mIsFormatted = false;
     private boolean mLoadFromMap = false;
+    private boolean mReLoadMarker = false;
 
     private boolean mTabChangedFromReadToWrite = false;
     private boolean mTabChangedFromWriteToRead = false;
@@ -1483,6 +1484,14 @@ public class NfcService {
         this.mLoadFromMap = loadFromMap;
     }
 
+    public boolean isReLoadMarker() {
+        return mReLoadMarker;
+    }
+
+    public void setReLoadMarker(boolean reLoadMarker) {
+        this.mReLoadMarker = reLoadMarker;
+    }
+
     public String getLockPassword() {
         return mLockPassword;
     }
@@ -1534,4 +1543,6 @@ public class NfcService {
         setLockPassword("");
         setNewPassword("");
     }
+
+
 }

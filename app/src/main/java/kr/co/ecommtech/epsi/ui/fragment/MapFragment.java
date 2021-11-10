@@ -35,6 +35,9 @@ import com.naver.maps.map.overlay.Overlay;
 import com.naver.maps.map.overlay.OverlayImage;
 import com.naver.maps.map.util.FusedLocationSource;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -52,8 +55,11 @@ import kr.co.ecommtech.epsi.ui.data.Pipe;
 import kr.co.ecommtech.epsi.ui.data.PipeList;
 import kr.co.ecommtech.epsi.ui.dialog.CustomDialog;
 import kr.co.ecommtech.epsi.ui.network.HttpClientToken;
+import kr.co.ecommtech.epsi.ui.services.EventMessage;
+import kr.co.ecommtech.epsi.ui.services.LoginManager;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.services.QueryService;
+import kr.co.ecommtech.epsi.ui.utils.Utils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -61,8 +67,8 @@ import retrofit2.Response;
 public class MapFragment extends Fragment implements OnMapReadyCallback, DefaultMainActivity.OnBackPressedListener {
     private final static String TAG = "MapFragment";
 
-    private final static int markerWidth = 56;
-    private final static int markerHeight = 80;
+    private final static int markerWidth = 50;
+    private final static int markerHeight = 50;
 
     private static final int PERMISSION_REQUEST_CODE = 9621;
     private static final String[] PERMISSIONS = {
@@ -147,6 +153,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        EventBus.getDefault().register(this);
     }
 
     @Nullable
@@ -237,11 +244,35 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
             ((DefaultMainActivity)getActivity()).setTitle("");
             ((DefaultMainActivity)getActivity()).setHomeBtnVisible(false);
             ((DefaultMainActivity)getActivity()).stopGpsSearch();
+            ((DefaultMainActivity)getActivity()).setOnBackPressedListener(null);
         }
 
         mPipeList = null;
         mMarkerList = null;
         mLocationSource = null;
+        EventBus.getDefault().unregister(this);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(EventMessage e) {
+        Log.d(TAG, "onMessageEvent()" + e);
+
+        switch (e.what) {
+            case EL_EVENT_MAP_REFRESH:
+                if (NfcService.getInstance().isReLoadMarker()) {
+                    reqGetPipeLists();
+                }
+
+                if (getActivity() != null) {
+                    ((DefaultMainActivity)getActivity()).setTitle("지도보기");
+                    ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
+                    ((DefaultMainActivity)getActivity()).setOnBackPressedListener(this);
+                }
+                break;
+
+            default:
+                break;
+        }
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -276,11 +307,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
                 NfcService.getInstance().setBuildPhone(mSelectedPipe.getBuildPhone());
                 NfcService.getInstance().setLoadFromMap(true);
 
-//                Intent intent = new Intent(this, InfoActivity.class);
-////                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//                intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//                intent.putExtra("fromMap", true);
-//                startActivity(intent);
+                if (getActivity() != null) {
+                    FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.add(R.id.fragmentHodler, new NfcFragment());
+                    fragmentTransaction.commit();
+                }
                 break;
         }
     }
@@ -310,22 +341,42 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
                 newMarker.setPosition(new LatLng(pipe.getPositionX(), pipe.getPositionY()));
             }
 
-            switch (pipe.getPipeGroup()) {
-                case "1":
-                    newMarker.setIcon(mPipeBlueImage);
-                    break;
+            if (mSelectedMarker != null && ((int)mSelectedMarker.getTag() == (int)pipe.getPipeId())) {
+                switch (pipe.getPipeGroup()) {
+                    case "1":
+                        newMarker.setIcon(mPipeBlueSelectImage);
+                        break;
 
-                case "2":
-                    newMarker.setIcon(mPipeBlackImage);
-                    break;
+                    case "2":
+                        newMarker.setIcon(mPipeBlackSelectImage);
+                        break;
 
-                case "3":
-                    newMarker.setIcon(mPipeRedImage);
-                    break;
+                    case "3":
+                        newMarker.setIcon(mPipeRedSelectImage);
+                        break;
 
-                case "4":
-                    newMarker.setIcon(mPipeYellowImage);
-                    break;
+                    case "4":
+                        newMarker.setIcon(mPipeYellowSelectImage);
+                        break;
+                }
+            } else {
+                switch (pipe.getPipeGroup()) {
+                    case "1":
+                        newMarker.setIcon(mPipeBlueImage);
+                        break;
+
+                    case "2":
+                        newMarker.setIcon(mPipeBlackImage);
+                        break;
+
+                    case "3":
+                        newMarker.setIcon(mPipeRedImage);
+                        break;
+
+                    case "4":
+                        newMarker.setIcon(mPipeYellowImage);
+                        break;
+                }
             }
 
             newMarker.setTag((Integer)pipe.getPipeId());
@@ -564,9 +615,21 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
                             Log.d(TAG, "LoadPipeList() mPipeList: " + mPipeList.size());
                             if (mIsMapReady) {
                                 makeMakerList();
-                                if (mCurrentLatLng != null) {
-                                    Log.d(TAG, "LoadPipeList() mCurrentLatLng: " + mCurrentLatLng);
-                                    updateCurrentPosition(mCurrentLatLng);
+
+                                if (NfcService.getInstance().isReLoadMarker()) {
+                                    Log.d(TAG, "LoadPipeList() isReloadMarker is TRUE, mSelectedMarker.getTag() : " + mSelectedMarker.getTag());
+                                    NfcService.getInstance().setReLoadMarker(false);
+                                    if (getActivity() != null) {
+                                        ((DefaultMainActivity)getActivity()).setTitle("지도보기");
+                                        ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
+                                        ((DefaultMainActivity)getActivity()).setOnBackPressedListener(MapFragment.this);
+                                    }
+                                    showDetailInfo();
+                                } else {
+                                    if (mCurrentLatLng != null) {
+                                        Log.d(TAG, "LoadPipeList() mCurrentLatLng: " + mCurrentLatLng);
+                                        updateCurrentPosition(mCurrentLatLng);
+                                    }
                                 }
                             }
                         }
@@ -623,7 +686,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
 
         if (getActivity() != null) {
             FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.remove(this);
             fragmentTransaction.replace(R.id.fragmentHodler, new HomeFragment());
             fragmentTransaction.commit();
         }

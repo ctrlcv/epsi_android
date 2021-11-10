@@ -143,6 +143,7 @@ public class NfcReadFragment extends Fragment {
     private ArrayList<Pipe> mPipeList = null;
     protected QueryService mQueryService;
 
+
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -19,6 +19,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
+import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -30,6 +31,8 @@ import butterknife.OnClick;
 import kr.co.ecommtech.epsi.R;
 import kr.co.ecommtech.epsi.ui.activity.DefaultMainActivity;
 import kr.co.ecommtech.epsi.ui.activity.InfoPageAdapter;
+import kr.co.ecommtech.epsi.ui.services.Event;
+import kr.co.ecommtech.epsi.ui.services.EventMessage;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 
 public class NfcFragment extends Fragment implements DefaultMainActivity.OnBackPressedListener {
@@ -44,6 +47,7 @@ public class NfcFragment extends Fragment implements DefaultMainActivity.OnBackP
     ViewPager2 mReadInfoViewPager;
 
     InfoPageAdapter mInfoPageAdapter;
+    private boolean mIsStartFromMap = false;
 
     final List<String> mTabElement = Arrays.asList("관로정보", "평면도", "단면도");
 
@@ -59,11 +63,7 @@ public class NfcFragment extends Fragment implements DefaultMainActivity.OnBackP
         View rootView = inflater.inflate(R.layout.fragment_nfc, container, false);
         ButterKnife.bind(this, rootView);
 
-        if (getActivity() != null) {
-            ((DefaultMainActivity)getActivity()).setTitle("정보읽기");
-            ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
-        }
-
+        mIsStartFromMap = NfcService.getInstance().isLoadFromMap();
         mInfoPageAdapter = new InfoPageAdapter(getActivity());
         mReadInfoViewPager.setAdapter(mInfoPageAdapter);
 
@@ -84,6 +84,12 @@ public class NfcFragment extends Fragment implements DefaultMainActivity.OnBackP
     @Override
     public void onResume() {
         super.onResume();
+
+        if (getActivity() != null) {
+            ((DefaultMainActivity)getActivity()).setTitle("정보읽기");
+            ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
+            ((DefaultMainActivity)getActivity()).setOnBackPressedListener(this);
+        }
     }
 
     @Override
@@ -92,15 +98,28 @@ public class NfcFragment extends Fragment implements DefaultMainActivity.OnBackP
         ((DefaultMainActivity)getActivity()).initInputData();
         if (getActivity() != null) {
             ((DefaultMainActivity)getActivity()).setHomeBtnVisible(false);
+            if (!mIsStartFromMap) {
+                ((DefaultMainActivity) getActivity()).setOnBackPressedListener(null);
+            }
         }
     }
 
     @Override
     public void onBack() {
         if (getActivity() != null) {
-            FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
-            fragmentTransaction.replace(R.id.fragmentHodler, new HomeFragment());
-            fragmentTransaction.commit();
+            if (mIsStartFromMap) {
+                mIsStartFromMap = false;
+                NfcService.getInstance().setReLoadMarker(true);
+
+                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.remove(this);
+                fragmentTransaction.commit();
+                EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_MAP_REFRESH));
+            } else {
+                FragmentTransaction fragmentTransaction = getActivity().getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.fragmentHodler, new HomeFragment());
+                fragmentTransaction.commit();
+            }
         }
     }
 

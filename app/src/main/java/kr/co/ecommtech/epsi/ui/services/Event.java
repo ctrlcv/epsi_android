@@ -16,5 +16,6 @@ public enum Event {
     EL_EVENT_DB_SAVE_SUCCESS,
     EL_EVENT_DB_SAVE_FAIL,
     EL_EVENT_REFRESH,
+    EL_EVENT_MAP_REFRESH,
 }
 

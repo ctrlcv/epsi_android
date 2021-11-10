@@ -19,7 +19,7 @@ import kr.co.ecommtech.epsi.ui.activity.DefaultMainActivity;
 import kr.co.ecommtech.epsi.ui.activity.InfoActivity;
 import kr.co.ecommtech.epsi.ui.activity.MapActivity;
 
-public class HomeFragment extends Fragment implements DefaultMainActivity.OnBackPressedListener {
+public class HomeFragment extends Fragment {
     private static String TAG = "HomeFragment";
 
     @Override
@@ -59,13 +59,6 @@ public class HomeFragment extends Fragment implements DefaultMainActivity.OnBack
 
             default:
                 break;
-        }
-    }
-
-    @Override
-    public void onBack() {
-        if (getActivity() != null) {
-            ((DefaultMainActivity) getActivity()).finish();
         }
     }
 }
