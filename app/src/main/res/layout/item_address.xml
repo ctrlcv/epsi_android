@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp">
+    <LinearLayout
+        android:id="@+id/item_title_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp"
+        android:layout_marginStart="2dp"
+        android:layout_marginEnd="2dp"
+        android:paddingLeft="15dp"
+        android:paddingStart="15dp"
+        android:paddingRight="10dp"
+        android:paddingEnd="10dp">
+        <TextView
+            android:id="@+id/tv_address_jibun"
+            android:fontFamily="@font/nexon_regular"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:textSize="13dp"
+            android:textColor="#840a47"
+            android:gravity="center_vertical|left"/>
+        <TextView
+            android:id="@+id/tv_address_road"
+            android:fontFamily="@font/nexon_regular"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:textSize="13dp"
+            android:textColor="#818181"
+            android:gravity="center_vertical|left"/>
+    </LinearLayout>
+</LinearLayout>

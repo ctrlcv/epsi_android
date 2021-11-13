@@ -23,10 +23,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
+            android:background="@color/white"
             app:tabIndicatorGravity="top"
             app:tabIndicatorColor="#840a47"
             app:tabTextColor="#c4c4c4"
             app:tabSelectedTextColor="#840a47"
+            app:tabBackground="@color/white"
             app:tabIndicatorHeight="4dp"
             app:tabTextAppearance="@style/tab_text" />
 

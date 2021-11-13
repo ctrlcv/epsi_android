@@ -112,18 +112,9 @@ public class StartActivity extends BaseActivity {
 
         LoginManager.getInstance().initLoginInfo(getApplicationContext());
 
-        if (LoginManager.getInstance().isLoggedIn(StartActivity.this)) {
-            Intent intent = new Intent(getApplicationContext(), HomeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        } else {
-//            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//            startActivity(intent);
-            Intent intent = new Intent(getApplicationContext(), DefaultMainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-        }
+        Intent intent = new Intent(getApplicationContext(), DefaultMainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
         finish();
     }
 }

@@ -2,6 +2,7 @@ package kr.co.ecommtech.epsi.ui.fragment;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -11,9 +12,12 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -22,7 +26,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.naver.maps.geometry.LatLng;
 import com.naver.maps.map.CameraPosition;
 import com.naver.maps.map.LocationTrackingMode;
@@ -42,6 +50,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,20 +61,26 @@ import kr.co.ecommtech.epsi.ui.activity.BaseActivity;
 import kr.co.ecommtech.epsi.ui.activity.DefaultMainActivity;
 import kr.co.ecommtech.epsi.ui.activity.InfoActivity;
 import kr.co.ecommtech.epsi.ui.activity.LoginActivity;
+import kr.co.ecommtech.epsi.ui.data.Address;
+import kr.co.ecommtech.epsi.ui.data.AddressResponse;
 import kr.co.ecommtech.epsi.ui.data.Pipe;
 import kr.co.ecommtech.epsi.ui.data.PipeList;
 import kr.co.ecommtech.epsi.ui.dialog.CustomDialog;
 import kr.co.ecommtech.epsi.ui.network.HttpClientToken;
 import kr.co.ecommtech.epsi.ui.services.EventMessage;
 import kr.co.ecommtech.epsi.ui.services.LoginManager;
+import kr.co.ecommtech.epsi.ui.services.NaverMapService;
 import kr.co.ecommtech.epsi.ui.services.NfcService;
 import kr.co.ecommtech.epsi.ui.services.QueryService;
 import kr.co.ecommtech.epsi.ui.utils.Utils;
+import okhttp3.OkHttpClient;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback, DefaultMainActivity.OnBackPressedListener {
+public class MapFragment extends Fragment implements OnMapReadyCallback, DefaultMainActivity.OnBackPressedListener, SearchListAdapter.OnAddressItemSelectedListener {
     private final static String TAG = "MapFragment";
 
     private final static int markerWidth = 50;
@@ -124,6 +140,30 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
     @BindView(R.id.tv_pipe_material)
     TextView mPipeMaterial;
 
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.btn_address_search)
+    LinearLayout mAddressSearchBtn;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.layout_address_search)
+    LinearLayout mAddressLayout;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.et_search)
+    EditText mAddressEt;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.btn_search)
+    TextView mSearchBtnTv;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.address_search_rv)
+    RecyclerView mSearchRecyclerView;
+
+    @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.no_search_result)
+    LinearLayout mNoResultLayout;
+
     protected QueryService mQueryService;
 
     Marker mSelectedMarker;
@@ -133,6 +173,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
     ArrayList<Marker> mMarkerList = null;
 
     boolean mIsMapReady = false;
+    boolean mIsShowAddressSearch = false;
 
     OverlayImage mCenterImage;
     OverlayImage mPipeBlackImage;
@@ -149,6 +190,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
 
     MapView mMapView;
     NaverMap mNaverMap;
+
+    AddressResponse mSearchList = null;
+    private SearchListAdapter mSearchListAdapter;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -167,6 +211,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
         if (getActivity() != null) {
             ((DefaultMainActivity)getActivity()).setTitle("지도보기");
             ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
+            ((DefaultMainActivity)getActivity()).showKeyBoard(false);
         }
 
         if (!((DefaultMainActivity)getActivity()).isGPSEnable()) {
@@ -222,6 +267,32 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
         mPipeYellowImage = OverlayImage.fromResource(R.drawable.pipe_yellow);
         mPipeYellowSelectImage = OverlayImage.fromResource(R.drawable.pipe_yellow_sel);
 
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
+        mSearchRecyclerView.setLayoutManager(layoutManager);
+
+        mSearchListAdapter = new SearchListAdapter(getActivity(), this);
+        mSearchRecyclerView.setAdapter(mSearchListAdapter);
+
+        mNoResultLayout.setVisibility(View.GONE);
+        mSearchRecyclerView.setVisibility(View.GONE);
+
+//        mAddressEt.setOnKeyListener(new View.OnKeyListener() {
+//            @Override
+//            public boolean onKey(View v, int keyCode, KeyEvent event) {
+//                switch (keyCode) {
+//                    case KeyEvent.KEYCODE_ENTER:
+//                        String editText = mAddressEt.getText().toString();
+//                        if (TextUtils.isEmpty(editText)) {
+//                            return true;
+//                        }
+//                        reqSearchAddress(editText);
+//                        return false;
+//                }
+//
+//                return true;
+//            }
+//        });
+
         mLocationSource = new FusedLocationSource(this, PERMISSION_REQUEST_CODE);
 
         ((DefaultMainActivity)getActivity()).findMyLocation(new BaseActivity.OnGpsLocGetListener() {
@@ -245,6 +316,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
             ((DefaultMainActivity)getActivity()).setHomeBtnVisible(false);
             ((DefaultMainActivity)getActivity()).stopGpsSearch();
             ((DefaultMainActivity)getActivity()).setOnBackPressedListener(null);
+            ((DefaultMainActivity)getActivity()).showKeyBoard(false);
         }
 
         mPipeList = null;
@@ -267,6 +339,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
                     ((DefaultMainActivity)getActivity()).setTitle("지도보기");
                     ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
                     ((DefaultMainActivity)getActivity()).setOnBackPressedListener(this);
+                    ((DefaultMainActivity)getActivity()).showKeyBoard(false);
                 }
                 break;
 
@@ -276,7 +349,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
     }
 
     @SuppressLint("NonConstantResourceId")
-    @OnClick({R.id.view_detail_layout})
+    @OnClick({R.id.view_detail_layout, R.id.btn_address_search, R.id.btn_search})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.view_detail_layout:
@@ -312,6 +385,29 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
                     fragmentTransaction.add(R.id.fragmentHodler, new NfcFragment());
                     fragmentTransaction.commit();
                 }
+                break;
+
+            case R.id.btn_address_search:
+                mAddressSearchBtn.setVisibility(View.GONE);
+                mAddressLayout.setVisibility(View.VISIBLE);
+
+                mNoResultLayout.setVisibility(View.GONE);
+                mSearchRecyclerView.setVisibility(View.GONE);
+
+                mIsShowAddressSearch = true;
+                mAddressEt.setText("");
+                mAddressEt.requestFocus();
+
+                ((DefaultMainActivity)getActivity()).showKeyBoard(true);
+                break;
+
+            case R.id.btn_search:
+                if (TextUtils.isEmpty(mAddressEt.getText().toString())) {
+                    Utils.showToast(getActivity(), "검색어를 입력하세요.");
+                    return;
+                }
+
+                reqSearchAddress(mAddressEt.getText().toString());
                 break;
         }
     }
@@ -623,6 +719,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
                                         ((DefaultMainActivity)getActivity()).setTitle("지도보기");
                                         ((DefaultMainActivity)getActivity()).setHomeBtnVisible(true);
                                         ((DefaultMainActivity)getActivity()).setOnBackPressedListener(MapFragment.this);
+                                        ((DefaultMainActivity)getActivity()).showKeyBoard(false);
                                     }
                                     showDetailInfo();
                                 } else {
@@ -642,6 +739,60 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
             @Override
             public void onFailure(Call<PipeList> call, Throwable t) {
                 Log.e(TAG,"reqGetPipeLists() Fail msg : " + t.getMessage());
+            }
+        });
+    }
+
+    private void reqSearchAddress(String query) {
+        if (TextUtils.isEmpty(query)) {
+            return;
+        }
+
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(1, TimeUnit.MINUTES)
+                .readTimeout(10,TimeUnit.SECONDS)
+                .writeTimeout(10,TimeUnit.SECONDS)
+                .build();
+        Gson gson = new GsonBuilder().setLenient().create();
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://naveropenapi.apigw.ntruss.com/")
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .client(client)
+                .build();
+
+        retrofit.create(NaverMapService.class).searchAddress(query).enqueue(new Callback<AddressResponse>() {
+            @Override
+            public void onResponse(Call<AddressResponse> call, Response<AddressResponse> response) {
+                if(response.isSuccessful()){
+                    mSearchList = response.body();
+                    Log.d(TAG, mSearchList.toString());
+
+                    getActivity().runOnUiThread(new Runnable(){
+                        @SuppressLint("NotifyDataSetChanged")
+                        public void run(){
+                            mSearchListAdapter.setItems(mSearchList);
+                            mSearchListAdapter.notifyDataSetChanged();
+
+                            List<Address> addresses = mSearchList.getAddresses();
+                            if (addresses.size() == 0) {
+                                mNoResultLayout.setVisibility(View.VISIBLE);
+                                mSearchRecyclerView.setVisibility(View.GONE);
+                            } else {
+                                mNoResultLayout.setVisibility(View.GONE);
+                                mSearchRecyclerView.setVisibility(View.VISIBLE);
+                                ((DefaultMainActivity)getActivity()).showKeyBoard(false);
+                            }
+                        }
+                    });
+                } else {
+                    Log.d(TAG,"reqSearchAddress() Status Code : " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AddressResponse> call, Throwable t) {
+                Log.e(TAG,"reqSearchAddress() Fail msg : " + t.getMessage());
             }
         });
     }
@@ -679,6 +830,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
 
     @Override
     public void onBack() {
+        if (mIsShowAddressSearch) {
+            mAddressSearchBtn.setVisibility(View.VISIBLE);
+            mAddressLayout.setVisibility(View.GONE);
+            mIsShowAddressSearch = false;
+            return;
+        }
+
         if (mSelectedMarker != null) {
             deSelectMarker();
             return;
@@ -695,5 +853,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
     public void onAttach(Context context) {
         super.onAttach(context);
         ((DefaultMainActivity)context).setOnBackPressedListener(this);
+    }
+
+    @Override
+    public void onAddressItemSelected(View v, Address selectedAddress) {
+        mNoResultLayout.setVisibility(View.GONE);
+        mSearchRecyclerView.setVisibility(View.GONE);
+
+        mAddressSearchBtn.setVisibility(View.VISIBLE);
+        mAddressLayout.setVisibility(View.GONE);
+
+        ((DefaultMainActivity)getActivity()).showKeyBoard(false);
+
+        mCurrentLatLng = new LatLng(Double.parseDouble(selectedAddress.getLatitude()), Double.parseDouble(selectedAddress.getLongitude()));
+
+        CameraPosition prePosition = mNaverMap.getCameraPosition();
+        CameraPosition cameraPosition = new CameraPosition(mCurrentLatLng, prePosition.zoom);
+
+        mNaverMap.setCameraPosition(cameraPosition);
     }
 }

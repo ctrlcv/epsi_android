@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -106,6 +107,8 @@ public class DefaultMainActivity extends BaseActivity {
         ft.add(R.id.fragmentHodler, groupFragment);
         ft.commitAllowingStateLoss();
         drawerLayout.closeDrawer(GravityCompat.START);
+
+        showKeyBoard(false);
     }
 
     @Override
@@ -270,6 +273,17 @@ public class DefaultMainActivity extends BaseActivity {
 
         setVisibleNfcReadDialog(false);
         setVisibleNfcWriteDialog(false);
+    }
+
+    public void showKeyBoard(boolean show) {
+        InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
+
+        if (show) {
+            imm.toggleSoftInput(InputMethodManager.RESULT_SHOWN, InputMethodManager.RESULT_SHOWN);
+        } else {
+            imm.hideSoftInputFromWindow(mDialogTitle.getWindowToken(), 0);
+        }
+
     }
 
 }
