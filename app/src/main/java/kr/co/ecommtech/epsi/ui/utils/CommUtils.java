@@ -14,7 +14,7 @@ public class CommUtils {
         if (!TextUtils.isEmpty(setPosition) && setPosition.equals("경계석")) {
             if (!TextUtils.isEmpty(pipeType)) {
                 switch (pipeType) {
-                    case "진직형":
+                    case "직진형":
                         if (!TextUtils.isEmpty(distanceDirection) && distanceDirection.equals("LEFT")) {
                             return R.drawable.d_type_0_center;
                         } else if (!TextUtils.isEmpty(distanceDirection) && distanceDirection.equals("RIGHT")) {
@@ -144,7 +144,7 @@ public class CommUtils {
         } else {
             if (!TextUtils.isEmpty(pipeType)) {
                 switch (pipeType) {
-                    case "진직형":
+                    case "직진형":
                         return R.drawable.d_type_0;
 
                     case "T분기형(0°)":

@@ -28,7 +28,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,7 +40,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -53,6 +51,8 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -238,6 +238,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     private DirectionListAdapter mDirectionListAdapter;
 
     private Uri mSelectedFilePathUri;
+    private boolean mShowSaveDialog = false;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
@@ -294,6 +295,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
                 if (!str2.equals(str)) {
                     mPositionX.setText(str2);
+                    Log.d(TAG, "afterTextChanged() mPositionX str2:" + str2);
                     int pos = mPositionX.getText().length();
                     mPositionX.setSelection(pos);
                 }
@@ -311,6 +313,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
                 if (!str2.equals(str)) {
                     mPositionY.setText(str2);
+                    Log.d(TAG, "afterTextChanged() mPositionY str2:" + str2);
                     int pos = mPositionY.getText().length();
                     mPositionY.setSelection(pos);
                 }
@@ -343,6 +346,15 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
         if (NfcService.getInstance().isTabChangedFromReadToWrite()) {
             loadPipeInfo();
+
+            String dirText = mSetPosition.getText().toString();
+            if (dirText == null || TextUtils.isEmpty(dirText) || "관로위".equals(dirText)) {
+                setEnableDistanceEdits(false);
+            } else {
+                setEnableDistanceEdits(true);
+            }
+        } else {
+            setEnableDistanceEdits(false);
         }
 
         NfcService.getInstance().setTabChangedFromReadToWrite(false);
@@ -598,6 +610,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                     @SuppressLint("DefaultLocale")
                     @Override
                     public void onGpsLocGet(Location location) {
+                        Log.d(TAG, "findMyLocation() - onGpsLocGet");
                         mPositionX.setText(String.format("%10.6f", location.getLatitude()).trim());
                         mPositionY.setText(String.format("%10.6f", location.getLongitude()).trim());
                     }
@@ -821,12 +834,21 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 NfcService.getInstance().onPauseNfcMode();
                 mSerialNumber.setText(NfcService.getInstance().getSerialNumber());
 
-                if (mSelectedFilePathUri == null) {
+                if (mSiteImage.getVisibility() == View.GONE && NfcService.getInstance().getSiteImage() == null) {
                     reqSavePipeInfo();
                 } else {
                     String fileName = mPositionX.getText().toString() + "-" + mPositionY.getText().toString() + ".JPG";
-                    Log.d(TAG, "save fileName:" + fileName + ", filePath:" + mSelectedFilePathUri.toString());
-                    uploadSiteImageByFtp(mSelectedFilePathUri, fileName);
+
+                    if (NfcService.getInstance().getSiteImage() != null) {
+                        Log.d(TAG, "savePhoto by Bitmap, fileName:" + fileName);
+                        Bitmap imageBitmap = NfcService.getInstance().getSiteImage();
+                        uploadSiteBitmapByFtp(imageBitmap, fileName);
+                    } else if (mSelectedFilePathUri != null) {
+                        Log.d(TAG, "savePhoto by select, save fileName:" + fileName + ", filePath:" + mSelectedFilePathUri.toString());
+                        uploadSiteImageByFtp(mSelectedFilePathUri, fileName);
+                    } else {
+                        reqSavePipeInfo();
+                    }
                 }
                 break;
 
@@ -869,35 +891,39 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                     ((DefaultMainActivity)getActivity()).setVisibleNfcSaveDialog(false);
                 }
 
-                new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
-                    @Override
-                    public void onCreate(Dialog dialog) {
-                        dialog.setContentView(R.layout.dialog_alert);
+                if (!mShowSaveDialog) {
+                    mShowSaveDialog = true;
+                    new CustomDialog(getActivity(), new CustomDialog.CustomDialogListener() {
+                        @Override
+                        public void onCreate(Dialog dialog) {
+                            dialog.setContentView(R.layout.dialog_alert);
 
 //                        String password = !TextUtils.isEmpty(NfcService.getInstance().getNewPassword())
 //                                            ? NfcService.getInstance().getNewPassword()
 //                                            : NfcService.getInstance().getLockPassword();
 
-                        TextView MessageTv = dialog.findViewById(R.id.tv_dlg_contents);
-                        //MessageTv.setText("저장되었습니다.\n\n [주의] 저장된 암호는'" + password + "'입니다. 암호 분실시 Tag 정보를 수정할 수 없습니다. 암호 관리에 유의하시기 바랍니다.");
-                        MessageTv.setText("저장되었습니다");
+                            TextView MessageTv = dialog.findViewById(R.id.tv_dlg_contents);
+                            //MessageTv.setText("저장되었습니다.\n\n [주의] 저장된 암호는'" + password + "'입니다. 암호 분실시 Tag 정보를 수정할 수 없습니다. 암호 관리에 유의하시기 바랍니다.");
+                            MessageTv.setText("저장되었습니다");
 
-                        mSelectedFilePathUri = null;
-                        NfcService.getInstance().onPauseNfcMode();
-                        NfcService.getInstance().setWriteMode(false);
+                            mSelectedFilePathUri = null;
+                            NfcService.getInstance().onPauseNfcMode();
+                            NfcService.getInstance().setWriteMode(false);
 
-                        TextView okBtn = dialog.findViewById(R.id.btn_ok);
-                        okBtn.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                dialog.dismiss();
+                            TextView okBtn = dialog.findViewById(R.id.btn_ok);
+                            okBtn.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    dialog.dismiss();
+                                    mShowSaveDialog = false;
 
-                                NfcService.getInstance().setLockPassword("");
-                                NfcService.getInstance().setNewPassword("");
-                            }
-                        });
-                    }
-                }).show();
+                                    NfcService.getInstance().setLockPassword("");
+                                    NfcService.getInstance().setNewPassword("");
+                                }
+                            });
+                        }
+                    }).show();
+                }
                 break;
 
             case EL_EVENT_DB_SAVE_FAIL:
@@ -1004,6 +1030,19 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         });
     }
 
+    public static InputStream getInputStreamByBitmap(Context context, Bitmap bitmap) {
+        try {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            byte[] bitmapData = bos.toByteArray();
+            InputStream inputStream = new ByteArrayInputStream(bitmapData);
+            return inputStream;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public static InputStream getInputStreamByUri(Context context, Uri uri) {
         try {
             return context.getContentResolver().openInputStream(uri);
@@ -1039,6 +1078,49 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
                     InputStream inputStream  = getInputStreamByUri(getActivity(), filePathUri);
                     Log.d(TAG, "uploadSiteImageByFtp() inputStream:" + inputStream.available());
+                    boolean isSuccess = ftpClient.storeFile(fileName, inputStream);
+
+                    if (isSuccess){
+                        EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_UPLOADED_PHOTO));
+                    } else {
+                        EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_UPLOADED_PHOTO_FAIL));
+                    }
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    EventBus.getDefault().post(new EventMessage(Event.EL_EVENT_UPLOADED_PHOTO_FAIL));
+                    return;
+                }
+            }
+        });
+        thread.start();
+    }
+
+    public void uploadSiteBitmapByFtp(Bitmap imageBitmap, String uploadFileName) {
+        final String parameter = uploadFileName;
+
+        Thread thread = new Thread(new Runnable() {
+            String fileName = parameter.trim();
+
+            @Override
+            public void run() {
+                FTPClient ftpClient = new FTPClient();
+
+                try {
+                    ftpClient.connect("139.150.83.28", FTP.DEFAULT_PORT);
+                    ftpClient.login("root", "ecomm123456");
+                    ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    Utils.showToast(requireActivity(), "FTP 접속에 실패하여 사진을 upload 할 수 없습니다. 관리자에게 문의하세요.");
+                    return;
+                }
+
+                try {
+                    ftpClient.deleteFile("/siteImages/" + fileName);
+                    ftpClient.changeWorkingDirectory("/usr/local/apache/htdocs/siteImages");
+
+                    InputStream inputStream  = getInputStreamByBitmap(getActivity(), imageBitmap);
+                    Log.d(TAG, "uploadSiteBitmapByFtp() inputStream:" + inputStream.available());
                     boolean isSuccess = ftpClient.storeFile(fileName, inputStream);
 
                     if (isSuccess){
@@ -1119,12 +1201,14 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
         if (NfcService.getInstance().getPositionX() != 0.0) {
             mPositionX.setText(String.valueOf(NfcService.getInstance().getPositionX()));
+            Log.d(TAG, "loadPipeInfo() :mPositionX.setText(" + String.valueOf(NfcService.getInstance().getPositionX()) + ")");
         } else {
             mPositionX.setText("");
         }
 
         if (NfcService.getInstance().getPositionY() != 0.0) {
             mPositionY.setText(String.valueOf(NfcService.getInstance().getPositionY()));
+            Log.d(TAG, "loadPipeInfo() :mPositionY.setText(" + String.valueOf(NfcService.getInstance().getPositionY()) + ")");
         } else {
             mPositionY.setText("");
         }
@@ -1463,9 +1547,15 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
     public void makeDistanceDirectionCodes() {
         ArrayList<Object> resultList = new ArrayList<>();
-        resultList.add(DistanceDirection.EL_DIRECTION_CENTER);
-        resultList.add(DistanceDirection.EL_DIRECTION_LEFT);
-        resultList.add(DistanceDirection.EL_DIRECTION_RIGHT);
+
+        String pipeType = mPipeType.getText().toString();
+        if (!TextUtils.isEmpty(pipeType) && pipeType.equals("직진형")) {
+            resultList.add(DistanceDirection.EL_DIRECTION_CENTER);
+        } else {
+            resultList.add(DistanceDirection.EL_DIRECTION_CENTER);
+            resultList.add(DistanceDirection.EL_DIRECTION_LEFT);
+            resultList.add(DistanceDirection.EL_DIRECTION_RIGHT);
+        }
 
         mDirectionListAdapter.setItems(resultList, mPipeType.getText().toString(), mSetPosition.getText().toString(), mDistanceDirection.getText().toString());
         mDirectionListAdapter.notifyDataSetChanged();
@@ -1504,20 +1594,9 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
 
             mSetPosition.setText(selText);
             if (!TextUtils.isEmpty(selText) && "관로위".equals(selText)) {
-                mDistanceDirection.setText("");
-                mPipeDistance.setText("");
-                mPipeDistanceLR.setText("");
-                mDistanceDirectionLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
-                mDistanceLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
-                mDistanceLRLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
-                mPipeDistance.setEnabled(false);
-                mPipeDistanceLR.setEnabled(false);
+                setEnableDistanceEdits(false);
             } else {
-                mDistanceDirectionLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
-                mDistanceLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
-                mDistanceLRLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
-                mPipeDistance.setEnabled(true);
-                mPipeDistanceLR.setEnabled(true);
+                setEnableDistanceEdits(true);
             }
         } else if (selectedObject instanceof DistanceDirection) {
             mDistanceLRLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
@@ -1623,5 +1702,24 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             rFinal = rFinal + t;
             i++;
         }return rFinal;
+    }
+
+    public void setEnableDistanceEdits(boolean enabled) {
+        if (!enabled) {
+            mDistanceDirection.setText("");
+            mPipeDistance.setText("");
+            mPipeDistanceLR.setText("");
+            mDistanceDirectionLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
+            mDistanceLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
+            mDistanceLRLayout.setBackgroundResource(R.drawable.border_c4c4c4_840a47_3dp);
+            mPipeDistance.setEnabled(false);
+            mPipeDistanceLR.setEnabled(false);
+        } else {
+            mDistanceDirectionLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
+            mDistanceLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
+            mDistanceLRLayout.setBackgroundResource(R.drawable.border_ffffff_840a47_3dp);
+            mPipeDistance.setEnabled(true);
+            mPipeDistanceLR.setEnabled(true);
+        }
     }
 }

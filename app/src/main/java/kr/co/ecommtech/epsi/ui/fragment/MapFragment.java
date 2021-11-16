@@ -516,7 +516,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
             return;
         }
 
-        CameraPosition cameraPosition = new CameraPosition(latLng, 9);
+        CameraPosition cameraPosition = new CameraPosition(latLng, 15);
         if (mNaverMap != null) {
             mNaverMap.setCameraPosition(cameraPosition);
         }
