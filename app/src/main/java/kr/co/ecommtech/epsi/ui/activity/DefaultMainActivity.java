@@ -72,12 +72,28 @@ public class DefaultMainActivity extends BaseActivity {
         mBackListener = listener;
     }
 
+    public interface On2ndBackPressedListener {
+        public boolean on2ndBack();
+    }
+
+    private On2ndBackPressedListener m2ndBackListener;
+
+    public void setOn2ndBackPressedListener(On2ndBackPressedListener listener) {
+        m2ndBackListener = listener;
+    }
+
     @Override
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             Log.d(TAG, "onBackPressed() - isDrawerOpen()");
             drawerLayout.closeDrawer(GravityCompat.START);
             return;
+        }
+
+        if (m2ndBackListener != null) {
+            if (m2ndBackListener.on2ndBack()) {
+                return;
+            }
         }
 
         if(mBackListener != null) {
@@ -283,7 +299,5 @@ public class DefaultMainActivity extends BaseActivity {
         } else {
             imm.hideSoftInputFromWindow(mDialogTitle.getWindowToken(), 0);
         }
-
     }
-
 }

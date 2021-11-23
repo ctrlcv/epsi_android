@@ -1304,10 +1304,16 @@ public class NfcService {
     }
 
     public String getSetPosition() {
+        if (!TextUtils.isEmpty(mSetPosition) && "경계석".equals(mSetPosition)) {
+            mSetPosition = "지면";
+        }
         return mSetPosition;
     }
 
     public void setSetPosition(String setPosition) {
+        if (!TextUtils.isEmpty(setPosition) && "경계석".equals(setPosition)) {
+            setPosition = "지면";
+        }
         this.mSetPosition = setPosition;
     }
 
@@ -1543,6 +1549,4 @@ public class NfcService {
         setLockPassword("");
         setNewPassword("");
     }
-
-
 }

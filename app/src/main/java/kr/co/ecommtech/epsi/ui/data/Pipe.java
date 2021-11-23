@@ -1,5 +1,7 @@
 package kr.co.ecommtech.epsi.ui.data;
 
+import android.text.TextUtils;
+
 import com.google.gson.annotations.SerializedName;
 
 public class Pipe {
@@ -159,10 +161,16 @@ public class Pipe {
     }
 
     public String getSetPosition() {
+        if (!TextUtils.isEmpty(setPosition) && "경계석".equals(setPosition)) {
+            setPosition = "지면";
+        }
         return setPosition;
     }
 
     public void setSetPosition(String setPosition) {
+        if (!TextUtils.isEmpty(setPosition) && "경계석".equals(setPosition)) {
+            setPosition = "지면";
+        }
         this.setPosition = setPosition;
     }
 

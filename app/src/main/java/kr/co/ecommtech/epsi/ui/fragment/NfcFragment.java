@@ -128,5 +128,4 @@ public class NfcFragment extends Fragment implements DefaultMainActivity.OnBackP
         super.onAttach(context);
         ((DefaultMainActivity)context).setOnBackPressedListener(this);
     }
-
 }

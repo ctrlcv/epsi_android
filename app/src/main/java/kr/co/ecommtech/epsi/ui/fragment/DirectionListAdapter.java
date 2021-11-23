@@ -3,6 +3,7 @@ package kr.co.ecommtech.epsi.ui.fragment;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import kr.co.ecommtech.epsi.ui.data.TypeCode;
 import kr.co.ecommtech.epsi.ui.services.DistanceDirection;
 
 public class DirectionListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private static String TAG = "DirectionListAdapter";
 
     private Context mContext;
     private ArrayList<Object> mCodeList;
@@ -92,7 +94,9 @@ public class DirectionListAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     public int getImageResourceId(String setPosition, String pipeType, String distanceDirection) {
-        if (!TextUtils.isEmpty(setPosition) && setPosition.equals("경계석")) {
+        Log.d(TAG, "getImageResourceId() setPosition:" + setPosition + ", pipeType:" + pipeType + ", distanceDirection:" + distanceDirection);
+
+        if (!TextUtils.isEmpty(setPosition) && (setPosition.equals("경계석") || setPosition.equals("지면"))) {
             if (!TextUtils.isEmpty(pipeType)) {
                 switch (pipeType) {
                     case "직진형":
@@ -219,7 +223,7 @@ public class DirectionListAdapter extends RecyclerView.Adapter<RecyclerView.View
                 } else if (!TextUtils.isEmpty(distanceDirection) && distanceDirection.equals("RIGHT")) {
                     return R.drawable.l_type_0_right;
                 } else {
-                    return R.drawable.l_type_0_center;
+                    return R.drawable.d_type_0_center;
                 }
             }
         } else {
@@ -266,7 +270,7 @@ public class DirectionListAdapter extends RecyclerView.Adapter<RecyclerView.View
                         return R.drawable.e_type_270;
                 }
             } else {
-                return R.drawable.l_type_0;
+                return R.drawable.d_type_0;
             }
         }
     }

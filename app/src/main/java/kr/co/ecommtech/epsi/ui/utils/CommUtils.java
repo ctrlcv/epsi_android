@@ -11,7 +11,7 @@ public class CommUtils {
     public static int getImageResourceId(String setPosition, String pipeType, String distanceDirection) {
         Log.d(TAG, "getImageResourceId() setPosition:'" + setPosition + "', pipeType:'" + pipeType + "', distanceDirection:'" + distanceDirection + "'");
 
-        if (!TextUtils.isEmpty(setPosition) && setPosition.equals("경계석")) {
+        if (!TextUtils.isEmpty(setPosition) && (setPosition.equals("경계석") || setPosition.equals("지면"))) {
             if (!TextUtils.isEmpty(pipeType)) {
                 switch (pipeType) {
                     case "직진형":
