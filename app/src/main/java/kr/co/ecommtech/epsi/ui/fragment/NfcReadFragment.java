@@ -113,6 +113,10 @@ public class NfcReadFragment extends Fragment {
     EditText mPhoneNumber;
 
     @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.et_year)
+    EditText mPipeYear;
+
+    @SuppressLint("NonConstantResourceId")
     @BindView(R.id.et_memo)
     EditText mMemo;
 
@@ -333,6 +337,7 @@ public class NfcReadFragment extends Fragment {
                                 NfcService.getInstance().setMemo(pipe.getMemo());
                                 NfcService.getInstance().setBuildCompany(pipe.getBuildCompany());
                                 NfcService.getInstance().setBuildPhone(pipe.getBuildPhone());
+                                NfcService.getInstance().setPipeYear(pipe.getPipeYear());
                                 loadPipeInfo();
 
                                 if (getActivity() != null) {
@@ -468,6 +473,12 @@ public class NfcReadFragment extends Fragment {
             mMakerPhone.setText(NfcService.getInstance().getBuildPhone());
         } else {
             mMakerPhone.setText("");
+        }
+
+        if (!TextUtils.isEmpty(NfcService.getInstance().getPipeYear())) {
+            mPipeYear.setText(NfcService.getInstance().getPipeYear());
+        } else {
+            mPipeYear.setText("");
         }
     }
 

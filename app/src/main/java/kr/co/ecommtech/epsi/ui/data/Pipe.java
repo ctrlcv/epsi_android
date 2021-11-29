@@ -77,7 +77,10 @@ public class Pipe {
     @SerializedName("locdistance")
     double locDistance;
 
-    public Pipe(int pipeId, String serialNumber, String pipeGroup, String pipeGroupName, String pipeGroupColor, String pipeType, String pipeTypeName, String setPosition, String distanceDirection, double diameter, String material, String materialName, double distance, double distanceLr, double pipeDepth, double positionX, double positionY, String offerCompany, String companyPhone, String memo, String buildCompany, String buildPhone, String siteImageUrl, double locDistance) {
+    @SerializedName("pipeyear")
+    String pipeYear;
+
+    public Pipe(int pipeId, String serialNumber, String pipeGroup, String pipeGroupName, String pipeGroupColor, String pipeType, String pipeTypeName, String setPosition, String distanceDirection, double diameter, String material, String materialName, double distance, double distanceLr, double pipeDepth, double positionX, double positionY, String offerCompany, String companyPhone, String memo, String buildCompany, String buildPhone, String siteImageUrl, double locDistance, String pipeYear) {
         this.pipeId = pipeId;
         this.serialNumber = serialNumber;
         this.pipeGroup = pipeGroup;
@@ -102,6 +105,7 @@ public class Pipe {
         this.buildPhone = buildPhone;
         this.siteImageUrl = siteImageUrl;
         this.locDistance = locDistance;
+        this.pipeYear = pipeYear;
     }
 
     public int getPipeId() {
@@ -300,6 +304,14 @@ public class Pipe {
 
     public void setLocDistance(double locDistance) {
         this.locDistance = locDistance;
+    }
+
+    public String getPipeYear() {
+        return pipeYear;
+    }
+
+    public void setPipeYear(String pipeYear) {
+        this.pipeYear = pipeYear;
     }
 
     @Override

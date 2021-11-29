@@ -66,6 +66,7 @@ public class NfcService {
     private final static String TAG_MEMO = "|H:";
     private final static String TAG_BUILD_COMPANY = "|I:";
     private final static String TAG_BUILD_PHONE = "|J:";
+    private final static String TAG_PIPE_YEAR = "|K:";
 
     public final static byte CMD_READ = (byte)0x30;
     public final static byte CMD_WRITE = (byte)0xA2;
@@ -101,6 +102,7 @@ public class NfcService {
     private double mPositionY;
     private String mOfferCompany;
     private String mCompanyPhone;
+    private String mPipeYear;
     private String mMemo;
     private String mBuildCompany;
     private String mBuildPhone;
@@ -491,6 +493,12 @@ public class NfcService {
         if (data.contains(TAG_PHONE_NUMBER)) {
             String value = data.replace(TAG_PHONE_NUMBER, "");
             setCompanyPhone(value.trim());
+            return;
+        }
+
+        if (data.contains(TAG_PIPE_YEAR)) {
+            String value = data.replace(TAG_PIPE_YEAR, "");
+            setPipeYear(value.trim());
             return;
         }
 
@@ -1216,7 +1224,8 @@ public class NfcService {
                 textToNdefRecord(TAG_PHONE_NUMBER + mCompanyPhone),
                 textToNdefRecord(TAG_MEMO + mMemo),
                 textToNdefRecord(TAG_BUILD_COMPANY + mBuildCompany),
-                textToNdefRecord(TAG_BUILD_PHONE + mBuildPhone)
+                textToNdefRecord(TAG_BUILD_PHONE + mBuildPhone),
+                textToNdefRecord(TAG_PIPE_YEAR + mPipeYear)
             });
 
         return message;
@@ -1405,6 +1414,14 @@ public class NfcService {
         this.mCompanyPhone = companyPhone;
     }
 
+    public String getPipeYear() {
+        return mPipeYear;
+    }
+
+    public void setPipeYear(String pipeYear) {
+        this.mPipeYear = pipeYear;
+    }
+
     public String getMemo() {
         return mMemo;
     }
@@ -1548,5 +1565,6 @@ public class NfcService {
         setSiteImage(null);
         setLockPassword("");
         setNewPassword("");
+        setPipeYear("");
     }
 }

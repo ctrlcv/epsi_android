@@ -378,6 +378,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Default
                 NfcService.getInstance().setMemo(mSelectedPipe.getMemo());
                 NfcService.getInstance().setBuildCompany(mSelectedPipe.getBuildCompany());
                 NfcService.getInstance().setBuildPhone(mSelectedPipe.getBuildPhone());
+                NfcService.getInstance().setPipeYear(mSelectedPipe.getPipeYear());
                 NfcService.getInstance().setLoadFromMap(true);
 
                 if (getActivity() != null) {

@@ -179,6 +179,7 @@ public class InfoActivity extends BaseActivity {
         NfcService.getInstance().setMemo("");
         NfcService.getInstance().setBuildCompany("");
         NfcService.getInstance().setBuildPhone("");
+        NfcService.getInstance().setPipeYear("");
         NfcService.getInstance().setSiteImageUrl("");
         NfcService.getInstance().setSiteImage(null);
         NfcService.getInstance().setLockPassword("");

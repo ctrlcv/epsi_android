@@ -284,6 +284,7 @@ public class MapActivity extends BaseActivity implements NaverMap.OnMapClickList
                 NfcService.getInstance().setMemo(mSelectedPipe.getMemo());
                 NfcService.getInstance().setBuildCompany(mSelectedPipe.getBuildCompany());
                 NfcService.getInstance().setBuildPhone(mSelectedPipe.getBuildPhone());
+                NfcService.getInstance().setPipeYear(mSelectedPipe.getPipeYear());
                 NfcService.getInstance().setLoadFromMap(true);
 //                finish();
 

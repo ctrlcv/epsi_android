@@ -158,6 +158,10 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
     EditText mPhoneNumber;
 
     @SuppressLint("NonConstantResourceId")
+    @BindView(R.id.et_year)
+    EditText mPipeYear;
+
+    @SuppressLint("NonConstantResourceId")
     @BindView(R.id.et_memo)
     EditText mMemo;
 
@@ -559,6 +563,12 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
                 if (TextUtils.isEmpty(mPositionY.getText())) {
                     Utils.showToast(getActivity(), "매설위치를 입력하세요.");
                     mPositionY.requestFocus();
+                    return;
+                }
+
+                if (TextUtils.isEmpty(mPipeYear.getText())) {
+                    Utils.showToast(getActivity(), "관로 설치연도를 입력하세요.");
+                    mPipeYear.requestFocus();
                     return;
                 }
 
@@ -1012,6 +1022,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         }
         map.put("offercompany", mAgency.getText().toString());
         map.put("companyphone", mPhoneNumber.getText().toString());
+        map.put("pipeyear", mPipeYear.getText().toString());
         map.put("memo", mMemo.getText().toString());
         map.put("buildcompany", mMaker.getText().toString());
         map.put("buildphone", mMakerPhone.getText().toString());
@@ -1245,6 +1256,12 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
             mPhoneNumber.setText("");
         }
 
+        if (!TextUtils.isEmpty(NfcService.getInstance().getPipeYear())) {
+            mPipeYear.setText(NfcService.getInstance().getPipeYear());
+        } else {
+            mPipeYear.setText("");
+        }
+
         if (!TextUtils.isEmpty(NfcService.getInstance().getMemo())) {
             mMemo.setText(NfcService.getInstance().getMemo());
         } else {
@@ -1414,6 +1431,7 @@ public class NfcWriteFragment extends Fragment implements CodeListAdapter.OnCode
         NfcService.getInstance().setMemo(mMemo.getText().toString());
         NfcService.getInstance().setBuildCompany(mMaker.getText().toString());
         NfcService.getInstance().setBuildPhone(mMakerPhone.getText().toString());
+        NfcService.getInstance().setPipeYear(mPipeYear.getText().toString());
     }
 
     private void reqGetPipeGroupCodes(boolean showPopup) {

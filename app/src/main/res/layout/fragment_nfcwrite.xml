@@ -712,6 +712,43 @@
                 android:layout_marginTop="12dp"
                 android:layout_gravity="center_vertical">
                 <TextView
+                    android:id="@+id/tv_year"
+                    android:fontFamily="@font/nexon_bold"
+                    android:layout_width="65dp"
+                    android:layout_height="match_parent"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:gravity="center"
+                    android:text="관로\n설치연도"
+                    tools:ignore="HardcodedText"/>
+
+                <EditText
+                    android:id="@+id/et_year"
+                    android:fontFamily="@font/nexon_regular"
+                    android:layout_width="match_parent"
+                    android:layout_height="30dp"
+                    android:layout_marginTop="2.5dp"
+                    android:layout_marginLeft="4dp"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="10dp"
+                    android:paddingRight="10dp"
+                    android:textSize="14dp"
+                    android:textColor="#840a47"
+                    android:inputType="phone"
+                    android:digits="0123456789+-"
+                    android:gravity="center_vertical|start"
+                    android:layout_toRightOf="@id/tv_year"
+                    android:layout_toEndOf="@id/tv_year"
+                    android:background="@drawable/border_ffffff_840a47_3dp"
+                    tools:ignore="HardcodedText" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="12dp"
+                android:layout_gravity="center_vertical">
+                <TextView
                     android:id="@+id/tv_memo"
                     android:fontFamily="@font/nexon_bold"
                     android:layout_width="65dp"
